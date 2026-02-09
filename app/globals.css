@@ -1,0 +1,930 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Neon colors – brighter green for cyberdeck */
+  --neon-blue: #00d9ff;
+  --neon-magenta: #ff00ff;
+  --neon-green: #00ffaa;
+  --neon-green-dim: #00ff88;
+  --neon-orange: #ff9500;
+  --neon-purple: #b026ff;
+
+  /* Backgrounds – darker for physical screen feel */
+  --bg-black: #000000;
+  --bg-charcoal: #0a0a0a;
+  --bg-dark-gray: #1a1a1a;
+  --bg-card: #0c0c0e;
+  --bg-card-panel: #08080a;
+
+  /* Text – higher contrast (closer to pure white) */
+  --text-primary: #f5f5f7;
+  --text-secondary: #e0e0e5;
+  --text-muted: #9a9aa3;
+
+  /* Metallic */
+  --metal-silver: #8e8e93;
+  --metal-chrome: #c7c7cc;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-black);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* Scanline overlay – 2px spacing, 2–3% opacity, scroll down (old monitor feel) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 1px,
+    rgba(0, 0, 0, 0.025) 1px,
+    rgba(0, 0, 0, 0.025) 2px
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: scanline-scroll 8s linear infinite;
+}
+
+@keyframes scanline-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Space Mono', 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: 3rem; line-height: 1.2; letter-spacing: 0.03em; text-shadow: 0 0 12px rgba(0, 255, 170, 0.3); }
+h2 { font-size: 2.5rem; line-height: 1.25; letter-spacing: 0.02em; text-shadow: 0 0 8px rgba(0, 255, 170, 0.25); }
+h3 { font-size: 2rem; line-height: 1.3; letter-spacing: 0.02em; }
+h4 { font-size: 1.5rem; line-height: 1.35; }
+h5 { font-size: 1.25rem; line-height: 1.4; }
+h6 { font-size: 1.125rem; line-height: 1.4; }
+
+/* Spacing - more room between elements */
+p + p { margin-top: 1rem; }
+h1, h2, h3, h4, h5, h6 { margin-bottom: 0.5em; }
+section + section { margin-top: 2rem; }
+
+/* Dashboard grid pattern overlay - very faint */
+.dashboard-grid {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgba(0, 217, 255, 0.03) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+  background-position: 0 0;
+}
+
+/* ========== DECK / NEUROMANCER HARDWARE TEXTURES ========== */
+
+/* 1. Cutting mat / circuit board grid – 1px lines, 40px spacing, 2–3% opacity */
+.deck-grid {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 170, 0.025) 0,
+      rgba(0, 255, 170, 0.025) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 255, 170, 0.025) 0,
+      rgba(0, 255, 170, 0.025) 1px,
+      transparent 1px,
+      transparent 40px
+    );
+  background-size: 40px 40px;
+  background-position: 0 0;
+}
+
+/* 2. Film grain / noise texture – 10–15% opacity for heavy analog feel */
+.deck-noise {
+  position: relative;
+}
+
+.deck-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 3. Faint circuit traces – green paths (brighter #00ffaa) */
+.deck-circuits {
+  position: relative;
+}
+
+.deck-circuits::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(135deg, rgba(0, 255, 170, 0.06) 0%, transparent 12%),
+    linear-gradient(225deg, rgba(0, 255, 170, 0.05) 0%, transparent 10%),
+    linear-gradient(315deg, rgba(0, 255, 170, 0.05) 0%, transparent 10%),
+    linear-gradient(45deg, rgba(0, 255, 170, 0.06) 0%, transparent 12%);
+  background-size: 100% 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 4. Vignette – darker corners (screen edges) */
+.deck-vignette {
+  box-shadow: inset 0 0 120px 30px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 255, 170, 0.06);
+}
+
+/* 5. Screen bezel – inset shadow on main container */
+.deck-bezel {
+  box-shadow:
+    inset 0 0 60px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px rgba(0, 255, 170, 0.08),
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ========== MOUNTING SCREWS (removable panels) ========== */
+.deck-screws {
+  position: relative;
+}
+
+.deck-screws::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(circle at 8px 8px, #1a1a1e 20%, #2a2a30 45%, #1a1a1e 55%, #0a0a0c 100%),
+    radial-gradient(circle at calc(100% - 8px) 8px, #1a1a1e 20%, #2a2a30 45%, #1a1a1e 55%, #0a0a0c 100%),
+    radial-gradient(circle at 8px calc(100% - 8px), #1a1a1e 20%, #2a2a30 45%, #1a1a1e 55%, #0a0a0c 100%),
+    radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), #1a1a1e 20%, #2a2a30 45%, #1a1a1e 55%, #0a0a0c 100%);
+  background-size: 12px 12px;
+  background-repeat: no-repeat;
+  background-position: 8px 8px, calc(100% - 8px) 8px, 8px calc(100% - 8px), calc(100% - 8px) calc(100% - 8px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ========== THICKER BORDERS (physical bezels) ========== */
+.deck-border-thick {
+  border-width: 2px;
+}
+
+.deck-section-separator {
+  border-bottom: 3px solid rgba(0, 255, 170, 0.2);
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.deck-seam {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 170, 0.15), transparent);
+  margin: 0.5rem 0;
+}
+
+/* ========== HEX / SERIAL ID (hardware diagnostics) ========== */
+.hex-id {
+  font-family: 'Space Mono', 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: rgba(0, 255, 170, 0.5);
+  text-transform: uppercase;
+}
+
+/* ========== CARD DEPTH & TEXTURE (physical panels) ========== */
+
+/* Inner border: 2px physical bezel + lighter top/left, darker bottom/right (beveled) */
+.deck-panel {
+  position: relative;
+  border: 2px solid rgba(0, 255, 170, 0.2);
+  background-clip: padding-box;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 2px 10px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.deck-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(0,0,0,0.4) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Darker physical screen feel – gunmetal + brushed metal horizontal lines */
+.deck-card-bg {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 2px,
+      rgba(255, 255, 255, 0.02) 2px,
+      rgba(255, 255, 255, 0.02) 3px
+    ),
+    linear-gradient(160deg, rgba(18, 18, 22, 0.98) 0%, rgba(10, 10, 14, 0.99) 50%, rgba(6, 6, 10, 1) 100%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 1px,
+      rgba(255, 255, 255, 0.012) 1px,
+      rgba(255, 255, 255, 0.012) 2px
+    );
+  background-size: 100% 100%, 100% 100%, 4px 100%;
+}
+
+/* ========== PROGRESS BAR – segmented LED strip ========== */
+.progress-segmented {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: 9999px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.progress-segmented-fill {
+  height: 100%;
+  flex: 1;
+  min-width: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.progress-segmented-fill.progress-segment-empty {
+  box-shadow: none;
+}
+
+/* ========== CORNER BRACKETS (mounting hardware) ========== */
+.deck-section {
+  position: relative;
+}
+
+.deck-section::before,
+.deck-section::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(0, 255, 170, 0.35);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.deck-section::before {
+  top: 0;
+  left: 0;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.deck-section::after {
+  top: 0;
+  right: 0;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.deck-section-both::before {
+  top: 0;
+  left: 0;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.deck-section-both::after {
+  top: 0;
+  right: 0;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.deck-section .deck-bracket-bottom-left {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-left: 2px solid rgba(0, 255, 170, 0.35);
+  border-bottom: 2px solid rgba(0, 255, 170, 0.35);
+  border-radius: 0 0 0 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.deck-section .deck-bracket-bottom-right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid rgba(0, 255, 170, 0.35);
+  border-bottom: 2px solid rgba(0, 255, 170, 0.35);
+  border-radius: 0 0 2px 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ========== STATUS LED INDICATORS (6–8px, top-right, brighter glow) ========== */
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor, 0 0 12px currentColor, 0 0 20px currentColor; }
+  50% { opacity: 0.9; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 28px currentColor; }
+}
+
+.led-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: led-pulse 2s ease-in-out infinite;
+}
+
+.led-green {
+  background: #00ffaa;
+  color: #00ffaa;
+  box-shadow: 0 0 6px #00ffaa, 0 0 12px rgba(0, 255, 170, 0.6), 0 0 20px rgba(0, 255, 170, 0.35);
+}
+
+.led-yellow {
+  background: #facc15;
+  color: #facc15;
+  box-shadow: 0 0 6px #facc15, 0 0 12px rgba(250, 204, 21, 0.6), 0 0 20px rgba(250, 204, 21, 0.35);
+}
+
+.led-red {
+  background: #f87171;
+  color: #f87171;
+  box-shadow: 0 0 6px #f87171, 0 0 12px rgba(248, 113, 113, 0.6), 0 0 20px rgba(248, 113, 113, 0.35);
+}
+
+/* LED in top-right of card */
+.led-card-top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+}
+
+/* ========== DATA READOUT (brighter green glow) ========== */
+.data-readout {
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10px rgba(0, 255, 170, 0.45), 0 0 20px rgba(0, 255, 170, 0.2);
+  letter-spacing: 0.05em;
+}
+
+/* ========== CHUNKY BUTTONS (mechanical switch feel) ========== */
+.btn-chunky {
+  padding: 12px 16px;
+  font-weight: 600;
+  border: 2px solid rgba(0, 255, 170, 0.35);
+  background: linear-gradient(180deg, rgba(20, 22, 24, 0.95) 0%, rgba(12, 14, 16, 0.98) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 0 rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.btn-chunky:hover {
+  background: linear-gradient(180deg, rgba(14, 16, 18, 0.98) 0%, rgba(8, 10, 12, 1) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 1px 0 rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
+}
+
+.btn-chunky:active {
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  transform: translateY(2px);
+}
+
+/* Heading glow - softer neon (reduced blur) for readability */
+.heading-glow {
+  text-shadow: 0 0 8px rgba(0, 217, 255, 0.25), 0 0 16px rgba(0, 217, 255, 0.1);
+}
+
+.heading-glow-muted {
+  text-shadow: 0 0 6px rgba(0, 217, 255, 0.15);
+}
+
+/* Staggered fade-in for dashboard sections */
+.animate-fade-in-stagger > * {
+  opacity: 0;
+  animation: fade-in 0.5s ease-out forwards;
+}
+.animate-fade-in-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.animate-fade-in-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.animate-fade-in-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.animate-fade-in-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.animate-fade-in-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.animate-fade-in-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.animate-fade-in-stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.animate-fade-in-stagger > *:nth-child(8) { animation-delay: 0.4s; }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes low-stock-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4), 0 0 12px rgba(239, 68, 68, 0.2); }
+  50% { opacity: 0.95; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 16px rgba(239, 68, 68, 0.35); }
+  75% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
+.animate-low-stock-pulse {
+  animation: low-stock-pulse 2s ease-in-out infinite;
+}
+
+/* Terminal cursor blink */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.animate-cursor-blink {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* Progress bar fill animation (0 → target) */
+@keyframes progress-fill {
+  from { width: 0; }
+  to { width: var(--progress, 0); }
+}
+
+.progress-fill-animate {
+  width: 0;
+  animation: progress-fill 0.7s ease-out forwards;
+}
+
+/* Glitch text (RGB split) on hover */
+@keyframes glitch-text {
+  0% { text-shadow: 0 0 0 transparent, 0 0 0 transparent; }
+  20% { text-shadow: -2px 0 0 #ff0066, 2px 0 0 #00ff88; }
+  40% { text-shadow: 2px 0 0 #ff0066, -2px 0 0 #00d9ff; }
+  60% { text-shadow: -1px 0 0 #00d9ff, 1px 0 0 #ff0066; }
+  80% { text-shadow: 1px 0 0 #00ff88, -1px 0 0 #ff0066; }
+  100% { text-shadow: 0 0 0 transparent, 0 0 0 transparent; }
+}
+
+.hover-glitch:hover {
+  animation: glitch-text 0.4s ease-in-out;
+}
+
+.group:hover .glitch-on-hover {
+  animation: glitch-text 0.4s ease-in-out;
+}
+
+/* CRT vignette */
+.crt-vignette {
+  box-shadow: inset 0 0 80px 20px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 255, 136, 0.05);
+}
+
+/* Matrix-style data stream (very subtle) */
+.matrix-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(transparent 0%, rgba(0, 255, 136, 0.02) 50%, transparent 100%);
+  background-size: 100% 200%;
+  animation: matrix-fall 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes matrix-fall {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 200%; }
+}
+
+/* Skeleton loading scan line */
+@keyframes skeleton-scan {
+  0% { top: 0; opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.6; }
+}
+
+.skeleton-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(0, 255, 136, 0.5), transparent);
+  animation: skeleton-scan 2s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ========== HARDWARE DASHBOARD – heavy textures & mock hardware ========== */
+
+/* Main background: dark gradient + radial spotlight */
+.dashboard-hardware {
+  position: relative;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(20, 22, 26, 0.6) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0a0a 0%, #0e0e0e 40%, #151515 100%);
+  min-height: 100%;
+}
+
+/* Scanlines – two layers, 8–10% opacity, 30s scroll, pause on hover */
+.scanline-layer-thin {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 1px,
+    rgba(0, 0, 0, 0.09) 1px,
+    rgba(0, 0, 0, 0.09) 2px
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 100;
+  animation: scanline-translate 30s linear infinite;
+}
+
+.scanline-layer-thick {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 47px,
+    rgba(0, 0, 0, 0.08) 47px,
+    rgba(0, 0, 0, 0.08) 50px
+  );
+  background-size: 100% 100px;
+  pointer-events: none;
+  z-index: 99;
+  animation: scanline-translate 30s linear infinite;
+}
+
+.dashboard-hardware:hover .scanline-layer-thin,
+.dashboard-hardware:hover .scanline-layer-thick {
+  animation-play-state: paused;
+}
+
+@keyframes scanline-translate {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100px); }
+}
+
+/* Buttons light up when sections hovered */
+.dashboard-hardware:has(.deck-section:hover) .hw-btn-panel .hw-btn:nth-child(2) .hw-btn-led,
+.dashboard-hardware:has(.deck-panel:hover) .hw-btn-panel .hw-btn:nth-child(2) .hw-btn-led {
+  filter: brightness(1.4);
+  box-shadow: 0 0 10px #00ffaa, 0 0 16px rgba(0, 255, 170, 0.6);
+}
+
+/* Hex dump background – 5% opacity, slow scroll */
+.hex-dump-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.05;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: rgba(0, 255, 170, 0.8);
+  white-space: pre-wrap;
+  word-break: break-all;
+  animation: hex-dump-scroll 60s linear infinite;
+}
+
+@keyframes hex-dump-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+/* Carbon fiber / perforated main container */
+.deck-carbon {
+  position: relative;
+}
+
+.deck-carbon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 1px,
+      rgba(0, 0, 0, 0.15) 1px,
+      rgba(0, 0, 0, 0.15) 2px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 1px,
+      rgba(0, 0, 0, 0.1) 1px,
+      rgba(0, 0, 0, 0.1) 2px
+    );
+  background-size: 8px 8px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Glass reflection – diagonal light streak */
+.glass-reflection {
+  position: relative;
+}
+
+.glass-reflection::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.02) 45%,
+    transparent 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* System info readout – top-left, cyan glow */
+.sys-info {
+  font-family: 'Space Mono', 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #22d3ee;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.5), 0 0 16px rgba(34, 211, 238, 0.2);
+}
+
+@keyframes corner-led-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0.4; }
+}
+
+.corner-led-blink {
+  animation: corner-led-blink 4s ease-in-out infinite;
+}
+
+/* Mock hardware button panel – top-right */
+.hw-btn-panel {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.hw-btn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-family: 'Space Mono', monospace;
+  font-size: 6px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(180deg, #2a2a2e 0%, #1a1a1e 100%);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.hw-btn-led {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hw-btn-led-red { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+.hw-btn-led-blue { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+.hw-btn-led-green { background: #00ffaa; box-shadow: 0 0 6px #00ffaa; }
+.hw-btn-led-amber { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+.hw-btn-led-pulse {
+  animation: led-pulse 2s ease-in-out infinite;
+}
+
+/* Power indicator strip – 8–10 segments, first 6 lit */
+.power-strip {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.power-strip-segment {
+  width: 12px;
+  height: 6px;
+  border-radius: 1px;
+  background: #1a1a1e;
+}
+
+.power-strip-segment.lit {
+  background: #00ffaa;
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.6), 0 0 12px rgba(0, 255, 170, 0.3);
+}
+
+/* Data port indicators – USB, NET, AUX */
+.data-port {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.data-port-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1a1a1e;
+}
+
+.data-port-dot.lit {
+  background: #00ffaa;
+  box-shadow: 0 0 6px rgba(0, 255, 170, 0.5);
+}
+
+/* Corner detail panels – TEMP, VOLT, FAN */
+.corner-panel {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: rgba(0, 255, 170, 0.7);
+  text-shadow: 0 0 6px rgba(0, 255, 170, 0.3);
+  letter-spacing: 0.04em;
+}
+
+/* Barcode / hex decorative strip */
+.barcode-deco {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: rgba(0, 255, 170, 0.35);
+  transform: rotate(-90deg);
+  white-space: nowrap;
+}
+
+/* Custom utilities */
+@layer utilities {
+  .neon-text {
+    color: var(--neon-blue);
+    text-shadow: 0 0 3px rgba(0, 217, 255, 0.35);
+  }
+
+  .neon-border {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 4px rgba(0, 217, 255, 0.18);
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 6px rgba(0, 217, 255, 0.2);
+  }
+
+  /* Holographic cards - less transparent, more readable */
+  .holographic {
+    background: linear-gradient(
+      135deg,
+      rgba(20, 20, 28, 0.92) 0%,
+      rgba(18, 18, 26, 0.94) 50%,
+      rgba(22, 20, 28, 0.92) 100%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(0, 217, 255, 0.08),
+      rgba(255, 0, 255, 0.06),
+      rgba(57, 255, 20, 0.06)
+    );
+    border: 1px solid rgba(0, 217, 255, 0.25);
+    backdrop-filter: blur(10px);
+  }
+
+  .glass {
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(199, 199, 204, 0.15);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-charcoal);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neon-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-magenta);
+  box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+}
+
+/* Form inputs cyberpunk styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background: var(--bg-card);
+  border: 1px solid var(--metal-silver);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 6px rgba(0, 217, 255, 0.25);
+}
+
+/* Button base styles */
+button {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Link hover effect */
+a {
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  text-shadow: 0 0 8px currentColor;
+}
