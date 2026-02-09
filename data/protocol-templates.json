@@ -1,0 +1,105 @@
+[
+  {
+    "id": "knee-recovery",
+    "hexId": "0xP101",
+    "name": "Knee Recovery",
+    "duration": "8-12 weeks",
+    "difficulty": "Intermediate",
+    "category": "injury_recovery",
+    "peptides": [
+      { "name": "BPC-157", "dose": "250-500 mcg", "timing": "Twice daily", "route": "SubQ", "priority": "Primary" },
+      { "name": "TB-500", "dose": "2.5 mg", "timing": "2x per week", "route": "SubQ", "priority": "Primary" },
+      { "name": "GHK-Cu", "dose": "1-2 mg", "timing": "2-3x per week", "route": "SubQ", "priority": "Secondary" }
+    ],
+    "expectedOutcomes": ["Reduced inflammation and pain", "Improved ligament/tendon healing", "Faster return to activity"],
+    "costEstimate": "$400-600",
+    "importantNotes": "Combine with rest and progressive rehab. Avoid heavy loading in first 4 weeks.",
+    "outcomesTimeline": "Weeks 1-2: Reduced swelling. Weeks 3-6: Noticeable strength and mobility gains. Weeks 8-12: Full recovery with rehab."
+  },
+  {
+    "id": "rotator-cuff-recovery",
+    "hexId": "0xP102",
+    "name": "Rotator Cuff Recovery",
+    "duration": "8-10 weeks",
+    "difficulty": "Intermediate",
+    "category": "injury_recovery",
+    "peptides": [
+      { "name": "BPC-157", "dose": "250-500 mcg", "timing": "Twice daily", "route": "SubQ", "priority": "Primary" },
+      { "name": "TB-500", "dose": "2.5 mg", "timing": "2x per week", "route": "SubQ", "priority": "Primary" },
+      { "name": "Thymosin Alpha-1", "dose": "1.6 mg", "timing": "2x per week", "route": "SubQ", "priority": "Secondary" }
+    ],
+    "expectedOutcomes": ["Tendon repair support", "Reduced shoulder pain", "Improved range of motion"],
+    "costEstimate": "$500-750",
+    "importantNotes": "Injection site can be distal (e.g. abdomen). Pair with physical therapy for best results.",
+    "outcomesTimeline": "Weeks 1-3: Pain reduction. Weeks 4-6: ROM improvement. Weeks 8-10: Strength and stability gains."
+  },
+  {
+    "id": "acl-surgery-recovery",
+    "hexId": "0xP201",
+    "name": "ACL Surgery Recovery",
+    "duration": "12-16 weeks",
+    "difficulty": "Advanced",
+    "category": "surgical",
+    "peptides": [
+      { "name": "BPC-157", "dose": "500 mcg", "timing": "Twice daily", "route": "SubQ", "priority": "Primary" },
+      { "name": "TB-500", "dose": "2.5-5 mg", "timing": "2x per week", "route": "SubQ", "priority": "Primary" },
+      { "name": "GHK-Cu", "dose": "2 mg", "timing": "2x per week", "route": "SubQ", "priority": "Secondary" },
+      { "name": "Ipamorelin", "dose": "200-300 mcg", "timing": "Daily (PM)", "route": "SubQ", "priority": "Optional" }
+    ],
+    "expectedOutcomes": ["Accelerated graft healing", "Reduced post-op inflammation", "Faster rehab milestones"],
+    "costEstimate": "$700-1000",
+    "importantNotes": "Start after surgeon clearance. Ipamorelin supports muscle retention during immobilization.",
+    "outcomesTimeline": "Weeks 1-4: Wound and graft healing. Weeks 5-8: Early rehab support. Weeks 9-16: Strength and return to sport."
+  },
+  {
+    "id": "hair-regrowth",
+    "hexId": "0xP301",
+    "name": "Hair Regrowth",
+    "duration": "12-16 weeks",
+    "difficulty": "Beginner",
+    "category": "aesthetic",
+    "peptides": [
+      { "name": "GHK-Cu", "dose": "0.1-1% topical", "timing": "Daily to scalp", "route": "Topical", "priority": "Primary" },
+      { "name": "TB-500", "dose": "2.5 mg", "timing": "1-2x per week", "route": "SubQ", "priority": "Secondary" }
+    ],
+    "expectedOutcomes": ["Stimulation of hair follicles", "Improved scalp health", "Thicker hair appearance"],
+    "costEstimate": "$350-550",
+    "importantNotes": "GHK-Cu topical applied to thinning areas. TB-500 may support collagen and follicle environment.",
+    "outcomesTimeline": "Weeks 4-8: Reduced shedding. Weeks 8-12: Visible thickening. Weeks 12-16: Sustained results with maintenance."
+  },
+  {
+    "id": "mental-focus",
+    "hexId": "0xP401",
+    "name": "Mental Focus",
+    "duration": "4-8 weeks",
+    "difficulty": "Beginner",
+    "category": "cognitive",
+    "peptides": [
+      { "name": "Semax", "dose": "200-800 mcg", "timing": "Daily AM", "route": "Intranasal", "priority": "Primary" },
+      { "name": "Selank", "dose": "200-400 mcg", "timing": "Daily AM or as needed", "route": "Intranasal", "priority": "Primary" },
+      { "name": "Dihexa", "dose": "10-50 mg", "timing": "Daily", "route": "Oral", "priority": "Secondary" }
+    ],
+    "expectedOutcomes": ["Improved focus and clarity", "Reduced anxiety", "Enhanced memory and learning"],
+    "costEstimate": "$300-500",
+    "importantNotes": "Cycle 4 weeks on, 2 weeks off to avoid tolerance. Best combined with sleep and exercise.",
+    "outcomesTimeline": "Week 1-2: Acute focus and calm. Weeks 3-4: Sustained cognitive benefits. Weeks 4-8: Long-term memory support with Dihexa."
+  },
+  {
+    "id": "longevity-stack",
+    "hexId": "0xP501",
+    "name": "Longevity Stack",
+    "duration": "Ongoing (cycles)",
+    "difficulty": "Advanced",
+    "category": "longevity",
+    "peptides": [
+      { "name": "Epitalon", "dose": "10 mg", "timing": "Daily, 20-day cycle 3-4x/year", "route": "SubQ", "priority": "Primary" },
+      { "name": "Thymosin Alpha-1", "dose": "1.6 mg", "timing": "2x per week", "route": "SubQ", "priority": "Primary" },
+      { "name": "GHK-Cu", "dose": "1-2 mg", "timing": "2x per week", "route": "SubQ", "priority": "Secondary" },
+      { "name": "CJC-1295", "dose": "1-2 mg", "timing": "1-2x per week", "route": "SubQ", "priority": "Optional" }
+    ],
+    "expectedOutcomes": ["Telomere and immune support", "Improved sleep and recovery", "Metabolic and skin benefits"],
+    "costEstimate": "$600-900 per cycle",
+    "importantNotes": "Epitalon in 20-day pulses. TA-1 and GHK-Cu can run year-round. CJC-1295 adds GH support; monitor IGF-1.",
+    "outcomesTimeline": "Epitalon cycles: immediate sleep/rhythm effects. 3-6 months: immune and biomarker improvements. Long-term: maintenance protocol."
+  }
+]
