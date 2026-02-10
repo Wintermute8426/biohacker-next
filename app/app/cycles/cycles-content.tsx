@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Syringe, X, ChevronDown, ChevronUp, Play, Plus, Trash2 } from "lucide-react";
 import { loadCycles, saveCycles } from "@/lib/cycle-storage";
+import { markTaskComplete } from "@/lib/onboarding-helper";
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -252,6 +253,7 @@ export function CyclesContent({
       };
     });
     setCycles((prev) => [...prev, ...newCycles]);
+    markTaskComplete("set_first_cycle");
     setProtocolModalOpen(false);
     setToast("✅ Cycle created - check Calendar to see schedule");
   };
