@@ -299,7 +299,7 @@ export default async function DashboardPage() {
                     </div>
                     <h4 className="font-mono font-semibold text-white text-sm">Track</h4>
                   </div>
-                  <p   className="text-xs text-[#9a9aa3]">Log doses, monitor progress</p>
+                  <p className="text-xs text-[#9a9aa3]">Log doses, monitor progress</p>
                 </div>
               </div>
             </div>
