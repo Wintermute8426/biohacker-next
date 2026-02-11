@@ -9,6 +9,17 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Fetch real stats from database
+  const { data: activeCyclesCount } = await supabase.rpc("get_active_cycles_count");
+  const { data: dosesTodayCount } = await supabase.rpc("get_doses_today_count");
+  const { data: adherencePercentage } = await supabase.rpc("get_adherence_percentage", { days: 7 });
+  
+  const { data: cyclesData } = await supabase
+    .from("cycles")
+    .select("id")
+    .limit(100);
+  const totalProtocols = cyclesData?.length || 0;
+
   return (
     <div className="space-y-8">
       {/* Dashboard Stats - Exact Protocol Style */}
@@ -88,7 +99,7 @@ export default async function DashboardPage() {
                   STATUS
                 </span>
                 <ul className="mt-1 list-inside list-disc text-xs text-[#e0e0e5] font-mono">
-                  <li>3 peptide protocols in progress</li>
+                  <li>{activeCyclesCount || 0} peptide protocol{(activeCyclesCount || 0) !== 1 ? 's' : ''} in progress</li>
                   <li>All cycles on schedule</li>
                   <li>No missed doses</li>
                 </ul>
@@ -134,7 +145,7 @@ export default async function DashboardPage() {
                   AVAILABLE
                 </span>
                 <ul className="mt-1 list-inside list-disc text-xs text-[#e0e0e5] font-mono">
-                  <li>3 research-backed templates</li>
+                  <li>{totalProtocols} total cycle{totalProtocols !== 1 ? 's' : ''} created</li>
                   <li>Custom protocols ready</li>
                   <li>Safety validated</li>
                 </ul>
@@ -171,7 +182,7 @@ export default async function DashboardPage() {
 
               <div className="mt-3 flex flex-wrap gap-1.5">
                 <span className="rounded border px-2 py-0.5 text-[10px] font-mono font-medium bg-amber-500/20 border-amber-500/40">
-                  0 scheduled
+                  {dosesTodayCount || 0} scheduled
                 </span>
               </div>
 
@@ -225,8 +236,8 @@ export default async function DashboardPage() {
                   PERFORMANCE
                 </span>
                 <ul className="mt-1 list-inside list-disc text-xs text-[#e0e0e5] font-mono">
-                  <li>98% completion rate</li>
-                  <li>13 of 13 doses taken</li>
+                  <li>{adherencePercentage?.toFixed(1) || '100.0'}% completion rate</li>
+                  <li>Last 7 days performance</li>
                   <li>On track for goals</li>
                 </ul>
               </div>

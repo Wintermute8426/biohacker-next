@@ -2,8 +2,10 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Syringe, X, Info } from "lucide-react";
+import { Syringe, X, Info, Calculator } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import DoseCalculator from "@/components/DoseCalculator";
+import { getDoseRecommendation } from "@/lib/dose-recommendations";
 
 export type ResearchCategory = "longevity" | "recovery" | "cognitive" | "metabolic" | "aesthetic";
 
@@ -150,6 +152,7 @@ function ResearchCard({
   onViewDetails: (study: PeptideStudy) => void;
   onOpenMethodology: () => void;
 }) {
+  const [showCalculator, setShowCalculator] = useState(false);
   const barColor = getQualityBarColor(study.qualityScore);
   const segmentCount = 10;
   const filledSegments = Math.min(segmentCount, Math.round((study.qualityScore / 100) * segmentCount));
@@ -262,13 +265,32 @@ function ResearchCard({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => onViewDetails(study)}
-          className="mt-4 flex w-full items-center justify-center rounded border border-[#00ffaa]/40 bg-[#00ffaa]/5 py-2.5 font-mono text-xs font-medium text-[#00ffaa] transition-colors hover:bg-[#00ffaa]/15 hover:border-[#00ffaa]/60"
-        >
-          View details
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCalculator(!showCalculator)}
+            className="flex items-center justify-center gap-1 rounded border border-neon-blue/40 bg-neon-blue/5 px-3 py-2.5 font-mono text-xs font-medium text-neon-blue transition-colors hover:bg-neon-blue/15 hover:border-neon-blue/60"
+          >
+            <Calculator className="w-3.5 h-3.5" />
+            {showCalculator ? "Hide" : "Calc"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewDetails(study)}
+            className="flex-1 flex items-center justify-center rounded border border-[#00ffaa]/40 bg-[#00ffaa]/5 py-2.5 font-mono text-xs font-medium text-[#00ffaa] transition-colors hover:bg-[#00ffaa]/15 hover:border-[#00ffaa]/60"
+          >
+            View details
+          </button>
+        </div>
+
+        {showCalculator && (
+          <div className="mt-4">
+            <DoseCalculator
+              peptideName={study.peptideName}
+              recommendation={getDoseRecommendation(study.peptideName)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

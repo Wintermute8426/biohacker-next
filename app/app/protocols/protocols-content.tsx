@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Layers, Syringe, X } from "lucide-react";
+import { Layers, Syringe, X, Calculator } from "lucide-react";
+import DoseCalculator from "@/components/DoseCalculator";
+import { getDoseRecommendation } from "@/lib/dose-recommendations";
 
 export type ProtocolCategory = "injury_recovery" | "surgical" | "aesthetic" | "cognitive" | "longevity";
 
@@ -138,6 +140,8 @@ function ProtocolCard({
 }
 
 function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClose: () => void }) {
+  const [selectedPeptideCalc, setSelectedPeptideCalc] = useState<string | null>(null);
+  
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -213,6 +217,38 @@ function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClo
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Dose Calculators */}
+        <div className="mt-6">
+          <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa] mb-3">
+            Dose Calculators
+          </h4>
+          <div className="space-y-3">
+            {protocol.peptides.map((p) => (
+              <div key={p.name}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPeptideCalc(selectedPeptideCalc === p.name ? null : p.name)}
+                  className="w-full flex items-center justify-between px-4 py-2 rounded-lg border border-neon-blue/30 bg-neon-blue/5 text-neon-blue font-mono text-sm hover:bg-neon-blue/10 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4" />
+                    {p.name}
+                  </span>
+                  <span className="text-xs text-metal-silver">{selectedPeptideCalc === p.name ? "Hide" : "Calculate"}</span>
+                </button>
+                {selectedPeptideCalc === p.name && (
+                  <div className="mt-2">
+                    <DoseCalculator
+                      peptideName={p.name}
+                      recommendation={getDoseRecommendation(p.name)}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 

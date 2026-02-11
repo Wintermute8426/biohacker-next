@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { loadCycles } from "@/lib/cycle-storage";
-import type { Cycle } from "@/app/app/cycles/cycles-content";
+import { loadCycles, updateDoseStatus } from "@/lib/cycle-database";
+import type { Cycle, Dose } from "@/lib/cycle-database";
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -185,11 +185,11 @@ export default function CalendarPage() {
   const rangeEnd = useMemo(() => new Date(viewYear, viewMonth + 2, 0), [viewYear, viewMonth]);
 
   useEffect(() => {
-    setCycles(loadCycles() as Cycle[]);
+    loadCycles().then(setCycles);
   }, []);
 
   useEffect(() => {
-    const onFocus = () => setCycles(loadCycles() as Cycle[]);
+    const onFocus = () => loadCycles().then(setCycles);
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, []);

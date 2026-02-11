@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Syringe, X, ChevronDown, ChevronUp, Play, Plus, Trash2 } from "lucide-react";
-import { loadCycles, saveCycles } from "@/lib/cycle-storage";
+import { Syringe, X, ChevronDown, ChevronUp, Play, Plus, Trash2, Calculator } from "lucide-react";
+import { loadCycles, saveCycle, deleteCycle } from "@/lib/cycle-database";
+import type { Cycle as DbCycle } from "@/lib/cycle-database";
 import { markTaskComplete } from "@/lib/onboarding-helper";
+import DoseCalculator from "@/components/DoseCalculator";
+import type { DoseCalculation } from "@/components/DoseCalculator";
+import { getDoseRecommendation } from "@/lib/dose-recommendations";
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -209,15 +213,20 @@ export function CyclesContent({
   protocols: ProtocolTemplate[];
   peptideNames: string[];
 }) {
-  const [cycles, setCycles] = useState<Cycle[]>(() => (loadCycles() as Cycle[]));
+  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [loading, setLoading] = useState(true);
   const [protocolModalOpen, setProtocolModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // Load cycles from database on mount
   useEffect(() => {
-    saveCycles(cycles);
-  }, [cycles]);
+    loadCycles().then((data) => {
+      setCycles(data);
+      setLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -238,7 +247,7 @@ export function CyclesContent({
       const totalExpectedDoses = durationWeeks * dosesPerWeek;
       const hexId = `0x${(0xc100 + cycles.length + i + 1).toString(16).toUpperCase().padStart(4, "0")}`;
       return {
-        id: `cycle-${Date.now()}-${i}`,
+        id: crypto.randomUUID(),
         hexId,
         peptideName: p.name,
         doseAmount: p.dose,
@@ -252,10 +261,13 @@ export function CyclesContent({
         notes: undefined,
       };
     });
-    setCycles((prev) => [...prev, ...newCycles]);
-    markTaskComplete("set_first_cycle");
-    setProtocolModalOpen(false);
-    setToast("✅ Cycle created - check Calendar to see schedule");
+    // Save to database
+    Promise.all(newCycles.map(cycle => saveCycle(cycle))).then(() => {
+      setCycles((prev) => [...prev, ...newCycles]);
+      markTaskComplete("set_first_cycle");
+      setProtocolModalOpen(false);
+      setToast("✅ Cycle created - check Calendar to see schedule");
+    });
   };
 
   const createIndividualCycle = (form: {
@@ -272,7 +284,7 @@ export function CyclesContent({
     const totalExpectedDoses = form.durationWeeks * dosesPerWeek;
     const hexId = generateHexId(cycles);
     const cycle: Cycle = {
-      id: `cycle-${Date.now()}`,
+      id: crypto.randomUUID(),
       hexId,
       peptideName: form.peptideName,
       doseAmount: form.doseAmount,
@@ -284,42 +296,64 @@ export function CyclesContent({
       totalExpectedDoses,
       notes: form.notes || undefined,
     };
-    setCycles((prev) => [...prev, cycle]);
-    setCreateModalOpen(false);
-    setToast("✅ Cycle created - check Calendar to see schedule");
+    // Save to database
+    saveCycle(cycle).then(() => {
+      setCycles((prev) => [...prev, cycle]);
+      setCreateModalOpen(false);
+      setToast("✅ Cycle created - check Calendar to see schedule");
+    });
   };
 
   const clearAllCycles = () => {
     if (typeof window !== "undefined" && window.confirm("Clear all cycles? This cannot be undone.")) {
-      setCycles([]);
+      Promise.all(cycles.map(cycle => deleteCycle(cycle.id))).then(() => {
+        setCycles([]);
+      });
     }
   };
 
   const logDose = (cycle: Cycle) => {
-    setCycles((prev) =>
-      prev.map((c) =>
-        c.id === cycle.id ? { ...c, dosesLogged: Math.min(c.dosesLogged + 1, c.totalExpectedDoses) } : c
-      )
-    );
+    const updated = { ...cycle, dosesLogged: Math.min(cycle.dosesLogged + 1, cycle.totalExpectedDoses) };
+    saveCycle(updated).then(() => {
+      setCycles((prev) =>
+        prev.map((c) =>
+          c.id === cycle.id ? updated : c
+        )
+      );
+    });
   };
 
   const togglePause = (cycle: Cycle) => {
-    setCycles((prev) =>
-      prev.map((c) =>
-        c.id === cycle.id
-          ? { ...c, status: c.status === "paused" ? "active" : "paused" }
-          : c
-      )
-    );
+    const updated = { ...cycle, status: (cycle.status === "paused" ? "active" : "paused") as "active" | "paused" };
+    saveCycle(updated).then(() => {
+      setCycles((prev) =>
+        prev.map((c) =>
+          c.id === cycle.id ? updated : c
+        )
+      );
+    });
   };
 
   const completeCycle = (cycle: Cycle) => {
-    setCycles((prev) =>
-      prev.map((c) =>
-        c.id === cycle.id ? { ...c, status: "completed" as const, completedAt: new Date() } : c
-      )
-    );
+    const updated = { ...cycle, status: "completed" as const, completedAt: new Date() };
+    saveCycle(updated).then(() => {
+      setCycles((prev) =>
+        prev.map((c) =>
+          c.id === cycle.id ? updated : c
+        )
+      );
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
+        <div className="relative z-10 flex items-center justify-center min-h-[400px]">
+          <div className="text-neon-green font-mono">LOADING CYCLES...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
@@ -576,6 +610,11 @@ function CreateCycleModal({
   const [frequencyDays, setFrequencyDays] = useState<string[]>([]);
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
+  const [showCalculator, setShowCalculator] = useState(false);
+  
+  const handleCalculationComplete = (calc: DoseCalculation) => {
+    setDoseAmount(`${calc.desiredDoseMcg} mcg (${calc.mlToDraw.toFixed(3)}ml @ ${calc.concentrationMcgPerMl.toFixed(0)}mcg/ml)`);
+  };
 
   const timesOptions = frequencyType === "daily" ? [1, 2, 3] : frequencyType === "weekly" ? [1, 2, 3, 4] : [1, 2];
   const showDayPicker = frequencyType === "weekly";
@@ -646,15 +685,35 @@ function CreateCycleModal({
             />
           </div>
           <div>
-            <label htmlFor="cycle-dose" className="block font-mono text-xs font-medium text-[#00ffaa] mb-1">Dose amount</label>
-            <input
-              id="cycle-dose"
-              type="text"
-              placeholder="e.g. 250 mcg"
-              value={doseAmount}
-              onChange={(e) => setDoseAmount(e.target.value)}
-              className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] placeholder:text-[#9a9aa3] focus:border-[#00ffaa]/60 focus:outline-none"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="cycle-dose" className="block font-mono text-xs font-medium text-[#00ffaa]">Dose amount</label>
+              <button
+                type="button"
+                onClick={() => setShowCalculator(!showCalculator)}
+                className="flex items-center gap-1 px-2 py-1 rounded bg-neon-blue/10 border border-neon-blue/40 text-neon-blue text-[10px] font-mono hover:bg-neon-blue/20"
+              >
+                <Calculator className="w-3 h-3" />
+                {showCalculator ? "Hide" : "Calculate"}
+              </button>
+            </div>
+            {showCalculator ? (
+              <div className="mt-3">
+                <DoseCalculator
+                  peptideName={peptideName}
+                  recommendation={getDoseRecommendation(peptideName)}
+                  onCalculationComplete={handleCalculationComplete}
+                />
+              </div>
+            ) : (
+              <input
+                id="cycle-dose"
+                type="text"
+                placeholder="e.g. 250 mcg or use calculator"
+                value={doseAmount}
+                onChange={(e) => setDoseAmount(e.target.value)}
+                className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] placeholder:text-[#9a9aa3] focus:border-[#00ffaa]/60 focus:outline-none"
+              />
+            )}
           </div>
 
           <div>
