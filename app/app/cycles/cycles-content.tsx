@@ -5,17 +5,10 @@ import { Syringe, X, ChevronDown, ChevronUp, Play, Plus, Trash2, Calculator } fr
 import { loadCycles, saveCycle, deleteCycle } from "@/lib/cycle-database";
 import type { Cycle as DbCycle } from "@/lib/cycle-database";
 import { markTaskComplete } from "@/lib/onboarding-helper";
-import DoseCalculator from "@/components/DoseCalculator";
-import type { DoseCalculation } from "@/components/DoseCalculator";
-import { getDoseRecommendation } from "@/lib/dose-recommendations";
-// Browser-compatible UUID v4 generator
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
+import DoseCalculator from "@/components/DoseCalculatorV3";
+import type { DoseCalculation } from "@/components/DoseCalculatorV3";
+import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
+import { generateDosesForCycle } from "@/lib/dose-generator";
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -255,7 +248,7 @@ export function CyclesContent({
       const totalExpectedDoses = durationWeeks * dosesPerWeek;
       const hexId = `0x${(0xc100 + cycles.length + i + 1).toString(16).toUpperCase().padStart(4, "0")}`;
       return {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         hexId,
         peptideName: p.name,
         doseAmount: p.dose,
@@ -269,12 +262,15 @@ export function CyclesContent({
         notes: undefined,
       };
     });
-    // Save to database
-    Promise.all(newCycles.map(cycle => saveCycle(cycle))).then(() => {
+    // Save to database and generate doses
+    Promise.all(newCycles.map(async (cycle) => {
+      await saveCycle(cycle);
+      await generateDosesForCycle(cycle);
+    })).then(() => {
       setCycles((prev) => [...prev, ...newCycles]);
       markTaskComplete("set_first_cycle");
       setProtocolModalOpen(false);
-      setToast("✅ Cycle created - check Calendar to see schedule");
+      setToast("✅ Protocol started - doses scheduled on Calendar");
     });
   };
 
@@ -292,7 +288,7 @@ export function CyclesContent({
     const totalExpectedDoses = form.durationWeeks * dosesPerWeek;
     const hexId = generateHexId(cycles);
     const cycle: Cycle = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       hexId,
       peptideName: form.peptideName,
       doseAmount: form.doseAmount,
@@ -304,11 +300,13 @@ export function CyclesContent({
       totalExpectedDoses,
       notes: form.notes || undefined,
     };
-    // Save to database
-    saveCycle(cycle).then(() => {
+    // Save to database and generate doses
+    saveCycle(cycle).then(async () => {
+      await generateDosesForCycle(cycle);
       setCycles((prev) => [...prev, cycle]);
       setCreateModalOpen(false);
-      setToast("✅ Cycle created - check Calendar to see schedule");
+      markTaskComplete("set_first_cycle");
+      setToast("✅ Cycle created - doses scheduled on Calendar");
     });
   };
 
@@ -387,7 +385,7 @@ export function CyclesContent({
                   title="Clear all cycles (for testing)"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Clear All
+                  Clear All Cycles
                 </button>
               )}
               <span className="led-dot led-green" aria-hidden />
@@ -433,16 +431,9 @@ export function CyclesContent({
         {activeCycles.length === 0 && cycles.length === 0 && (
           <div className="deck-panel deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/30 p-6 font-mono text-sm text-[#9a9aa3]">
             <p className="text-[#e0e0e5]">&gt; No active cycles detected</p>
-            <p className="mt-1">&gt; Initialize protocol or create cycle to begin</p>
+            <p className="mt-1">&gt; Create a cycle to begin</p>
             <p className="mt-2 flex flex-wrap gap-2">
               <span className="text-[#00ffaa]">&gt;</span>
-              <button
-                type="button"
-                onClick={() => setProtocolModalOpen(true)}
-                className="rounded border border-[#00ffaa]/40 bg-[#00ffaa]/10 px-3 py-2 text-[#00ffaa] hover:bg-[#00ffaa]/20"
-              >
-                [START PROTOCOL]
-              </button>
               <button
                 type="button"
                 onClick={() => setCreateModalOpen(true)}
@@ -454,30 +445,14 @@ export function CyclesContent({
           </div>
         )}
 
-        {/* Quick start options (when we have cycles or always show below empty state) */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="deck-panel deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/30 p-5">
-            <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa] mb-2">
-              START PROTOCOL
-            </h3>
-            <p className="font-mono text-[10px] text-[#9a9aa3] mb-3">
-              Initialize from template — creates all cycles at once (e.g. BPC-157, TB-500, GHK-Cu).
-            </p>
-            <button
-              type="button"
-              onClick={() => setProtocolModalOpen(true)}
-              className="flex items-center gap-2 rounded border border-[#00ffaa]/40 bg-[#00ffaa]/5 px-3 py-2 font-mono text-xs text-[#00ffaa] hover:bg-[#00ffaa]/15"
-            >
-              <Play className="h-4 w-4" />
-              &gt; Initialize protocol from template
-            </button>
-          </div>
+        {/* Quick start option */}
+        <div className="max-w-md">
           <div className="deck-panel deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/30 p-5">
             <h3 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa] mb-2">
               CREATE CYCLE
             </h3>
             <p className="font-mono text-[10px] text-[#9a9aa3] mb-3">
-              Add a single peptide cycle with custom dose, duration, and start date.
+              Add a peptide cycle with custom dose, duration, and frequency.
             </p>
             <button
               type="button"
@@ -485,7 +460,7 @@ export function CyclesContent({
               className="flex items-center gap-2 rounded border border-[#00ffaa]/40 bg-[#00ffaa]/5 px-3 py-2 font-mono text-xs text-[#00ffaa] hover:bg-[#00ffaa]/15"
             >
               <Plus className="h-4 w-4" />
-              &gt; Create individual cycle
+              &gt; Create cycle
             </button>
           </div>
         </div>
@@ -619,9 +594,10 @@ function CreateCycleModal({
   const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
   const [showCalculator, setShowCalculator] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleCalculationComplete = (calc: DoseCalculation) => {
-    setDoseAmount(`${calc.desiredDoseMcg} mcg (${calc.mlToDraw.toFixed(3)}ml @ ${calc.concentrationMcgPerMl.toFixed(0)}mcg/ml)`);
+    setDoseAmount(`${calc.desiredDoseMg}mg (${calc.mlToDraw.toFixed(3)}ml @ ${calc.concentrationMgPerMl.toFixed(1)}mg/ml)`);
   };
 
   const timesOptions = frequencyType === "daily" ? [1, 2, 3] : frequencyType === "weekly" ? [1, 2, 3, 4] : [1, 2];
@@ -640,6 +616,9 @@ function CreateCycleModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (showDayPicker && !daysValid) return;
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     const frequency: CycleFrequency =
       frequencyType === "daily"
         ? { type: "daily", times: frequencyTimes }
@@ -691,37 +670,6 @@ function CreateCycleModal({
               onChange={(e) => setDurationWeeks(parseInt(e.target.value, 10) || 1)}
               className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] focus:border-[#00ffaa]/60 focus:outline-none"
             />
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="cycle-dose" className="block font-mono text-xs font-medium text-[#00ffaa]">Dose amount</label>
-              <button
-                type="button"
-                onClick={() => setShowCalculator(!showCalculator)}
-                className="flex items-center gap-1 px-2 py-1 rounded bg-neon-blue/10 border border-neon-blue/40 text-neon-blue text-[10px] font-mono hover:bg-neon-blue/20"
-              >
-                <Calculator className="w-3 h-3" />
-                {showCalculator ? "Hide" : "Calculate"}
-              </button>
-            </div>
-            {showCalculator ? (
-              <div className="mt-3">
-                <DoseCalculator
-                  peptideName={peptideName}
-                  recommendation={getDoseRecommendation(peptideName)}
-                  onCalculationComplete={handleCalculationComplete}
-                />
-              </div>
-            ) : (
-              <input
-                id="cycle-dose"
-                type="text"
-                placeholder="e.g. 250 mcg or use calculator"
-                value={doseAmount}
-                onChange={(e) => setDoseAmount(e.target.value)}
-                className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] placeholder:text-[#9a9aa3] focus:border-[#00ffaa]/60 focus:outline-none"
-              />
-            )}
           </div>
 
           <div>
@@ -808,6 +756,39 @@ function CreateCycleModal({
               className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] focus:border-[#00ffaa]/60 focus:outline-none"
             />
           </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="cycle-dose" className="block font-mono text-xs font-medium text-[#00ffaa]">Dose amount</label>
+              <button
+                type="button"
+                onClick={() => setShowCalculator(!showCalculator)}
+                className="flex items-center gap-1 px-2 py-1 rounded bg-neon-blue/10 border border-neon-blue/40 text-neon-blue text-[10px] font-mono hover:bg-neon-blue/20"
+              >
+                <Calculator className="w-3 h-3" />
+                {showCalculator ? "Hide" : "Calculate"}
+              </button>
+            </div>
+            {showCalculator ? (
+              <div className="mt-3">
+                <DoseCalculator
+                  peptideName={peptideName}
+                  recommendation={getDoseRecommendation(peptideName)}
+                  onCalculationComplete={handleCalculationComplete}
+                />
+              </div>
+            ) : (
+              <input
+                id="cycle-dose"
+                type="text"
+                placeholder="e.g. 1mg or use calculator"
+                value={doseAmount}
+                onChange={(e) => setDoseAmount(e.target.value)}
+                className="w-full rounded border border-[#00ffaa]/30 bg-black/50 px-3 py-2 font-mono text-sm text-[#f5f5f7] placeholder:text-[#9a9aa3] focus:border-[#00ffaa]/60 focus:outline-none"
+              />
+            )}
+          </div>
+
           <div>
             <label htmlFor="cycle-notes" className="block font-mono text-xs font-medium text-[#00ffaa] mb-1">Notes (optional)</label>
             <textarea
@@ -822,12 +803,18 @@ function CreateCycleModal({
           <div className="flex gap-2 pt-2">
             <button
               type="submit"
-              disabled={showDayPicker && !daysValid}
-              className="rounded border border-[#00ffaa]/40 bg-[#00ffaa]/10 px-4 py-2 font-mono text-sm font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={(showDayPicker && !daysValid) || isSubmitting}
+              className="rounded border border-[#00ffaa]/40 bg-[#00ffaa]/10 px-4 py-2 font-mono text-sm font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Start cycle
+              {isSubmitting && (
+                <svg className="animate-spin h-4 w-4 text-[#00ffaa]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {isSubmitting ? "Creating..." : "Start cycle"}
             </button>
-            <button type="button" onClick={onClose} className="rounded border border-[#9a9aa3]/40 bg-white/5 px-4 py-2 font-mono text-sm text-[#9a9aa3] hover:bg-white/10">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="rounded border border-[#9a9aa3]/40 bg-white/5 px-4 py-2 font-mono text-sm text-[#9a9aa3] hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancel
             </button>
           </div>

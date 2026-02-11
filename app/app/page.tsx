@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Activity, Calendar, ClipboardList, Target } from "lucide-react";
+import TodaysDosesWidget from "@/components/TodaysDosesWidget";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -162,50 +163,8 @@ export default async function DashboardPage() {
               </Link>
             </div>
 
-            {/* Doses Today Card */}
-            <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "200ms"}}>
-              <div className="led-card-top-right">
-                <span className="led-dot led-green" aria-hidden="true"></span>
-              </div>
-
-              <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                0xP103
-              </span>
-
-              <div className="flex items-center gap-2 mt-3">
-                <ClipboardList className="w-4 h-4 text-[#00ffaa] shrink-0" />
-              </div>
-
-              <h3 className="text-xl font-bold tracking-tight text-[#f5f5f7] font-space-mono">
-                Doses Today
-              </h3>
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                <span className="rounded border px-2 py-0.5 text-[10px] font-mono font-medium bg-amber-500/20 border-amber-500/40">
-                  {dosesTodayCount || 0} scheduled
-                </span>
-              </div>
-
-              <div className="mt-3">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#9a9aa3]">
-                  SCHEDULE
-                </span>
-                <ul className="mt-1 list-inside list-disc text-xs text-[#e0e0e5] font-mono">
-                  <li>No doses scheduled today</li>
-                  <li>Next dose: Tomorrow</li>
-                </ul>
-              </div>
-
-              <div className="mt-3 text-xs font-mono text-[#00ffaa]">
-                Status: Clear
-              </div>
-
-              <Link href="/app/calendar">
-                <button className="mt-4 flex w-full items-center justify-center rounded-lg border-[#00ffaa]/40 bg-[#00ffaa]/5 px-4 py-2.5 font-mono text-xs font-medium text-[#00ffaa] transition-colors hover:bg-[#00ffaa]/15 hover:border-[#00ffaa]/60">
-                  View calendar
-                </button>
-              </Link>
-            </div>
+            {/* Today's Doses Widget */}
+            <TodaysDosesWidget />
 
             {/* Adherence Card */}
             <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "300ms"}}>

@@ -220,6 +220,45 @@ export async function getAdherencePercentage(days: number = 7): Promise<number> 
   return data || 100.0;
 }
 
+export async function deleteDose(doseId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  const { error } = await supabase
+    .from("doses")
+    .delete()
+    .eq("id", doseId);
+  
+  if (error) {
+    console.error("Error deleting dose:", error);
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true };
+}
+
+export async function deleteAllCycles(): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "User not authenticated" };
+  }
+  
+  // Cascade delete will handle all doses automatically
+  const { error } = await supabase
+    .from("cycles")
+    .delete()
+    .eq("user_id", user.id);
+  
+  if (error) {
+    console.error("Error deleting all cycles:", error);
+    return { success: false, error: error.message };
+  }
+  
+  return { success: true };
+}
+
 // ============================================
 // TYPE CONVERTERS
 // ============================================

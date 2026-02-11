@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { loadCycles, updateDoseStatus } from "@/lib/cycle-database";
-import type { Cycle, Dose } from "@/lib/cycle-database";
+import { loadCycles, updateDoseStatus, loadDoses, deleteDose, deleteAllCycles } from "@/lib/cycle-database";
+import type { Cycle, Dose, DoseStatus as DbDoseStatus } from "@/lib/cycle-database";
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -195,25 +195,22 @@ export default function CalendarPage() {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDoses((prev) => {
-        const existingByDate = new Map<string, ScheduledDose[]>();
-        prev.forEach((d) => {
-          if (!existingByDate.has(d.date)) existingByDate.set(d.date, []);
-          existingByDate.get(d.date)!.push(d);
-        });
-        const generated = generateDosesFromCycles(activeCycles, rangeStart, rangeEnd, existingByDate);
-        const byId = new Map(prev.map((x) => [x.id, x]));
-        generated.forEach((g) => {
-          const existing = byId.get(g.id);
-          byId.set(g.id, existing ? { ...g, status: existing.status } : g);
-        });
-        return Array.from(byId.values());
-      });
+    setLoading(true);
+    loadDoses(rangeStart, rangeEnd).then((dbDoses) => {
+      const scheduledDoses: ScheduledDose[] = dbDoses.map((d) => ({
+        id: d.id,
+        cycleId: d.cycleId,
+        peptideName: d.peptideName,
+        doseAmount: d.doseAmount,
+        route: d.route,
+        timeLabel: d.timeLabel,
+        date: d.scheduledDate,
+        status: d.status as DoseStatus,
+      }));
+      setDoses(scheduledDoses);
       setLoading(false);
-    }, 300);
-    return () => clearTimeout(t);
-  }, [viewYear, viewMonth, activeCycles, rangeStart.getTime(), rangeEnd.getTime()]);
+    });
+  }, [viewYear, viewMonth, rangeStart, rangeEnd]);
 
   const dosesByDate = useMemo(() => {
     const m = new Map<string, ScheduledDose[]>();
@@ -233,8 +230,73 @@ export default function CalendarPage() {
   const weekNum = getWeekNumber(currentDate);
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "PST";
 
-  const setDoseStatus = (doseId: string, status: DoseStatus) => {
+  const setDoseStatus = async (doseId: string, status: DoseStatus) => {
+    // Optimistic update
     setDoses((prev) => prev.map((d) => (d.id === doseId ? { ...d, status } : d)));
+    
+    // Persist to database
+    const result = await updateDoseStatus(doseId, status as DbDoseStatus);
+    if (!result.success) {
+      console.error("Failed to update dose status:", result.error);
+      // Revert on error
+      loadDoses(rangeStart, rangeEnd).then((dbDoses) => {
+        const scheduledDoses: ScheduledDose[] = dbDoses.map((d) => ({
+          id: d.id,
+          cycleId: d.cycleId,
+          peptideName: d.peptideName,
+          doseAmount: d.doseAmount,
+          route: d.route,
+          timeLabel: d.timeLabel,
+          date: d.scheduledDate,
+          status: d.status as DoseStatus,
+        }));
+        setDoses(scheduledDoses);
+      });
+    }
+  };
+
+  const handleDeleteDose = async (doseId: string) => {
+    if (!confirm("Delete this dose?")) return;
+    
+    // Optimistic update
+    setDoses((prev) => prev.filter((d) => d.id !== doseId));
+    
+    // Persist to database
+    const result = await deleteDose(doseId);
+    if (!result.success) {
+      console.error("Failed to delete dose:", result.error);
+      // Reload on error
+      loadDoses(rangeStart, rangeEnd).then((dbDoses) => {
+        const scheduledDoses: ScheduledDose[] = dbDoses.map((d) => ({
+          id: d.id,
+          cycleId: d.cycleId,
+          peptideName: d.peptideName,
+          doseAmount: d.doseAmount,
+          route: d.route,
+          timeLabel: d.timeLabel,
+          date: d.scheduledDate,
+          status: d.status as DoseStatus,
+        }));
+        setDoses(scheduledDoses);
+      });
+    }
+  };
+
+  const handleClearAllData = async () => {
+    if (!confirm("⚠️ DELETE ALL cycles and doses? This cannot be undone!")) return;
+    if (!confirm("Are you ABSOLUTELY sure? All your data will be permanently deleted.")) return;
+    
+    setLoading(true);
+    const result = await deleteAllCycles();
+    if (result.success) {
+      setCycles([]);
+      setDoses([]);
+      setLoading(false);
+    } else {
+      console.error("Failed to clear data:", result.error);
+      alert("Error clearing data. Check console.");
+      setLoading(false);
+    }
   };
 
   const selectedDoses = selectedDate ? dosesByDate.get(selectedDate) ?? [] : [];
@@ -329,6 +391,18 @@ export default function CalendarPage() {
                 <button type="button" disabled className="cursor-not-allowed rounded border border-white/20 bg-white/5 px-1.5 py-0.5 text-[#9a9aa3] opacity-60">CONNECT</button>
               </div>
             </div>
+          </div>
+
+          {/* Clear All Data button */}
+          <div className="deck-panel deck-card-bg deck-border-thick rounded-lg border-red-500/30 p-3">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-red-400 mb-2">DANGER ZONE</p>
+            <button
+              type="button"
+              onClick={handleClearAllData}
+              className="rounded border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400 hover:bg-red-500/20 transition-colors"
+            >
+              CLEAR ALL DATA
+            </button>
           </div>
         </div>
 
@@ -483,9 +557,10 @@ export default function CalendarPage() {
                       )}
                       <button
                         type="button"
-                        className="rounded border border-white/20 bg-white/5 px-2 py-1 font-mono text-[10px] text-[#9a9aa3] hover:bg-white/10"
+                        onClick={() => handleDeleteDose(dose.id)}
+                        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-1 font-mono text-[10px] text-red-400 hover:bg-red-500/20"
                       >
-                        RESCHEDULE
+                        DELETE
                       </button>
                     </div>
                   </li>

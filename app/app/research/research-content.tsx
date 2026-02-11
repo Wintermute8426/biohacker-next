@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Syringe, X, Info, Calculator } from "lucide-react";
 import { format, parseISO } from "date-fns";
-import DoseCalculator from "@/components/DoseCalculator";
-import { getDoseRecommendation } from "@/lib/dose-recommendations";
+import DoseCalculator from "@/components/DoseCalculatorV3";
+import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
 
 export type ResearchCategory = "longevity" | "recovery" | "cognitive" | "metabolic" | "aesthetic";
 

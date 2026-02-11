@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { Layers, Syringe, X, Calculator } from "lucide-react";
-import DoseCalculator from "@/components/DoseCalculator";
-import { getDoseRecommendation } from "@/lib/dose-recommendations";
+import DoseCalculator from "@/components/DoseCalculatorV3";
+import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
 
 export type ProtocolCategory = "injury_recovery" | "surgical" | "aesthetic" | "cognitive" | "longevity";
 

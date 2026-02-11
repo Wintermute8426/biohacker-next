@@ -62,6 +62,8 @@ const config: Config = {
       },
       animation: {
         "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        glow: "glow 2s ease-in-out infinite",
         glitch: "glitch 1s linear infinite",
         "fade-in": "fade-in 0.5s ease-out forwards",
         "cursor-blink": "cursor-blink 1s step-end infinite",
@@ -79,6 +81,24 @@ const config: Config = {
           "50%": {
             opacity: "0.8",
             filter: "drop-shadow(0 0 12px currentColor)",
+          },
+        },
+        "pulse-slow": {
+          "0%, 100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+          "50%": {
+            opacity: "0.9",
+            transform: "scale(1.02)",
+          },
+        },
+        glow: {
+          "0%, 100%": {
+            boxShadow: "0 0 30px rgba(0,255,170,0.6), inset 0 0 20px rgba(0,255,170,0.1)",
+          },
+          "50%": {
+            boxShadow: "0 0 40px rgba(0,255,170,0.8), inset 0 0 30px rgba(0,255,170,0.2)",
           },
         },
         "cursor-blink": {
