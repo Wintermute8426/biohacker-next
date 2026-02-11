@@ -8,6 +8,14 @@ import { markTaskComplete } from "@/lib/onboarding-helper";
 import DoseCalculator from "@/components/DoseCalculator";
 import type { DoseCalculation } from "@/components/DoseCalculator";
 import { getDoseRecommendation } from "@/lib/dose-recommendations";
+// Browser-compatible UUID v4 generator
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -247,7 +255,7 @@ export function CyclesContent({
       const totalExpectedDoses = durationWeeks * dosesPerWeek;
       const hexId = `0x${(0xc100 + cycles.length + i + 1).toString(16).toUpperCase().padStart(4, "0")}`;
       return {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         hexId,
         peptideName: p.name,
         doseAmount: p.dose,
@@ -284,7 +292,7 @@ export function CyclesContent({
     const totalExpectedDoses = form.durationWeeks * dosesPerWeek;
     const hexId = generateHexId(cycles);
     const cycle: Cycle = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       hexId,
       peptideName: form.peptideName,
       doseAmount: form.doseAmount,

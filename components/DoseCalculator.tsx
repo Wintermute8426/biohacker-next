@@ -10,6 +10,7 @@ export type DoseCalculation = {
   concentrationMgPerMl: number;
   mlToDraw: number;
   unitsPerMl: number;
+  concentrationMcgPerMl: number;
 };
 
 export type DoseRecommendation = {
@@ -72,6 +73,7 @@ export default function DoseCalculator({
         reconstitutionMl,
         desiredDoseMcg,
         concentrationMgPerMl,
+        concentrationMcgPerMl,
         mlToDraw,
         unitsPerMl,
       });
