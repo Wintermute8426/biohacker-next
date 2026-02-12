@@ -7,8 +7,8 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    'https://egyflvqtijzbkydmgafh.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVneWZsdnF0aWp6Ymt5ZG1nYWZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1NzE3NTQsImV4cCI6MjA4NjE0Nzc1NH0.jX4FqyHeTe1Z5-lhiVtb8IdSy9w4Ht9_p7J-3x_Waq4',
     {
       cookies: {
         getAll() {
@@ -33,6 +33,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Skip auth check for auth routes
+  if (request.nextUrl.pathname.startsWith("/auth")) {
+    return supabaseResponse;
+  }
+
   // Protect /app routes
   if (!user && request.nextUrl.pathname.startsWith("/app")) {
     const url = request.nextUrl.clone();
@@ -40,18 +45,5 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect to app if logged in and on auth pages
-  if (user && request.nextUrl.pathname.startsWith("/auth")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/app";
-    return NextResponse.redirect(url);
-  }
-
   return supabaseResponse;
 }
-
-export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-};
