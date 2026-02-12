@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Activity, Calendar, ClipboardList, Target } from "lucide-react";
 import TodaysDosesWidget from "@/components/TodaysDosesWidget";
+import WeightTrackerWidget from "@/components/WeightTrackerWidget";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -165,6 +166,9 @@ export default async function DashboardPage() {
 
             {/* Today's Doses Widget */}
             <TodaysDosesWidget />
+
+            {/* Weight Tracker Widget */}
+            <WeightTrackerWidget />
 
             {/* Adherence Card */}
             <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "300ms"}}>

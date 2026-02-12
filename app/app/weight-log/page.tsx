@@ -7,6 +7,7 @@ import { Scale, TrendingDown, TrendingUp, Minus, Trash2 } from "lucide-react";
 interface WeightLog {
   id: string;
   weight_lbs: number;
+  body_fat_pct?: number;
   logged_at: string;
   notes?: string;
 }
@@ -14,6 +15,7 @@ interface WeightLog {
 export default function WeightLogPage() {
   const [logs, setLogs] = useState<WeightLog[]>([]);
   const [weight, setWeight] = useState("");
+  const [bodyFat, setBodyFat] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -50,6 +52,7 @@ if (!user) return;
 const { error } = await supabase.from("weight_logs").insert({
   user_id: user.id,
   weight_lbs: parseFloat(weight),
+  body_fat_pct: bodyFat ? parseFloat(bodyFat) : null,
   notes: notes || null,
   logged_at: new Date().toISOString(),
 });
@@ -57,6 +60,7 @@ const { error } = await supabase.from("weight_logs").insert({
     if (!error) {
       setMessage("✓ WEIGHT LOGGED");
       setWeight("");
+      setBodyFat("");
       setNotes("");
       loadLogs();
     } else {
@@ -128,6 +132,19 @@ const { error } = await supabase.from("weight_logs").insert({
           </div>
           <div>
             <label className="block text-[#00ff41] font-mono text-sm mb-2">
+              {'>'} BODY FAT % (optional)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              value={bodyFat}
+              onChange={(e) => setBodyFat(e.target.value)}
+              className="w-full bg-black/50 border border-[#00ff41]/30 rounded px-4 py-3 text-[#00ff41] font-mono focus:outline-none focus:border-[#00ff41] focus:shadow-[0_0_10px_rgba(0,255,65,0.3)] transition-all"
+              placeholder="15.0"
+            />
+          </div>
+          <div>
+            <label className="block text-[#00ff41] font-mono text-sm mb-2">
               {'>'} NOTES (optional)
             </label>
             <textarea
@@ -175,8 +192,11 @@ const { error } = await supabase.from("weight_logs").insert({
         ) : (
           <div className="space-y-2">
             {logs.map((log, idx) => {
-              const prevWeight = logs[idx + 1]?.weight_lbs;
-              const change = prevWeight ? log.weight_lbs - prevWeight : 0;
+              const prevLog = logs[idx + 1];
+              const weightChange = prevLog ? log.weight_lbs - prevLog.weight_lbs : 0;
+              const bodyFatChange = log.body_fat_pct && prevLog?.body_fat_pct 
+                ? log.body_fat_pct - prevLog.body_fat_pct 
+                : 0;
               
               return (
                 <div
@@ -185,21 +205,41 @@ const { error } = await supabase.from("weight_logs").insert({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <span className="text-[#00ff41] font-mono font-bold text-lg">
                           {log.weight_lbs} lbs
                         </span>
-                        {prevWeight && change !== 0 && (
+                        {prevLog && weightChange !== 0 && (
                           <span className={`flex items-center gap-1 font-mono text-sm ${
-                            change > 0 ? "text-red-400" : "text-green-400"
+                            weightChange > 0 ? "text-red-400" : "text-green-400"
                           }`}>
-                            {change > 0 ? (
+                            {weightChange > 0 ? (
                               <TrendingUp className="w-4 h-4" />
                             ) : (
                               <TrendingDown className="w-4 h-4" />
                             )}
-                            {Math.abs(change).toFixed(1)} lbs
+                            {Math.abs(weightChange).toFixed(1)} lbs
                           </span>
+                        )}
+                        {log.body_fat_pct && (
+                          <>
+                            <span className="text-gray-500">|</span>
+                            <span className="text-[#00d4ff] font-mono font-bold text-lg">
+                              {log.body_fat_pct}%
+                            </span>
+                            {prevLog?.body_fat_pct && bodyFatChange !== 0 && (
+                              <span className={`flex items-center gap-1 font-mono text-sm ${
+                                bodyFatChange > 0 ? "text-red-400" : "text-green-400"
+                              }`}>
+                                {bodyFatChange > 0 ? (
+                                  <TrendingUp className="w-4 h-4" />
+                                ) : (
+                                  <TrendingDown className="w-4 h-4" />
+                                )}
+                                {Math.abs(bodyFatChange).toFixed(1)}%
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                       <div className="text-gray-400 text-sm font-mono">

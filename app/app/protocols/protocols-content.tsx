@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Layers, Syringe, X, Calculator } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Layers, Syringe, X, Calculator, Plus, User } from "lucide-react";
 import DoseCalculator from "@/components/DoseCalculatorV3";
 import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
+import ProtocolCreationForm from "@/components/ProtocolCreationForm";
 
 export type ProtocolCategory = "injury_recovery" | "surgical" | "aesthetic" | "cognitive" | "longevity";
 
@@ -17,16 +18,23 @@ export type ProtocolPeptide = {
 
 export type ProtocolTemplate = {
   id: string;
-  hexId: string;
+  hex_id?: string;
+  hexId?: string;
   name: string;
   duration: string;
   difficulty: string;
   category: ProtocolCategory;
   peptides: ProtocolPeptide[];
-  expectedOutcomes: string[];
-  costEstimate: string;
-  importantNotes: string;
-  outcomesTimeline: string;
+  expected_outcomes?: string[];
+  expectedOutcomes?: string[];
+  cost_estimate?: string;
+  costEstimate?: string;
+  important_notes?: string;
+  importantNotes?: string;
+  outcomes_timeline?: string;
+  outcomesTimeline?: string;
+  is_official_template?: boolean;
+  creator_display_name?: string;
 };
 
 const CATEGORY_LABELS: Record<ProtocolCategory | "all", string> = {
@@ -70,7 +78,10 @@ function ProtocolCard({
   index: number;
   onViewDetails: (p: ProtocolTemplate) => void;
 }) {
-  const topOutcomes = protocol.expectedOutcomes.slice(0, 3);
+  const outcomes = protocol.expected_outcomes || protocol.expectedOutcomes || [];
+  const topOutcomes = outcomes.slice(0, 3);
+  const hexId = protocol.hex_id || protocol.hexId || "0xP???";
+  const costEstimate = protocol.cost_estimate || protocol.costEstimate;
 
   return (
     <div
@@ -80,7 +91,15 @@ function ProtocolCard({
       <div className="led-card-top-right">
         <span className="led-dot led-green" aria-hidden />
       </div>
-      <span className="hex-id absolute left-6 top-3 z-10" aria-hidden>{protocol.hexId}</span>
+      <span className="hex-id absolute left-6 top-3 z-10" aria-hidden>{hexId}</span>
+
+      {/* Community Protocol Badge */}
+      {!protocol.is_official_template && protocol.creator_display_name && (
+        <div className="absolute right-6 top-3 flex items-center gap-1 text-[10px] font-mono text-purple-400">
+          <User className="w-3 h-3" />
+          <span>{protocol.creator_display_name}</span>
+        </div>
+      )}
 
       <div className="glitch-on-hover relative z-10">
         <div className="flex items-center gap-2 mt-2">
@@ -100,6 +119,11 @@ function ProtocolCard({
           <span className={`rounded border px-2 py-0.5 text-[10px] font-mono font-medium ${CATEGORY_COLORS[protocol.category]}`}>
             {CATEGORY_LABELS[protocol.category]}
           </span>
+          {!protocol.is_official_template && (
+            <span className="rounded border border-purple-500/40 bg-purple-500/20 px-2 py-0.5 text-[10px] font-mono text-purple-400">
+              COMMUNITY
+            </span>
+          )}
         </div>
 
         <div className="mt-3">
@@ -123,9 +147,11 @@ function ProtocolCard({
           </ul>
         </div>
 
-        <div className="mt-3 text-xs font-mono text-[#00ffaa]">
-          Est. cost: <span className="font-semibold">{protocol.costEstimate}</span>
-        </div>
+        {costEstimate && (
+          <div className="mt-3 text-xs font-mono text-[#00ffaa]">
+            Est. cost: <span className="font-semibold">{costEstimate}</span>
+          </div>
+        )}
 
         <button
           type="button"
@@ -141,14 +167,11 @@ function ProtocolCard({
 
 function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClose: () => void }) {
   const [selectedPeptideCalc, setSelectedPeptideCalc] = useState<string | null>(null);
-  
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
+  const outcomes = protocol.expected_outcomes || protocol.expectedOutcomes || [];
+  const hexId = protocol.hex_id || protocol.hexId || "0xP???";
+  const costEstimate = protocol.cost_estimate || protocol.costEstimate;
+  const importantNotes = protocol.important_notes || protocol.importantNotes;
+  const outcomesTimeline = protocol.outcomes_timeline || protocol.outcomesTimeline;
 
   return (
     <div
@@ -177,8 +200,15 @@ function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClo
           <h2 id="protocol-modal-title" className="font-space-mono text-2xl font-bold text-[#f5f5f7]">
             {protocol.name}
           </h2>
-          <span className="hex-id ml-2">{protocol.hexId}</span>
+          <span className="hex-id ml-2">{hexId}</span>
         </div>
+
+        {!protocol.is_official_template && protocol.creator_display_name && (
+          <div className="mt-2 flex items-center gap-2 text-sm font-mono text-purple-400">
+            <User className="w-4 h-4" />
+            <span>Created by {protocol.creator_display_name}</span>
+          </div>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-2">
           <span className="rounded border border-[#00ffaa]/30 bg-[#00ffaa]/10 px-2 py-0.5 text-xs font-mono text-[#00ffaa]">
@@ -190,6 +220,11 @@ function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClo
           <span className={`rounded border px-2 py-0.5 text-xs font-mono font-medium ${CATEGORY_COLORS[protocol.category]}`}>
             {CATEGORY_LABELS[protocol.category]}
           </span>
+          {!protocol.is_official_template && (
+            <span className="rounded border border-purple-500/40 bg-purple-500/20 px-2 py-0.5 text-xs font-mono text-purple-400">
+              COMMUNITY PROTOCOL
+            </span>
+          )}
         </div>
 
         <div className="mt-6">
@@ -252,19 +287,25 @@ function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClo
           </div>
         </div>
 
-        <div className="mt-6">
-          <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa]">Expected outcomes timeline</h4>
-          <p className="mt-1 text-sm text-[#e0e0e5] leading-relaxed font-mono">{protocol.outcomesTimeline}</p>
-        </div>
+        {outcomesTimeline && (
+          <div className="mt-6">
+            <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa]">Expected outcomes timeline</h4>
+            <p className="mt-1 text-sm text-[#e0e0e5] leading-relaxed font-mono">{outcomesTimeline}</p>
+          </div>
+        )}
 
-        <div className="mt-6">
-          <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa]">Important notes</h4>
-          <p className="mt-1 text-sm text-[#e0e0e5] leading-relaxed font-mono">{protocol.importantNotes}</p>
-        </div>
+        {importantNotes && (
+          <div className="mt-6">
+            <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#00ffaa]">Important notes</h4>
+            <p className="mt-1 text-sm text-[#e0e0e5] leading-relaxed font-mono">{importantNotes}</p>
+          </div>
+        )}
 
-        <div className="mt-6 text-sm font-mono text-[#00ffaa]">
-          Cost estimate: <span className="font-semibold">{protocol.costEstimate}</span>
-        </div>
+        {costEstimate && (
+          <div className="mt-6 text-sm font-mono text-[#00ffaa]">
+            Cost estimate: <span className="font-semibold">{costEstimate}</span>
+          </div>
+        )}
 
         <button
           type="button"
@@ -277,16 +318,38 @@ function DetailsModal({ protocol, onClose }: { protocol: ProtocolTemplate; onClo
   );
 }
 
-export function ProtocolsContent({ protocols }: { protocols: ProtocolTemplate[] }) {
+export function ProtocolsContent({ protocols, onProtocolCreated }: { 
+  protocols: ProtocolTemplate[];
+  onProtocolCreated: () => void;
+}) {
   const [categoryFilter, setCategoryFilter] = useState<ProtocolCategory | "all">("all");
   const [modalProtocol, setModalProtocol] = useState<ProtocolTemplate | null>(null);
+  const [showCreationForm, setShowCreationForm] = useState(false);
 
-  const filteredProtocols = useMemo(() => {
-    if (categoryFilter === "all") return protocols;
-    return protocols.filter((p) => p.category === categoryFilter);
-  }, [protocols, categoryFilter]);
+  const officialProtocols = useMemo(() => {
+    return protocols.filter(p => p.is_official_template !== false);
+  }, [protocols]);
+
+  const communityProtocols = useMemo(() => {
+    return protocols.filter(p => p.is_official_template === false);
+  }, [protocols]);
+
+  const filteredOfficial = useMemo(() => {
+    if (categoryFilter === "all") return officialProtocols;
+    return officialProtocols.filter((p) => p.category === categoryFilter);
+  }, [officialProtocols, categoryFilter]);
+
+  const filteredCommunity = useMemo(() => {
+    if (categoryFilter === "all") return communityProtocols;
+    return communityProtocols.filter((p) => p.category === categoryFilter);
+  }, [communityProtocols, categoryFilter]);
 
   const lastSync = new Date().toISOString().slice(0, 16).replace("T", " ");
+
+  const handleProtocolCreated = () => {
+    setShowCreationForm(false);
+    onProtocolCreated();
+  };
 
   return (
     <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
@@ -302,9 +365,14 @@ export function ProtocolsContent({ protocols }: { protocols: ProtocolTemplate[] 
             <h1 className="font-space-mono text-xl font-bold tracking-wider text-[#f5f5f7] uppercase sm:text-2xl">
               PROTOCOL DATABASE | TEMPLATES: {protocols.length}
             </h1>
-            <div className="flex items-center gap-2">
-              <span className="led-dot led-green shrink-0" aria-hidden />
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreationForm(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-[#00ffaa] bg-[#00ffaa]/20 text-[#00ffaa] font-mono text-sm font-semibold hover:bg-[#00ffaa]/30 transition-colors shadow-[0_0_10px_rgba(0,255,170,0.2)]"
+            >
+              <Plus className="w-4 h-4" />
+              Build a Protocol
+            </button>
           </div>
 
           <div className="sys-info flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-[#22d3ee]">
@@ -332,24 +400,68 @@ export function ProtocolsContent({ protocols }: { protocols: ProtocolTemplate[] 
           ))}
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredProtocols.map((protocol, i) => (
-            <ProtocolCard
-              key={protocol.id}
-              protocol={protocol}
-              index={i}
-              onViewDetails={setModalProtocol}
-            />
-          ))}
-        </div>
+        {/* Biohacker Templates Section */}
+        {filteredOfficial.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#00ffaa]/50 to-transparent" />
+              <h2 className="font-space-mono text-lg font-bold tracking-wider text-[#00ffaa] uppercase">
+                Biohacker Templates
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#00ffaa]/50 to-transparent" />
+            </div>
 
-        {filteredProtocols.length === 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredOfficial.map((protocol, i) => (
+                <ProtocolCard
+                  key={protocol.id}
+                  protocol={protocol}
+                  index={i}
+                  onViewDetails={setModalProtocol}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Community Protocols Section */}
+        {filteredCommunity.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+              <h2 className="font-space-mono text-lg font-bold tracking-wider text-purple-400 uppercase">
+                Community Protocols
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredCommunity.map((protocol, i) => (
+                <ProtocolCard
+                  key={protocol.id}
+                  protocol={protocol}
+                  index={i + filteredOfficial.length}
+                  onViewDetails={setModalProtocol}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filteredOfficial.length === 0 && filteredCommunity.length === 0 && (
           <p className="font-mono text-sm text-[#9a9aa3]">No protocols in this category.</p>
         )}
       </div>
 
       {modalProtocol && (
         <DetailsModal protocol={modalProtocol} onClose={() => setModalProtocol(null)} />
+      )}
+
+      {showCreationForm && (
+        <ProtocolCreationForm
+          onSuccess={handleProtocolCreated}
+          onCancel={() => setShowCreationForm(false)}
+        />
       )}
     </div>
   );

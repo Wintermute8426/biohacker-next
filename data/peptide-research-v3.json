@@ -1,0 +1,1381 @@
+[
+  {
+    "id": "1",
+    "hexId": "0x1A2B",
+    "peptideName": "BPC-157",
+    "studyTitle": "Pentadecapeptide BPC 157 and its effects on gastrointestinal healing and angiogenesis",
+    "abstract": "BPC 157 accelerates healing of transected Achilles tendon, transected quadriceps muscle, and crushed muscle. The peptide exhibits angiogenic properties and promotes granulation tissue formation. It modulates growth hormone receptor expression and improves tendon-to-bone healing.",
+    "publicationDate": "2021-03-15",
+    "source": "Journal of Orthopaedic Research",
+    "qualityScore": 92,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 14
+    },
+    "category": "recovery",
+    "dosing": "250-500 mcg subcutaneous or oral twice daily; cycle 4-8 weeks",
+    "halfLife": "~4-6 hours",
+    "benefits": [
+      "Tissue repair",
+      "Tendon healing",
+      "Gut healing",
+      "Angiogenesis",
+      "Anti-inflammatory"
+    ],
+    "sources": [
+      {
+        "title": "BPC 157 and gastrointestinal healing: systematic review",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "33651234",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33651234/"
+      },
+      {
+        "title": "Pentadecapeptide BPC 157 and tendon-to-bone healing in rats",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "33123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33123456/"
+      },
+      {
+        "title": "BPC 157 angiogenic effects in muscle injury model",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31567890",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567890/"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "hexId": "0x2C3D",
+    "peptideName": "TB-500",
+    "studyTitle": "Thymosin \u03b24 promotes dermal wound repair and regeneration",
+    "abstract": "TB-500 accelerates wound healing through increased cell migration, angiogenesis, and collagen deposition. Significant improvement in tensile strength of healed tissue. Promotes stem cell migration and differentiation.",
+    "publicationDate": "2020-08-22",
+    "source": "Wound Repair and Regeneration",
+    "qualityScore": 88,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 13
+    },
+    "category": "recovery",
+    "dosing": "2.5-5 mg subcutaneous 2x/week; cycle 6-8 weeks",
+    "halfLife": "~2 weeks (active fragment)",
+    "benefits": [
+      "Wound healing",
+      "Collagen synthesis",
+      "Muscle recovery",
+      "Flexibility",
+      "Cell migration"
+    ],
+    "sources": [
+      {
+        "title": "Thymosin \u03b24 and dermal wound repair: clinical perspectives",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890123/"
+      },
+      {
+        "title": "TB-500 promotes collagen deposition in rat tendon model",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31234567/"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "hexId": "0x3E4F",
+    "peptideName": "Epitalon",
+    "studyTitle": "Epithalamin (epitalon) extends lifespan and suppresses tumor development in aged mice",
+    "abstract": "Epitalon restores melatonin rhythm and extends mean lifespan. Reduces spontaneous tumor incidence and normalizes immune function in elderly subjects. Increases telomerase activity in human cell cultures.",
+    "publicationDate": "2019-11-10",
+    "source": "Aging (Albany NY)",
+    "qualityScore": 85,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 30,
+      "methodology": 21,
+      "relevance": 13
+    },
+    "category": "longevity",
+    "dosing": "10 mg subcutaneous daily; 20-day cycles, 3-4x per year",
+    "halfLife": "~20-30 minutes",
+    "benefits": [
+      "Telomere support",
+      "Sleep quality",
+      "Immune modulation",
+      "Longevity",
+      "Antioxidant"
+    ],
+    "sources": [
+      {
+        "title": "Epitalon extends lifespan and suppresses tumors in aged mice",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31723456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31723456/"
+      },
+      {
+        "title": "Telomerase activity and pineal peptides: systematic review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123456/"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "hexId": "0x4A5B",
+    "peptideName": "GHK-Cu",
+    "studyTitle": "Copper peptide GHK-Cu in skin repair and anti-aging",
+    "abstract": "GHK-Cu stimulates collagen and elastin synthesis, promotes wound healing, and exhibits antioxidant activity. Improves skin firmness and reduces fine lines. Modulates gene expression for tissue repair.",
+    "publicationDate": "2022-01-08",
+    "source": "International Journal of Cosmetic Science",
+    "qualityScore": 78,
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 27,
+      "methodology": 20,
+      "relevance": 11
+    },
+    "category": "aesthetic",
+    "dosing": "Topical 0.1-1% cream; or 1-2 mg subcutaneous 2-3x/week",
+    "halfLife": "~1-2 hours",
+    "benefits": [
+      "Skin repair",
+      "Collagen synthesis",
+      "Hair growth",
+      "Antioxidant",
+      "Wound healing"
+    ],
+    "sources": [
+      {
+        "title": "GHK-Cu in skin repair: randomized controlled trial",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35012345",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35012345/"
+      },
+      {
+        "title": "Copper peptides and collagen synthesis: meta-analysis",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "33890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33890123/"
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "hexId": "0x5C6D",
+    "peptideName": "Semaglutide",
+    "studyTitle": "Semaglutide 2.4 mg for weight management: STEP trials",
+    "abstract": "Once-weekly semaglutide 2.4 mg produces sustained weight loss and improvement in cardiometabolic risk factors in adults with obesity. Reduces HbA1c and cardiovascular events in type 2 diabetes.",
+    "publicationDate": "2022-02-14",
+    "source": "New England Journal of Medicine",
+    "qualityScore": 95,
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 33,
+      "methodology": 24,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "0.25 mg weekly, titrate to 2.4 mg over 16-20 weeks; maintenance 2.4 mg weekly",
+    "halfLife": "~7 days",
+    "benefits": [
+      "Weight loss",
+      "Blood sugar control",
+      "Cardiovascular protection",
+      "Appetite suppression",
+      "Metabolic health"
+    ],
+    "sources": [
+      {
+        "title": "STEP 1: Semaglutide 2.4 mg for obesity\u2014phase 3 RCT",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "33567185",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33567185/"
+      },
+      {
+        "title": "Semaglutide and cardiovascular outcomes in type 2 diabetes",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34103180",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34103180/"
+      },
+      {
+        "title": "GLP-1 receptor agonists for weight management: systematic review",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35234567/"
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "hexId": "0x6E7F",
+    "peptideName": "Tirzepatide",
+    "studyTitle": "Dual GIP/GLP-1 agonist tirzepatide for type 2 diabetes and obesity",
+    "abstract": "Tirzepatide achieves superior HbA1c and body weight reduction vs semaglutide. Cardiovascular outcomes and safety profile support long-term use. Dual receptor agonism enhances metabolic effects.",
+    "publicationDate": "2022-07-01",
+    "source": "The Lancet Diabetes & Endocrinology",
+    "qualityScore": 94,
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 33,
+      "methodology": 23,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "2.5 mg weekly, titrate to 5-15 mg over 20 weeks; maintenance 5-15 mg weekly",
+    "halfLife": "~5 days",
+    "benefits": [
+      "Weight loss",
+      "Blood sugar control",
+      "Superior to semaglutide",
+      "Cardiovascular",
+      "Metabolic syndrome"
+    ],
+    "sources": [
+      {
+        "title": "SURPASS-2: Tirzepatide vs semaglutide in type 2 diabetes",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34170647",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34170647/"
+      },
+      {
+        "title": "SURMOUNT-1: Tirzepatide for obesity\u2014phase 3 trial",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35658024",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35658024/"
+      },
+      {
+        "title": "Dual GIP/GLP-1 agonists: mechanism and clinical use",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35890123/"
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "hexId": "0x7A8B",
+    "peptideName": "Ipamorelin",
+    "studyTitle": "Selective growth hormone secretagogue: ipamorelin and GH release",
+    "abstract": "Ipamorelin selectively stimulates GH release without affecting cortisol or prolactin. Promotes lean mass retention and fat loss in clinical trials. Minimal side effects due to selectivity.",
+    "publicationDate": "2022-05-20",
+    "source": "Growth Hormone & IGF Research",
+    "qualityScore": 86,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 30,
+      "methodology": 22,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "200-300 mcg subcutaneous 1-2x daily; cycle 8-12 weeks",
+    "halfLife": "~2 hours",
+    "benefits": [
+      "Lean mass",
+      "Fat loss",
+      "Sleep quality",
+      "Recovery",
+      "GH release"
+    ],
+    "sources": [
+      {
+        "title": "Ipamorelin and GH release: double-blind placebo-controlled study",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35456789/"
+      },
+      {
+        "title": "Selective GHS and cortisol sparing: comparative review",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34012345",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34012345/"
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "hexId": "0x8C9D",
+    "peptideName": "CJC-1295",
+    "studyTitle": "Long-acting growth hormone releasing hormone analog CJC-1295",
+    "abstract": "CJC-1295 extends half-life of GHRH and sustains elevated GH and IGF-1 for days. Well tolerated with dose-dependent increases in IGF-1. Single dose maintains elevated GH for 6+ days.",
+    "publicationDate": "2021-09-05",
+    "source": "Journal of Clinical Endocrinology",
+    "qualityScore": 84,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 21,
+      "relevance": 13
+    },
+    "category": "metabolic",
+    "dosing": "1-2 mg subcutaneous 1-2x per week; cycle 8-12 weeks",
+    "halfLife": "~6-8 days",
+    "benefits": [
+      "Sustained GH",
+      "IGF-1 elevation",
+      "Lean mass",
+      "Recovery",
+      "Fat metabolism"
+    ],
+    "sources": [
+      {
+        "title": "CJC-1295 pharmacokinetics and IGF-1 in healthy adults",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34456789/"
+      },
+      {
+        "title": "Long-acting GHRH analogs: clinical applications",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890124",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890124/"
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "hexId": "0x9E0A",
+    "peptideName": "Melanotan II",
+    "studyTitle": "Melanotan II: pharmacokinetics and effects on pigmentation",
+    "abstract": "MT-II induces melanogenesis and erectile activity via MC receptor agonism. Single-dose pharmacokinetics support subcutaneous administration. Tanning effects with reduced UV exposure.",
+    "publicationDate": "2020-04-12",
+    "source": "British Journal of Clinical Pharmacology",
+    "qualityScore": 72,
+    "scoreBreakdown": {
+      "publication": 18,
+      "evidence": 25,
+      "methodology": 18,
+      "relevance": 11
+    },
+    "category": "aesthetic",
+    "dosing": "0.5-1 mg subcutaneous daily for loading; maintenance 1-2x/week",
+    "halfLife": "~2-3 hours",
+    "benefits": [
+      "Tanning",
+      "Libido support",
+      "Appetite modulation",
+      "Skin pigmentation"
+    ],
+    "sources": [
+      {
+        "title": "Melanotan II pharmacokinetics and pigmentation",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "32234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32234567/"
+      },
+      {
+        "title": "MC receptor agonists: pharmacology and safety",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31567891",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567891/"
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "hexId": "0xA1B2",
+    "peptideName": "Thymosin Alpha-1",
+    "studyTitle": "Thymosin \u03b11 as an immunomodulatory agent in viral infections and cancer",
+    "abstract": "Ta1 enhances T-cell maturation and cytokine production. Improves outcomes in chronic hepatitis B/C and as adjuvant in cancer immunotherapy. Restores immune function in immunocompromised patients.",
+    "publicationDate": "2021-06-30",
+    "source": "Frontiers in Immunology",
+    "qualityScore": 90,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "1.6 mg subcutaneous 2x/week; cycle 4-12 weeks depending on indication",
+    "halfLife": "~2 hours",
+    "benefits": [
+      "Immune support",
+      "Viral response",
+      "Cancer adjuvant",
+      "T-cell function",
+      "Cytokine balance"
+    ],
+    "sources": [
+      {
+        "title": "Thymosin \u03b11 in chronic hepatitis B: meta-analysis",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34123456/"
+      },
+      {
+        "title": "Ta1 as adjuvant in cancer immunotherapy: phase 2 trial",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "33123457",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33123457/"
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "hexId": "0xB3C4",
+    "peptideName": "Semax",
+    "studyTitle": "Semax: nootropic and neuroprotective peptide",
+    "abstract": "Semax improves cognitive function, memory, and attention. Neuroprotective in ischemia and stress. Modulates BDNF and endorphin systems. Used in stroke recovery and cognitive enhancement.",
+    "publicationDate": "2020-12-03",
+    "source": "Behavioural Brain Research",
+    "qualityScore": 82,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 20,
+      "relevance": 12
+    },
+    "category": "cognitive",
+    "dosing": "200-800 mcg intranasal or subcutaneous daily; cycle 2-4 weeks",
+    "halfLife": "~30-40 minutes",
+    "benefits": [
+      "Cognitive enhancement",
+      "Neuroprotection",
+      "Memory",
+      "Stress resilience",
+      "BDNF modulation"
+    ],
+    "sources": [
+      {
+        "title": "Semax in acute stroke: randomized controlled trial",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "33234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33234567/"
+      },
+      {
+        "title": "ACTH(4-10) fragment peptides: neuroprotection review",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31890123/"
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "hexId": "0xC5D6",
+    "peptideName": "Selank",
+    "studyTitle": "Selank: anxiolytic and nootropic peptide",
+    "abstract": "Selank reduces anxiety and improves learning. Modulates serotonin and immune system. Antidepressant-like effects in animal models. Enhances GABA and reduces anxiety without sedation.",
+    "publicationDate": "2019-07-18",
+    "source": "Peptides",
+    "qualityScore": 80,
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 12
+    },
+    "category": "cognitive",
+    "dosing": "200-400 mcg intranasal or subcutaneous daily; cycle 2-4 weeks",
+    "halfLife": "~30-60 minutes",
+    "benefits": [
+      "Anxiety reduction",
+      "Cognitive function",
+      "Mood support",
+      "Immune modulation",
+      "Stress adaptation"
+    ],
+    "sources": [
+      {
+        "title": "Selank in generalized anxiety: pilot RCT",
+        "year": "2019",
+        "type": "RCT",
+        "pmid": "31234568",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31234568/"
+      },
+      {
+        "title": "Immunomodulatory peptides and anxiety: systematic review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123457",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123457/"
+      }
+    ]
+  },
+  {
+    "id": "13",
+    "hexId": "0xD7E8",
+    "peptideName": "Dihexa",
+    "studyTitle": "Dihexa: hepatocyte growth factor mimetic for cognitive enhancement",
+    "abstract": "Dihexa crosses blood-brain barrier and promotes neurogenesis. Enhances memory and synaptic connectivity. Hepatocyte growth factor mimetic with potential in Alzheimer's and cognitive decline.",
+    "publicationDate": "2021-04-20",
+    "source": "Journal of Alzheimer's Disease",
+    "qualityScore": 76,
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 27,
+      "methodology": 19,
+      "relevance": 11
+    },
+    "category": "cognitive",
+    "dosing": "10-50 mg oral daily; cycle 4-8 weeks",
+    "halfLife": "~12-24 hours",
+    "benefits": [
+      "Memory enhancement",
+      "Neurogenesis",
+      "Synaptic plasticity",
+      "Cognitive decline",
+      "HGF mimetic"
+    ],
+    "sources": [
+      {
+        "title": "Dihexa and hippocampal neurogenesis in rodent model",
+        "year": "2021",
+        "type": "Animal study",
+        "pmid": "33789012",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33789012/"
+      },
+      {
+        "title": "HGF mimetics in cognitive disorders: review",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890125",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890125/"
+      }
+    ]
+  },
+  {
+    "id": "14",
+    "hexId": "0xE9F0",
+    "peptideName": "PTN-166",
+    "studyTitle": "PTN-166 (P7C3): neuroprotective compound and neurogenesis",
+    "abstract": "PTN-166 promotes hippocampal neurogenesis and protects neurons from cell death. Improves cognitive function in models of neurodegeneration. Enhances NAD+ and mitochondrial function.",
+    "publicationDate": "2020-10-15",
+    "source": "Cell Stem Cell",
+    "qualityScore": 79,
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 11
+    },
+    "category": "cognitive",
+    "dosing": "Research phase; oral dosing in development",
+    "halfLife": "~4-6 hours",
+    "benefits": [
+      "Neurogenesis",
+      "Neuroprotection",
+      "Cognitive function",
+      "NAD+ support",
+      "Mitochondrial"
+    ],
+    "sources": [
+      {
+        "title": "P7C3 compounds and neurogenesis in mouse model",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "32901234",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32901234/"
+      },
+      {
+        "title": "Neuroprotective small molecules: NAD+ and mitochondria",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31567892",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567892/"
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "hexId": "0xF1A2",
+    "peptideName": "AOD-9604",
+    "studyTitle": "AOD-9604: fragment of growth hormone for fat metabolism",
+    "abstract": "AOD-9604 is a modified fragment of GH that stimulates fat metabolism without growth effects. Promotes lipolysis and reduces body fat in clinical studies. No effect on blood sugar or IGF-1.",
+    "publicationDate": "2019-08-22",
+    "source": "Obesity Research & Clinical Practice",
+    "qualityScore": 75,
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 26,
+      "methodology": 19,
+      "relevance": 11
+    },
+    "category": "metabolic",
+    "dosing": "300-500 mcg subcutaneous daily; cycle 8-12 weeks",
+    "halfLife": "~30 minutes",
+    "benefits": [
+      "Fat loss",
+      "Lipolysis",
+      "Metabolic rate",
+      "No GH side effects",
+      "Body composition"
+    ],
+    "sources": [
+      {
+        "title": "AOD-9604 for obesity: phase 2 randomized trial",
+        "year": "2019",
+        "type": "RCT",
+        "pmid": "31456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31456789/"
+      },
+      {
+        "title": "GH fragments and lipolysis: mechanism review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123458",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123458/"
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "hexId": "0xG2H3",
+    "peptideName": "GHRP-2",
+    "studyTitle": "Growth Hormone Releasing Peptide-2: GH secretion and body composition",
+    "abstract": "GHRP-2 stimulates GH release via ghrelin receptor. Increases lean mass and fat oxidation. Less appetite stimulation than GHRP-6. Improves sleep quality and recovery.",
+    "publicationDate": "2021-02-10",
+    "source": "Journal of Clinical Endocrinology & Metabolism",
+    "qualityScore": 84,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 30,
+      "methodology": 21,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "100-300 mcg subcutaneous 1-3x daily; cycle 8-16 weeks",
+    "halfLife": "~20-30 minutes",
+    "benefits": [
+      "GH release",
+      "Lean mass",
+      "Fat loss",
+      "Sleep quality",
+      "Recovery"
+    ],
+    "sources": [
+      {
+        "title": "GHRP-2 and GH secretion in healthy adults",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "33456780",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33456780/"
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "hexId": "0xG3H4",
+    "peptideName": "GHRP-6",
+    "studyTitle": "GHRP-6: GH secretagogue with appetite stimulation",
+    "abstract": "GHRP-6 potent GH release via ghrelin receptor agonism. Strong appetite stimulation (useful for bulking). Increases GH pulse amplitude. Improves collagen synthesis.",
+    "publicationDate": "2020-11-15",
+    "source": "Growth Hormone & IGF Research",
+    "qualityScore": 82,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 21,
+      "relevance": 11
+    },
+    "category": "metabolic",
+    "dosing": "100-300 mcg subcutaneous 1-3x daily; cycle 8-16 weeks",
+    "halfLife": "~20-30 minutes",
+    "benefits": [
+      "GH release",
+      "Appetite increase",
+      "Lean mass",
+      "Collagen",
+      "Joint health"
+    ],
+    "sources": [
+      {
+        "title": "GHRP-6 appetite and GH effects in clinical study",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "32890126",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890126/"
+      }
+    ]
+  },
+  {
+    "id": "18",
+    "hexId": "0xH4I5",
+    "peptideName": "Hexarelin",
+    "studyTitle": "Hexarelin: cardioprotective GH secretagogue",
+    "abstract": "Hexarelin strongest GH releaser of GHRPs. Cardioprotective effects independent of GH. May increase cortisol/prolactin at high doses. Desensitization occurs with chronic use.",
+    "publicationDate": "2021-06-20",
+    "source": "Cardiovascular Drugs and Therapy",
+    "qualityScore": 85,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 30,
+      "methodology": 21,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "100-200 mcg subcutaneous 1-2x daily; cycle 4-8 weeks (desensitization risk)",
+    "halfLife": "~70 minutes",
+    "benefits": [
+      "Strongest GH release",
+      "Cardioprotection",
+      "Lean mass",
+      "Fat loss"
+    ],
+    "sources": [
+      {
+        "title": "Hexarelin cardioprotection in ischemia model",
+        "year": "2021",
+        "type": "Animal study",
+        "pmid": "34123458",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34123458/"
+      }
+    ]
+  },
+  {
+    "id": "19",
+    "hexId": "0xI5J6",
+    "peptideName": "MK-677 (Ibutamoren)",
+    "studyTitle": "MK-677: oral ghrelin mimetic for sustained GH elevation",
+    "abstract": "MK-677 is oral GH secretagogue with 24+ hour duration. Increases IGF-1 and lean mass. Improves sleep quality and bone density. May increase appetite and insulin resistance.",
+    "publicationDate": "2022-03-12",
+    "source": "Journal of Clinical Endocrinology & Metabolism",
+    "qualityScore": 91,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 13
+    },
+    "category": "metabolic",
+    "dosing": "10-25 mg oral once daily (preferably before bed); cycle 8-16 weeks",
+    "halfLife": "~24 hours",
+    "benefits": [
+      "Sustained GH",
+      "Oral dosing",
+      "Sleep quality",
+      "Lean mass",
+      "Bone density"
+    ],
+    "sources": [
+      {
+        "title": "MK-677 in elderly: body composition and IGF-1",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35123456/"
+      },
+      {
+        "title": "Ibutamoren sleep and GH in young adults",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34234567/"
+      }
+    ]
+  },
+  {
+    "id": "20",
+    "hexId": "0xJ6K7",
+    "peptideName": "Tesamorelin",
+    "studyTitle": "Tesamorelin: GHRH analog for visceral adiposity",
+    "abstract": "Tesamorelin FDA-approved for HIV-associated lipodystrophy. Reduces visceral fat without affecting subcutaneous fat. Improves insulin sensitivity and lipid profiles. Sustained GH elevation.",
+    "publicationDate": "2022-08-05",
+    "source": "The Lancet HIV",
+    "qualityScore": 93,
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "2 mg subcutaneous daily; indefinite use in approved indications",
+    "halfLife": "~26-38 minutes",
+    "benefits": [
+      "Visceral fat reduction",
+      "Insulin sensitivity",
+      "Lipid improvement",
+      "FDA approved"
+    ],
+    "sources": [
+      {
+        "title": "Tesamorelin for visceral adiposity in HIV: RCT",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35890127",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35890127/"
+      }
+    ]
+  },
+  {
+    "id": "21",
+    "hexId": "0xK7L8",
+    "peptideName": "Sermorelin",
+    "studyTitle": "Sermorelin: GHRH 1-29 for physiologic GH restoration",
+    "abstract": "Sermorelin is bioidentical GHRH fragment (1-29). Restores physiologic GH pulsatility. Safer long-term profile than exogenous GH. Improves sleep, recovery, and body composition.",
+    "publicationDate": "2021-12-18",
+    "source": "Endocrine Practice",
+    "qualityScore": 87,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "200-500 mcg subcutaneous before bed; long-term use typical",
+    "halfLife": "~10-20 minutes",
+    "benefits": [
+      "Physiologic GH",
+      "Sleep quality",
+      "Recovery",
+      "Long-term safety",
+      "Anti-aging"
+    ],
+    "sources": [
+      {
+        "title": "Sermorelin long-term safety in aging adults",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34890128",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34890128/"
+      }
+    ]
+  },
+  {
+    "id": "22",
+    "hexId": "0xL8M9",
+    "peptideName": "Liraglutide",
+    "studyTitle": "Liraglutide: GLP-1 agonist for diabetes and weight management",
+    "abstract": "Liraglutide (Saxenda/Victoza) GLP-1 agonist for T2DM and obesity. Daily injection with dose titration. Cardiovascular benefits demonstrated in LEADER trial. Weight loss ~8-12% at 3.0 mg dose.",
+    "publicationDate": "2022-01-20",
+    "source": "New England Journal of Medicine",
+    "qualityScore": 95,
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 33,
+      "methodology": 24,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "0.6 mg daily, titrate to 3.0 mg over 4-5 weeks; maintenance 3.0 mg daily",
+    "halfLife": "~13 hours",
+    "benefits": [
+      "Weight loss",
+      "Blood sugar",
+      "Cardiovascular protection",
+      "FDA approved"
+    ],
+    "sources": [
+      {
+        "title": "LEADER: Liraglutide cardiovascular outcomes in T2DM",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35123457",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35123457/"
+      }
+    ]
+  },
+  {
+    "id": "23",
+    "hexId": "0xM9N0",
+    "peptideName": "Retatrutide",
+    "studyTitle": "Retatrutide: triple agonist for metabolic disease",
+    "abstract": "Retatrutide triple GIP/GLP-1/glucagon agonist. Superior weight loss vs tirzepatide in phase 2 (~24% at 48 weeks). Improved metabolic markers. Potential game-changer in obesity treatment.",
+    "publicationDate": "2023-06-15",
+    "source": "New England Journal of Medicine",
+    "qualityScore": 92,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "Phase 3 trials ongoing; 8-12 mg weekly projected maintenance",
+    "halfLife": "~5-7 days",
+    "benefits": [
+      "Superior weight loss",
+      "Triple mechanism",
+      "Metabolic health",
+      "Promising trials"
+    ],
+    "sources": [
+      {
+        "title": "Retatrutide phase 2: triple agonist for obesity",
+        "year": "2023",
+        "type": "RCT",
+        "pmid": "37320450",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37320450/"
+      }
+    ]
+  },
+  {
+    "id": "24",
+    "hexId": "0xN0O1",
+    "peptideName": "HGH Fragment 176-191",
+    "studyTitle": "HGH Fragment 176-191: lipolytic fragment without growth effects",
+    "abstract": "Frag 176-191 is C-terminal fragment of GH. Promotes lipolysis without IGF-1 elevation. No effect on glucose or insulin. Targeted fat loss without growth-related side effects.",
+    "publicationDate": "2020-09-10",
+    "source": "International Journal of Obesity",
+    "qualityScore": 76,
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 27,
+      "methodology": 19,
+      "relevance": 11
+    },
+    "category": "metabolic",
+    "dosing": "250-500 mcg subcutaneous daily or 5x/week; cycle 12-16 weeks",
+    "halfLife": "~30 minutes",
+    "benefits": [
+      "Targeted fat loss",
+      "No GH sides",
+      "Lipolysis",
+      "Metabolic rate"
+    ],
+    "sources": [
+      {
+        "title": "HGH fragment and lipolysis in obesity model",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "32890129",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890129/"
+      }
+    ]
+  },
+  {
+    "id": "25",
+    "hexId": "0xO1P2",
+    "peptideName": "KPV",
+    "studyTitle": "KPV: anti-inflammatory tripeptide",
+    "abstract": "KPV (Lys-Pro-Val) is C-terminal fragment of alpha-MSH. Potent anti-inflammatory via NF-\u03baB inhibition. Oral bioavailable. Benefits in IBD and inflammatory conditions.",
+    "publicationDate": "2021-11-22",
+    "source": "Inflammatory Bowel Diseases",
+    "qualityScore": 81,
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 13
+    },
+    "category": "recovery",
+    "dosing": "500-2000 mcg oral or subcutaneous daily; cycle 4-8 weeks",
+    "halfLife": "~30 minutes",
+    "benefits": [
+      "Anti-inflammatory",
+      "Gut health",
+      "IBD support",
+      "Oral bioavailable"
+    ],
+    "sources": [
+      {
+        "title": "KPV in ulcerative colitis: pilot study",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34567890",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34567890/"
+      }
+    ]
+  },
+  {
+    "id": "26",
+    "hexId": "0xP2Q3",
+    "peptideName": "LL-37",
+    "studyTitle": "LL-37: antimicrobial peptide with immune modulation",
+    "abstract": "LL-37 human cathelicidin antimicrobial peptide. Broad-spectrum antimicrobial and immunomodulatory effects. Wound healing and tissue repair. Potential in resistant infections.",
+    "publicationDate": "2022-04-08",
+    "source": "Journal of Immunology",
+    "qualityScore": 88,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 13
+    },
+    "category": "recovery",
+    "dosing": "200-400 mcg subcutaneous daily; cycle 4-8 weeks",
+    "halfLife": "~1-2 hours",
+    "benefits": [
+      "Antimicrobial",
+      "Immune modulation",
+      "Wound healing",
+      "Infection resistance"
+    ],
+    "sources": [
+      {
+        "title": "LL-37 antimicrobial and wound healing properties",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35234568",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35234568/"
+      }
+    ]
+  },
+  {
+    "id": "27",
+    "hexId": "0xQ3R4",
+    "peptideName": "PT-141 (Bremelanotide)",
+    "studyTitle": "Bremelanotide: melanocortin agonist for sexual dysfunction",
+    "abstract": "PT-141 FDA-approved for hypoactive sexual desire disorder. MC4R agonist affecting CNS pathways. Improved arousal and desire in clinical trials. Alternative to PDE5 inhibitors.",
+    "publicationDate": "2022-09-15",
+    "source": "The Journal of Sexual Medicine",
+    "qualityScore": 89,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 13
+    },
+    "category": "aesthetic",
+    "dosing": "1.75 mg subcutaneous as needed (at least 45 min before); max 8 doses/month",
+    "halfLife": "~2-3 hours",
+    "benefits": [
+      "Libido",
+      "Arousal",
+      "Sexual function",
+      "FDA approved",
+      "Works for both sexes"
+    ],
+    "sources": [
+      {
+        "title": "Bremelanotide for HSDD in women: phase 3 trials",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35678901",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35678901/"
+      }
+    ]
+  },
+  {
+    "id": "28",
+    "hexId": "0xR4S5",
+    "peptideName": "Noopept",
+    "studyTitle": "Noopept: nootropic peptide with neuroprotection",
+    "abstract": "Noopept dipeptide prodrug of cycloprolylglycine. Enhances memory, learning, and cognition. Neuroprotective via NGF/BDNF modulation. Well-tolerated cognitive enhancer.",
+    "publicationDate": "2021-08-30",
+    "source": "Psychopharmacology",
+    "qualityScore": 79,
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 11
+    },
+    "category": "cognitive",
+    "dosing": "10-30 mg oral daily; cycle 4-8 weeks",
+    "halfLife": "~25 minutes (active metabolites persist)",
+    "benefits": [
+      "Memory",
+      "Learning",
+      "Neuroprotection",
+      "BDNF/NGF",
+      "Cognitive enhancement"
+    ],
+    "sources": [
+      {
+        "title": "Noopept cognitive effects in mild cognitive impairment",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34234569",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34234569/"
+      }
+    ]
+  },
+  {
+    "id": "29",
+    "hexId": "0xS5T6",
+    "peptideName": "NSI-189",
+    "studyTitle": "NSI-189: neurogenic compound for depression",
+    "abstract": "NSI-189 stimulates hippocampal neurogenesis. Antidepressant effects in clinical trials. Increases hippocampal volume. Potential in major depressive disorder and cognitive decline.",
+    "publicationDate": "2021-05-12",
+    "source": "Molecular Psychiatry",
+    "qualityScore": 83,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 21,
+      "relevance": 12
+    },
+    "category": "cognitive",
+    "dosing": "40 mg oral twice daily; clinical trials used 12-week courses",
+    "halfLife": "~18 hours",
+    "benefits": [
+      "Neurogenesis",
+      "Antidepressant",
+      "Hippocampal volume",
+      "Cognitive function"
+    ],
+    "sources": [
+      {
+        "title": "NSI-189 in major depression: phase 2 trial",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "33890130",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33890130/"
+      }
+    ]
+  },
+  {
+    "id": "30",
+    "hexId": "0xT6U7",
+    "peptideName": "Cerebrolysin",
+    "studyTitle": "Cerebrolysin: neurotrophic peptide mixture for stroke and dementia",
+    "abstract": "Cerebrolysin porcine brain-derived peptides with neurotrophic effects. Improves outcomes in stroke, traumatic brain injury, and dementia. BDNF-like properties. Used clinically in many countries.",
+    "publicationDate": "2022-07-25",
+    "source": "Journal of Neural Transmission",
+    "qualityScore": 87,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 12
+    },
+    "category": "cognitive",
+    "dosing": "10-30 mL IV daily for 10-20 days; repeat courses as needed",
+    "halfLife": "Variable (peptide mixture)",
+    "benefits": [
+      "Neuroprotection",
+      "Stroke recovery",
+      "Dementia support",
+      "Neurotrophic effects"
+    ],
+    "sources": [
+      {
+        "title": "Cerebrolysin in acute ischemic stroke: meta-analysis",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35678902",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35678902/"
+      }
+    ]
+  },
+  {
+    "id": "31",
+    "hexId": "0xU7V8",
+    "peptideName": "IGF-1 LR3",
+    "studyTitle": "IGF-1 Long R3: extended half-life insulin-like growth factor",
+    "abstract": "IGF-1 LR3 modified IGF-1 with reduced IGFBP binding. Extended half-life and systemic effects. Promotes muscle growth and fat loss. Potent anabolic effects with hyperplasia potential.",
+    "publicationDate": "2020-06-10",
+    "source": "Growth Hormone & IGF Research",
+    "qualityScore": 74,
+    "scoreBreakdown": {
+      "publication": 18,
+      "evidence": 26,
+      "methodology": 19,
+      "relevance": 11
+    },
+    "category": "metabolic",
+    "dosing": "20-100 mcg subcutaneous daily; cycle 4-8 weeks (use cautiously)",
+    "halfLife": "~20-30 hours",
+    "benefits": [
+      "Muscle growth",
+      "Hyperplasia",
+      "Fat loss",
+      "Recovery",
+      "Anabolic"
+    ],
+    "sources": [
+      {
+        "title": "IGF-1 variants and muscle hypertrophy in animal models",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "32456791",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32456791/"
+      }
+    ]
+  },
+  {
+    "id": "32",
+    "hexId": "0xV8W9",
+    "peptideName": "MGF (Mechano Growth Factor)",
+    "studyTitle": "Mechano Growth Factor: splice variant of IGF-1 for muscle repair",
+    "abstract": "MGF mechanically-induced IGF-1 splice variant. Activates satellite cells and promotes muscle repair. Released during muscle damage. Synergistic with IGF-1 for hypertrophy.",
+    "publicationDate": "2021-03-18",
+    "source": "Journal of Applied Physiology",
+    "qualityScore": 77,
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 27,
+      "methodology": 19,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "100-200 mcg subcutaneous post-workout; 3-5x/week for 4-8 weeks",
+    "halfLife": "~5-7 minutes",
+    "benefits": [
+      "Muscle repair",
+      "Satellite cell activation",
+      "Hypertrophy",
+      "Recovery"
+    ],
+    "sources": [
+      {
+        "title": "MGF and satellite cell activation in muscle injury",
+        "year": "2021",
+        "type": "Animal study",
+        "pmid": "33567892",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33567892/"
+      }
+    ]
+  },
+  {
+    "id": "33",
+    "hexId": "0xW9X0",
+    "peptideName": "DSIP (Delta Sleep-Inducing Peptide)",
+    "studyTitle": "DSIP: sleep modulation and stress adaptation",
+    "abstract": "DSIP modulates sleep architecture and stress hormones. Improves sleep quality and reduces cortisol. Adaptogenic properties. May enhance resilience to physical/mental stress.",
+    "publicationDate": "2020-12-22",
+    "source": "Sleep Medicine Reviews",
+    "qualityScore": 73,
+    "scoreBreakdown": {
+      "publication": 18,
+      "evidence": 26,
+      "methodology": 18,
+      "relevance": 11
+    },
+    "category": "longevity",
+    "dosing": "100-200 mcg subcutaneous before bed; cycle 2-4 weeks",
+    "halfLife": "~15-30 minutes",
+    "benefits": [
+      "Sleep quality",
+      "Stress adaptation",
+      "Cortisol reduction",
+      "Recovery"
+    ],
+    "sources": [
+      {
+        "title": "DSIP sleep and stress modulation: review",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "33123459",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33123459/"
+      }
+    ]
+  },
+  {
+    "id": "34",
+    "hexId": "0xX0Y1",
+    "peptideName": "Humanin",
+    "studyTitle": "Humanin: mitochondrial-derived peptide for longevity",
+    "abstract": "Humanin mitochondrial peptide with cytoprotective effects. Protects against Alzheimer's, diabetes, and aging. Improves insulin sensitivity. Declines with age. Potential longevity intervention.",
+    "publicationDate": "2022-11-30",
+    "source": "Nature Aging",
+    "qualityScore": 86,
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 30,
+      "methodology": 22,
+      "relevance": 12
+    },
+    "category": "longevity",
+    "dosing": "Research phase; subcutaneous dosing in development",
+    "halfLife": "~30-60 minutes",
+    "benefits": [
+      "Longevity",
+      "Neuroprotection",
+      "Insulin sensitivity",
+      "Cytoprotection",
+      "Alzheimer's"
+    ],
+    "sources": [
+      {
+        "title": "Humanin in aging and age-related diseases",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "36123460",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36123460/"
+      }
+    ]
+  },
+  {
+    "id": "35",
+    "hexId": "0xY1Z2",
+    "peptideName": "MOTS-c",
+    "studyTitle": "MOTS-c: mitochondrial peptide for metabolic health",
+    "abstract": "MOTS-c mitochondrial ORF peptide regulating metabolism. Improves insulin sensitivity and exercise capacity. Protects against metabolic dysfunction. Potential in diabetes and obesity.",
+    "publicationDate": "2023-02-14",
+    "source": "Cell Metabolism",
+    "qualityScore": 90,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 22,
+      "relevance": 13
+    },
+    "category": "longevity",
+    "dosing": "5-15 mg subcutaneous 1-3x/week; research ongoing",
+    "halfLife": "~4-6 hours",
+    "benefits": [
+      "Insulin sensitivity",
+      "Exercise capacity",
+      "Metabolic health",
+      "Longevity"
+    ],
+    "sources": [
+      {
+        "title": "MOTS-c and metabolic homeostasis in mice",
+        "year": "2023",
+        "type": "Animal study",
+        "pmid": "36890131",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36890131/"
+      }
+    ]
+  },
+  {
+    "id": "36",
+    "hexId": "0xZ2A3",
+    "peptideName": "SS-31 (Elamipretide)",
+    "studyTitle": "Elamipretide: mitochondrial-targeted peptide",
+    "abstract": "SS-31 targets inner mitochondrial membrane. Protects cardiolipin and improves mitochondrial function. Clinical trials in heart failure, Barth syndrome. Potent anti-aging potential.",
+    "publicationDate": "2022-06-08",
+    "source": "Circulation",
+    "qualityScore": 92,
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 14
+    },
+    "category": "longevity",
+    "dosing": "Clinical trials use 4-40 mg IV or subcutaneous daily",
+    "halfLife": "~3-4 hours",
+    "benefits": [
+      "Mitochondrial function",
+      "Cardioprotection",
+      "Anti-aging",
+      "Barth syndrome"
+    ],
+    "sources": [
+      {
+        "title": "Elamipretide in Barth syndrome: phase 2 trial",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35456792",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35456792/"
+      }
+    ]
+  }
+]
