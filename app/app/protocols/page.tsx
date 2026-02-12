@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ProtocolsContent } from "./protocols-content";
 import { markTaskComplete } from "@/lib/onboarding-helper";
-import type { ProtocolTemplate } from "./protocols-content-v2";
+import type { ProtocolTemplate } from "./protocols-content";
 
 // Fallback JSON data (for backwards compatibility if database is empty)
 import protocolData from "@/data/protocol-templates.json";
 
-export type { ProtocolTemplate, ProtocolCategory, ProtocolPeptide } from "./protocols-content-v2";
+export type { ProtocolTemplate, ProtocolCategory, ProtocolPeptide } from "./protocols-content";
 
 export default function ProtocolsPage() {
   const [protocols, setProtocols] = useState<ProtocolTemplate[]>([]);

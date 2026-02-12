@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { Layers, Syringe, X, Calculator, Plus, User } from "lucide-react";
 import DoseCalculator from "@/components/DoseCalculatorV3";
-import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
+import { getDoseRecommendation } from "@/lib/dose-recommendations";
 import ProtocolCreationForm from "@/components/ProtocolCreationForm";
 
 export type ProtocolCategory = "injury_recovery" | "surgical" | "aesthetic" | "cognitive" | "longevity";
