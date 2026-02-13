@@ -9,6 +9,7 @@ import DoseCalculator from "@/components/DoseCalculatorV3";
 import type { DoseCalculation } from "@/components/DoseCalculatorV3";
 import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
 import { generateDosesForCycle } from "@/lib/dose-generator";
+import CycleReviewModal from "@/components/CycleReviewModal";
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -220,6 +221,10 @@ export function CyclesContent({
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [reviewingCycle, setReviewingCycle] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Load cycles from database on mount
   useEffect(() => {
@@ -341,14 +346,17 @@ export function CyclesContent({
   };
 
   const completeCycle = (cycle: Cycle) => {
+    // Trigger review modal instead of directly completing
+    setReviewingCycle({ id: cycle.id, name: cycle.peptideName });
+  };
+
+  const finalizeCompletion = async (cycleId: string) => {
+    const cycle = cycles.find(c => c.id === cycleId);
+    if (!cycle) return;
+    
     const updated = { ...cycle, status: "completed" as const, completedAt: new Date() };
-    saveCycle(updated).then(() => {
-      setCycles((prev) =>
-        prev.map((c) =>
-          c.id === cycle.id ? updated : c
-        )
-      );
-    });
+    await saveCycle(updated);
+    setCycles((prev) => prev.map((c) => c.id === cycleId ? updated : c));
   };
 
   if (loading) {
@@ -513,6 +521,20 @@ export function CyclesContent({
           peptideNames={peptideNames}
           onSubmit={createIndividualCycle}
           onClose={() => setCreateModalOpen(false)}
+        />
+      )}
+
+      {/* Cycle Review Modal */}
+      {reviewingCycle && (
+        <CycleReviewModal
+          cycleId={reviewingCycle.id}
+          peptideName={reviewingCycle.name}
+          onClose={() => setReviewingCycle(null)}
+          onSubmit={async () => {
+            await finalizeCompletion(reviewingCycle.id);
+            setReviewingCycle(null);
+            setToast("✅ Cycle completed and review saved");
+          }}
         />
       )}
     </div>
