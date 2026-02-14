@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { loadCycles } from "@/lib/cycle-storage";
+import { loadCycles } from "@/lib/cycle-database";
 import QuickWeightWidget from "@/components/dashboard/QuickWeightWidget";
 import {
   Activity,
