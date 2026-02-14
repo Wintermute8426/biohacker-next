@@ -5,6 +5,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { loadCycles, updateDoseStatus, loadDoses, deleteDose, deleteAllCycles } from "@/lib/cycle-database";
 import type { Cycle, Dose, DoseStatus as DbDoseStatus } from "@/lib/cycle-database";
+import GoogleCalendarSync from "@/components/GoogleCalendarSync";
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -50,6 +51,93 @@ function getTimesForDaily(times: number): string[] {
   if (times <= 1) return ["08:00"];
   if (times === 2) return ["08:00", "20:00"];
   return ["06:00", "12:00", "20:00"];
+}
+
+function generateDosesFromCycles(
+  cycles: Cycle[],
+  startRange: Date,
+  endRange: Date,
+  existingDoses: Map<string, ScheduledDose[]>
+): ScheduledDose[] {
+  const doses: ScheduledDose[] = [];
+  const todayKey = toDateKey(new Date());
+
+  cycles.forEach((cycle) => {
+    const start = cycle.startDate.getTime() > startRange.getTime() ? cycle.startDate : startRange;
+    const end = cycle.endDate.getTime() < endRange.getTime() ? cycle.endDate : endRange;
+    if (start.getTime() > end.getTime()) return;
+
+    const freq = cycle.frequency;
+    let d = new Date(start);
+    d.setHours(0, 0, 0, 0);
+
+    while (d.getTime() <= end.getTime()) {
+      const key = toDateKey(d);
+      const dayName = WEEKDAY_BY_DOW[d.getDay()];
+
+      if (freq.type === "daily") {
+        const times = getTimesForDaily(freq.times);
+        times.forEach((time) => {
+          const id = `${cycle.id}-${key}-${time}`;
+          const existing = existingDoses.get(key)?.find((x) => x.id === id);
+          const status: DoseStatus =
+            existing?.status ??
+            (key < todayKey ? (Math.random() > 0.2 ? "logged" : "missed") : key === todayKey && time === "08:00" && Math.random() > 0.5 ? "logged" : "scheduled");
+          doses.push({
+            id,
+            cycleId: cycle.id,
+            peptideName: cycle.peptideName,
+            doseAmount: cycle.doseAmount,
+            route: ROUTE_DEFAULT,
+            timeLabel: time,
+            date: key,
+            status,
+          });
+        });
+      } else if (freq.type === "weekly" && freq.days?.length) {
+        if (freq.days.includes(dayName)) {
+          const time = "08:00";
+          const id = `${cycle.id}-${key}-${time}`;
+          const existing = existingDoses.get(key)?.find((x) => x.id === id);
+          const status: DoseStatus =
+            existing?.status ?? (key < todayKey ? (Math.random() > 0.2 ? "logged" : "missed") : "scheduled");
+          doses.push({
+            id,
+            cycleId: cycle.id,
+            peptideName: cycle.peptideName,
+            doseAmount: cycle.doseAmount,
+            route: ROUTE_DEFAULT,
+            timeLabel: time,
+            date: key,
+            status,
+          });
+        }
+      } else if (freq.type === "monthly" && freq.dates?.length) {
+        const dom = d.getDate();
+        if (freq.dates.includes(dom)) {
+          const time = "08:00";
+          const id = `${cycle.id}-${key}-${time}`;
+          const existing = existingDoses.get(key)?.find((x) => x.id === id);
+          const status: DoseStatus =
+            existing?.status ?? (key < todayKey ? (Math.random() > 0.2 ? "logged" : "missed") : "scheduled");
+          doses.push({
+            id,
+            cycleId: cycle.id,
+            peptideName: cycle.peptideName,
+            doseAmount: cycle.doseAmount,
+            route: ROUTE_DEFAULT,
+            timeLabel: time,
+            date: key,
+            status,
+          });
+        }
+      }
+
+      d = addDays(d, 1);
+    }
+  });
+
+  return doses;
 }
 
 function getCalendarGrid(year: number, month: number): { date: Date; day: number; isCurrentMonth: boolean; isToday: boolean; isPast: boolean }[] {
@@ -235,10 +323,10 @@ export default function CalendarPage() {
           <span className="hex-id absolute right-3 top-3 z-10 font-mono text-sm" aria-hidden>0xCL01</span>
         </div>
 
-        {/* SELECT TIMEFRAME - Flattened across screen */}
+        {/* Month selector - FULL WIDTH */}
         <div className="deck-panel deck-card-bg deck-border-thick rounded-xl border-[#00ff88]/40 p-4">
-          <p className="font-mono text-[10px] text-[#00ff88] mb-3">&gt; SELECT TIMEFRAME</p>
-          <div className="flex flex-wrap items-center gap-3">
+          <p className="font-mono text-[10px] text-[#00ff88] mb-2">&gt; SELECT TIMEFRAME</p>
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -247,11 +335,11 @@ export default function CalendarPage() {
                   setViewYear((y) => y - 1);
                 } else setViewMonth((m) => m - 1);
               }}
-              className="rounded border border-[#00ff88]/40 bg-[#00ff88]/5 px-4 py-2 font-mono text-xs text-[#00ff88] hover:bg-[#00ff88]/15"
+              className="rounded border border-[#00ff88]/40 bg-[#00ff88]/5 px-3 py-2 font-mono text-xs text-[#00ff88] hover:bg-[#00ff88]/15"
             >
               &lt; PREV
             </button>
-            <span className="font-mono text-base font-bold text-[#f5f5f7] px-3">
+            <span className="font-mono text-sm font-bold text-[#f5f5f7] px-2">
               {MONTHS[viewMonth]} {viewYear}
             </span>
             <button
@@ -262,14 +350,14 @@ export default function CalendarPage() {
                   setViewYear((y) => y + 1);
                 } else setViewMonth((m) => m + 1);
               }}
-              className="rounded border border-[#00ff88]/40 bg-[#00ff88]/5 px-4 py-2 font-mono text-xs text-[#00ff88] hover:bg-[#00ff88]/15"
+              className="rounded border border-[#00ff88]/40 bg-[#00ff88]/5 px-3 py-2 font-mono text-xs text-[#00ff88] hover:bg-[#00ff88]/15"
             >
               NEXT &gt;
             </button>
             <select
               value={viewYear}
               onChange={(e) => setViewYear(parseInt(e.target.value, 10))}
-              className="rounded border border-[#00ff88]/30 bg-black/60 px-3 py-2 font-mono text-xs text-[#f5f5f7] focus:border-[#00ff88]/60 focus:outline-none"
+              className="ml-2 rounded border border-[#00ff88]/30 bg-black/60 px-2 py-2 font-mono text-xs text-[#f5f5f7] focus:border-[#00ff88]/60 focus:outline-none"
             >
               {Array.from({ length: 5 }, (_, i) => currentDate.getFullYear() - 1 + i).map((y) => (
                 <option key={y} value={y}>{y}</option>
@@ -365,33 +453,43 @@ export default function CalendarPage() {
           </div>
         ) : null}
 
-        {/* CALENDAR SYNC - Moved to bottom */}
-        <div className="deck-panel deck-card-bg deck-border-thick rounded-lg border-[#9a9aa3]/30 p-4">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#9a9aa3] mb-3">CALENDAR SYNC</p>
-          <div className="space-y-2 font-mono text-[10px]">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[#9a9aa3]">Google:</span>
-              <span className="text-red-400">OFFLINE</span>
-              <button type="button" disabled className="cursor-not-allowed rounded border border-white/20 bg-white/5 px-2 py-1 text-[#9a9aa3] opacity-60">CONNECT</button>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[#9a9aa3]">iCloud:</span>
-              <span className="text-red-400">OFFLINE</span>
-              <button type="button" disabled className="cursor-not-allowed rounded border border-white/20 bg-white/5 px-2 py-1 text-[#9a9aa3] opacity-60">CONNECT</button>
+        {/* Bottom row: Sync Status (left) and Danger Zone (right) */}
+        <div className="flex flex-wrap gap-4 items-stretch">
+          {/* Sync status panel - BOTTOM LEFT */}
+          <div className="deck-panel deck-card-bg deck-border-thick rounded-lg border-[#9a9aa3]/30 p-3 flex-1 min-w-[200px]">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#9a9aa3] mb-2">SYNC STATUS</p>
+            <div className="space-y-3 font-mono text-[10px]">
+              {/* Google Calendar Sync Component */}
+              <GoogleCalendarSync />
+              
+              {/* iCloud - Coming Soon */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[#9a9aa3]">iCloud:</span>
+                <span className="text-amber-400">SOON</span>
+                <button 
+                  type="button" 
+                  onClick={() => alert('iCloud sync coming in future update')}
+                  className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-amber-400 hover:bg-amber-500/20 transition-colors text-[10px]"
+                >
+                  SOON
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* DANGER ZONE - At bottom */}
-        <div className="deck-panel deck-card-bg deck-border-thick rounded-lg border-red-500/30 p-4">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-red-400 mb-3">DANGER ZONE</p>
-          <button
-            type="button"
-            onClick={handleClearAllData}
-            className="rounded border border-red-500/40 bg-red-500/10 px-4 py-2 font-mono text-xs text-red-400 hover:bg-red-500/20 transition-colors"
-          >
-            CLEAR ALL DATA
-          </button>
+          {/* Danger Zone - BOTTOM RIGHT */}
+          <div className="deck-panel deck-card-bg deck-border-thick rounded-lg border-red-500/30 p-3 flex-1 min-w-[200px] flex flex-col">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-red-400 mb-2">DANGER ZONE</p>
+            <div className="flex-1 flex items-center">
+              <button
+                type="button"
+                onClick={handleClearAllData}
+                className="rounded border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400 hover:bg-red-500/20 transition-colors"
+              >
+                CLEAR ALL DATA
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

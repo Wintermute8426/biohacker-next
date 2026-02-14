@@ -44,32 +44,34 @@ export default function SettingsDropdown() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Settings Gear Button */}
+      {/* Settings Gear Button - Enhanced */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 border border-[#00ff41]/30 bg-[#1a1f2e] rounded hover:bg-[#00ff41]/10 hover:border-[#00ff41] transition-all"
+        className="relative p-2.5 border border-[#00ff41]/40 bg-[#1a1f2e] rounded hover:bg-[#00ff41]/10 hover:border-[#00ff41] transition-all duration-300 group hover:shadow-[0_0_12px_rgba(0,255,65,0.3)]"
       >
-        <Settings className="w-5 h-5 text-[#00ff41]" />
+        <Settings className="w-5 h-5 text-[#00ff41] group-hover:rotate-90 transition-transform duration-300" />
+        {/* Subtle LED indicator */}
+        <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#00ff41] shadow-[0_0_4px_rgba(0,255,65,0.8)] animate-pulse"></div>
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 top-12 w-72 border border-[#00ff41]/30 bg-[#1a1f2e] rounded-lg shadow-[0_0_20px_rgba(0,255,65,0.2)] z-50">
+        <div className="absolute right-0 top-14 w-72 border border-[#00ff41]/30 bg-[#0a0e1a] rounded-lg shadow-[0_0_30px_rgba(0,255,65,0.25)] z-50 animate-fade-in">
           {/* Corner brackets */}
-          <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#00ff41]" />
-          <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#00ff41]" />
-          <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#00ff41]" />
-          <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#00ff41]" />
+          <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#00ff41]" />
+          <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#00ff41]" />
+          <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#00ff41]" />
+          <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#00ff41]" />
 
           {/* Hex ID */}
-          <div className="absolute top-1 right-4 text-[#00ff41]/50 text-[10px] font-mono">
+          <div className="absolute top-2 right-5 text-[#00ff41]/50 text-[10px] font-mono">
             [SET-0x7F]
           </div>
 
           {/* Header */}
           <div className="p-4 border-b border-[#00ff41]/20">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-[#00ff41] font-mono text-sm font-bold">SETTINGS</h3>
+              <h3 className="text-[#00ff41] font-mono text-sm font-bold tracking-wider">SETTINGS</h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 hover:text-[#00ff41] transition-colors"
@@ -89,7 +91,7 @@ export default function SettingsDropdown() {
                 router.push("/app/settings");
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 p-3 text-left text-gray-300 hover:bg-[#00ff41]/10 hover:text-[#00ff41] rounded transition-all font-mono text-sm"
+              className="w-full flex items-center gap-3 p-3 text-left text-gray-300 hover:bg-[#00ff41]/10 hover:text-[#00ff41] rounded transition-all font-mono text-sm border border-transparent hover:border-[#00ff41]/30"
             >
               <User className="w-4 h-4" />
               Profile Settings
@@ -100,7 +102,7 @@ export default function SettingsDropdown() {
                 router.push("/app/settings/reporting");
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 p-3 text-left text-gray-300 hover:bg-[#00ff41]/10 hover:text-[#00ff41] rounded transition-all font-mono text-sm"
+              className="w-full flex items-center gap-3 p-3 text-left text-gray-300 hover:bg-[#00ff41]/10 hover:text-[#00ff41] rounded transition-all font-mono text-sm border border-transparent hover:border-[#00ff41]/30"
             >
               <FileText className="w-4 h-4" />
               Cycle Reviews & Reporting
@@ -122,7 +124,7 @@ export default function SettingsDropdown() {
 
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 p-3 text-left text-[#ff0040] hover:bg-[#ff0040]/10 rounded transition-all font-mono text-sm"
+              className="w-full flex items-center gap-3 p-3 text-left text-[#ff0040] hover:bg-[#ff0040]/10 rounded transition-all font-mono text-sm border border-transparent hover:border-[#ff0040]/30"
             >
               <LogOut className="w-4 h-4" />
               Sign Out
@@ -132,8 +134,11 @@ export default function SettingsDropdown() {
           {/* Status LED */}
           <div className="p-3 border-t border-[#00ff41]/20 flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#00ff41] animate-pulse shadow-[0_0_6px_rgba(0,255,65,0.8)]" />
-            <span className="text-[#00ff41] text-[10px] font-mono">SYSTEM ONLINE</span>
+            <span className="text-[#00ff41] text-[10px] font-mono tracking-wider">SYSTEM ONLINE</span>
           </div>
+
+          {/* Scanline effect */}
+          <div className="absolute inset-0 pointer-events-none opacity-10 bg-scanlines rounded-lg"></div>
         </div>
       )}
     </div>

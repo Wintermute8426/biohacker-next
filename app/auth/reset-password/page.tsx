@@ -3,9 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -35,60 +32,125 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-bg-black via-bg-charcoal to-bg-darkGray">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-neon-green">Check Your Email</CardTitle>
-            <CardDescription>
-              Password reset link sent to <strong>{email}</strong>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-metal-silver">
-              We've sent you a password reset link. Please check your email and follow
-              the instructions to reset your password.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Link href="/auth/login" className="w-full">
-              <Button variant="outline" className="w-full">
-                Back to Login
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
+      <div className="min-h-screen relative bg-[#0a0e1a] flex items-center justify-center overflow-hidden">
+        {/* Matrix rain background effect */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="matrix-rain" />
+        </div>
+
+        {/* Scanlines */}
+        <div className="absolute inset-0 pointer-events-none bg-scanlines opacity-20" />
+
+        {/* Success panel */}
+        <div className="relative z-10 w-full max-w-md mx-4">
+          <div className="relative border border-[#00ff41]/30 bg-[#1a1f2e]/95 backdrop-blur-sm shadow-[0_0_30px_rgba(0,255,65,0.2)] rounded-lg overflow-hidden p-8">
+            {/* Corner brackets */}
+            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#00ff41]" />
+            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#00ff41]" />
+            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#00ff41]" />
+            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#00ff41]" />
+
+            {/* Hex ID */}
+            <div className="absolute top-2 right-6 text-[#00ff41]/50 text-xs font-mono">
+              [RESET-0x9D]
+            </div>
+
+            {/* Content */}
+            <div className="text-center">
+              <div className="mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#00ff41]/20 border-2 border-[#00ff41] flex items-center justify-center">
+                  <span className="text-3xl text-[#00ff41]">✉</span>
+                </div>
+                <h1 className="text-2xl font-bold text-[#00ff41] font-mono mb-2">
+                  RESET LINK SENT
+                </h1>
+                <p className="text-[#00d4ff] text-sm font-mono">
+                  {'>'} Check your email: <span className="text-white">{email}</span>
+                </p>
+              </div>
+
+              <div className="mb-6 p-4 bg-[#00ff41]/5 border border-[#00ff41]/20 rounded">
+                <p className="text-sm text-gray-300 font-mono leading-relaxed">
+                  We've sent you a password reset link. Please check your email and follow
+                  the instructions to reset your password.
+                </p>
+              </div>
+
+              <Link href="/auth/login" className="block">
+                <button className="w-full py-3 px-4 border border-[#00ff41] bg-[#00ff41]/10 text-[#00ff41] rounded font-mono hover:bg-[#00ff41]/20 transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,255,65,0.3)]">
+                  {'>'} BACK TO LOGIN
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-bg-black via-bg-charcoal to-bg-darkGray">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative bg-[#0a0e1a] flex items-center justify-center overflow-hidden">
+      {/* Matrix rain background effect */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="matrix-rain" />
+      </div>
+
+      {/* Scanlines */}
+      <div className="absolute inset-0 pointer-events-none bg-scanlines opacity-20" />
+
+      {/* Main terminal panel */}
+      <div className="relative z-10 w-full max-w-md mx-4">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-orbitron font-bold text-neon-blue mb-2 animate-pulse-glow">
+          <h1 className="text-4xl font-bold text-[#00ff41] font-mono mb-2 animate-pulse">
             BIOHACKER
           </h1>
-          <p className="text-metal-silver font-mono">Peptide Protocol Tracker</p>
+          <p className="text-[#00d4ff] font-mono text-sm">
+            {'>'} PEPTIDE PROTOCOL TRACKER v1.0
+          </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Reset Password</CardTitle>
-            <CardDescription>Enter your email to receive a reset link</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleReset}>
-            <CardContent className="space-y-4">
+        {/* Hardware panel frame */}
+        <div className="relative border border-[#00ff41]/30 bg-[#1a1f2e]/95 backdrop-blur-sm shadow-[0_0_30px_rgba(0,255,65,0.2)] rounded-lg overflow-hidden">
+          {/* Corner brackets */}
+          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#00ff41]" />
+          <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#00ff41]" />
+          <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#00ff41]" />
+          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#00ff41]" />
+
+          {/* Hex ID */}
+          <div className="absolute top-2 right-6 text-[#00ff41]/50 text-xs font-mono">
+            [RESET-0xB8]
+          </div>
+
+          {/* Content */}
+          <div className="p-8">
+            {/* Header */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-[#00ff41] font-mono mb-2 flex items-center">
+                <span className="inline-block w-3 h-5 bg-[#00ff41] mr-2 animate-pulse" />
+                RESET PASSWORD
+              </h2>
+              <p className="text-[#00d4ff] text-sm font-mono">
+                {'>'} Enter your email to receive a reset link
+              </p>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleReset} className="space-y-5">
+              {/* Error Message */}
               {error && (
-                <div className="p-3 rounded-md bg-red-500/10 border border-red-500 text-red-500 text-sm">
-                  {error}
+                <div className="p-3 rounded border border-red-500/50 bg-red-500/10 text-red-400 text-sm font-mono">
+                  {'>'} ERROR: {error}
                 </div>
               )}
+
+              {/* Email Field */}
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-metal-chrome">
-                  Email
+                <label htmlFor="email" className="block text-xs font-mono text-[#00d4ff] uppercase tracking-wider">
+                  {'>'} EMAIL ADDRESS
                 </label>
-                <Input
+                <input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
@@ -96,25 +158,31 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
+                  className="w-full px-4 py-3 bg-[#0a0e1a] border border-[#00ff41]/30 rounded text-white font-mono focus:outline-none focus:border-[#00ff41] focus:shadow-[0_0_12px_rgba(0,255,65,0.3)] transition-all disabled:opacity-50"
                 />
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button
+
+              {/* Submit Button */}
+              <button
                 type="submit"
-                className="w-full"
                 disabled={loading}
+                className="w-full py-3 px-4 border border-[#00ff41] bg-[#00ff41]/10 text-[#00ff41] rounded font-mono hover:bg-[#00ff41]/20 transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,255,65,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Sending..." : "Send Reset Link"}
-              </Button>
-              <Link href="/auth/login" className="w-full">
-                <Button variant="ghost" className="w-full">
-                  Back to Login
-                </Button>
+                {loading ? "{'>'} SENDING..." : "{'>'} SEND RESET LINK"}
+              </button>
+
+              {/* Back to Login Link */}
+              <Link href="/auth/login" className="block">
+                <button
+                  type="button"
+                  className="w-full py-3 px-4 border border-gray-600 bg-transparent text-gray-400 rounded font-mono hover:bg-gray-800/30 hover:border-gray-500 transition-all duration-300"
+                >
+                  {'>'} BACK TO LOGIN
+                </button>
               </Link>
-            </CardFooter>
-          </form>
-        </Card>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
