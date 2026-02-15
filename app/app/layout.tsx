@@ -72,8 +72,8 @@ export default function AppLayout({
         <div className="absolute inset-0 pointer-events-none opacity-10 bg-scanlines"></div>
       </nav>
 
-      {/* Main Content with top padding AND bottom padding for scroll */}
-      <main className="pt-16 pb-32 min-h-screen bg-[#000000]">{children}</main>
+      {/* Main Content with EXTRA padding top and bottom for modals and buttons */}
+      <main className="pt-24 pb-48 min-h-screen bg-[#000000]">{children}</main>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#00ff41]/30 bg-[#0a0e1a] shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
