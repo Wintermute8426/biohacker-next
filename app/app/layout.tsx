@@ -42,14 +42,14 @@ export default function AppLayout({
               <h1 className="text-2xl font-bold font-mono text-[#00ff41] tracking-[0.2em] group-hover:text-[#00ffaa] transition-colors mb-1">
                 BIOHACKER
               </h1>
-              
+
               {/* Cyberdeck elements - Below logo */}
               <div className="flex items-center gap-2">
                 {/* Version badge */}
                 <span className="px-2 py-0.5 border border-[#00ff41]/30 bg-[#00ff41]/10 rounded text-[9px] font-mono text-[#00ff41]">
                   v1.0
                 </span>
-                
+
                 {/* Hex ID */}
                 <span className="text-[9px] font-mono text-[#00ff41]/50">
                   [0xBIO]
@@ -72,8 +72,8 @@ export default function AppLayout({
         <div className="absolute inset-0 pointer-events-none opacity-10 bg-scanlines"></div>
       </nav>
 
-      {/* Main Content with top padding */}
-      <main className="pt-16 min-h-screen bg-[#000000]">{children}</main>
+      {/* Main Content with top padding AND bottom padding for scroll */}
+      <main className="pt-16 pb-32 min-h-screen bg-[#000000]">{children}</main>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#00ff41]/30 bg-[#0a0e1a] shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
@@ -82,6 +82,7 @@ export default function AppLayout({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
+
               return (
                 <Link
                   key={item.href}
