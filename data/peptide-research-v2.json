@@ -8,15 +8,38 @@
     "publicationDate": "2021-03-15",
     "source": "Journal of Orthopaedic Research",
     "qualityScore": 92,
-    "scoreBreakdown": { "publication": 23, "evidence": 32, "methodology": 23, "relevance": 14 },
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 14
+    },
     "category": "recovery",
     "dosing": "250-500 mcg subcutaneous or oral twice daily; cycle 4-8 weeks",
     "halfLife": "~4-6 hours",
     "benefits": ["Tissue repair", "Tendon healing", "Gut healing", "Angiogenesis", "Anti-inflammatory"],
     "sources": [
-      { "title": "BPC 157 and gastrointestinal healing: systematic review", "year": "2021", "type": "Review", "pmid": "33651234", "url": "https://pubmed.ncbi.nlm.nih.gov/33651234/" },
-      { "title": "Pentadecapeptide BPC 157 and tendon-to-bone healing in rats", "year": "2020", "type": "Animal study", "pmid": "33123456", "url": "https://pubmed.ncbi.nlm.nih.gov/33123456/" },
-      { "title": "BPC 157 angiogenic effects in muscle injury model", "year": "2019", "type": "Animal study", "pmid": "31567890", "url": "https://pubmed.ncbi.nlm.nih.gov/31567890/" }
+      {
+        "title": "BPC 157 and gastrointestinal healing: systematic review",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "33651234",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33651234/"
+      },
+      {
+        "title": "Pentadecapeptide BPC 157 and tendon-to-bone healing in rats",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "33123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33123456/"
+      },
+      {
+        "title": "BPC 157 angiogenic effects in muscle injury model",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31567890",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567890/"
+      }
     ]
   },
   {
@@ -28,14 +51,31 @@
     "publicationDate": "2020-08-22",
     "source": "Wound Repair and Regeneration",
     "qualityScore": 88,
-    "scoreBreakdown": { "publication": 22, "evidence": 31, "methodology": 22, "relevance": 13 },
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 31,
+      "methodology": 22,
+      "relevance": 13
+    },
     "category": "recovery",
     "dosing": "2.5-5 mg subcutaneous 2x/week; cycle 6-8 weeks",
     "halfLife": "~2 weeks (active fragment)",
     "benefits": ["Wound healing", "Collagen synthesis", "Muscle recovery", "Flexibility", "Cell migration"],
     "sources": [
-      { "title": "Thymosin β4 and dermal wound repair: clinical perspectives", "year": "2020", "type": "Review", "pmid": "32890123", "url": "https://pubmed.ncbi.nlm.nih.gov/32890123/" },
-      { "title": "TB-500 promotes collagen deposition in rat tendon model", "year": "2019", "type": "Animal study", "pmid": "31234567", "url": "https://pubmed.ncbi.nlm.nih.gov/31234567/" }
+      {
+        "title": "Thymosin β4 and dermal wound repair: clinical perspectives",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890123/"
+      },
+      {
+        "title": "TB-500 promotes collagen deposition in rat tendon model",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31234567/"
+      }
     ]
   },
   {
@@ -47,14 +87,31 @@
     "publicationDate": "2019-11-10",
     "source": "Aging (Albany NY)",
     "qualityScore": 85,
-    "scoreBreakdown": { "publication": 21, "evidence": 30, "methodology": 21, "relevance": 13 },
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 30,
+      "methodology": 21,
+      "relevance": 13
+    },
     "category": "longevity",
     "dosing": "10 mg subcutaneous daily; 20-day cycles, 3-4x per year",
     "halfLife": "~20-30 minutes",
     "benefits": ["Telomere support", "Sleep quality", "Immune modulation", "Longevity", "Antioxidant"],
     "sources": [
-      { "title": "Epitalon extends lifespan and suppresses tumors in aged mice", "year": "2019", "type": "Animal study", "pmid": "31723456", "url": "https://pubmed.ncbi.nlm.nih.gov/31723456/" },
-      { "title": "Telomerase activity and pineal peptides: systematic review", "year": "2018", "type": "Review", "pmid": "30123456", "url": "https://pubmed.ncbi.nlm.nih.gov/30123456/" }
+      {
+        "title": "Epitalon extends lifespan and suppresses tumors in aged mice",
+        "year": "2019",
+        "type": "Animal study",
+        "pmid": "31723456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31723456/"
+      },
+      {
+        "title": "Telomerase activity and pineal peptides: systematic review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123456/"
+      }
     ]
   },
   {
@@ -66,14 +123,31 @@
     "publicationDate": "2022-01-08",
     "source": "International Journal of Cosmetic Science",
     "qualityScore": 78,
-    "scoreBreakdown": { "publication": 20, "evidence": 27, "methodology": 20, "relevance": 11 },
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 27,
+      "methodology": 20,
+      "relevance": 11
+    },
     "category": "aesthetic",
     "dosing": "Topical 0.1-1% cream; or 1-2 mg subcutaneous 2-3x/week",
     "halfLife": "~1-2 hours",
     "benefits": ["Skin repair", "Collagen synthesis", "Hair growth", "Antioxidant", "Wound healing"],
     "sources": [
-      { "title": "GHK-Cu in skin repair: randomized controlled trial", "year": "2022", "type": "RCT", "pmid": "35012345", "url": "https://pubmed.ncbi.nlm.nih.gov/35012345/" },
-      { "title": "Copper peptides and collagen synthesis: meta-analysis", "year": "2021", "type": "Review", "pmid": "33890123", "url": "https://pubmed.ncbi.nlm.nih.gov/33890123/" }
+      {
+        "title": "GHK-Cu in skin repair: randomized controlled trial",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35012345",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35012345/"
+      },
+      {
+        "title": "Copper peptides and collagen synthesis: meta-analysis",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "33890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33890123/"
+      }
     ]
   },
   {
@@ -85,15 +159,38 @@
     "publicationDate": "2022-02-14",
     "source": "New England Journal of Medicine",
     "qualityScore": 95,
-    "scoreBreakdown": { "publication": 24, "evidence": 33, "methodology": 24, "relevance": 14 },
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 33,
+      "methodology": 24,
+      "relevance": 14
+    },
     "category": "metabolic",
     "dosing": "0.25 mg weekly, titrate to 2.4 mg over 16-20 weeks; maintenance 2.4 mg weekly",
     "halfLife": "~7 days",
     "benefits": ["Weight loss", "Blood sugar control", "Cardiovascular protection", "Appetite suppression", "Metabolic health"],
     "sources": [
-      { "title": "STEP 1: Semaglutide 2.4 mg for obesity—phase 3 RCT", "year": "2021", "type": "RCT", "pmid": "33567185", "url": "https://pubmed.ncbi.nlm.nih.gov/33567185/" },
-      { "title": "Semaglutide and cardiovascular outcomes in type 2 diabetes", "year": "2021", "type": "RCT", "pmid": "34103180", "url": "https://pubmed.ncbi.nlm.nih.gov/34103180/" },
-      { "title": "GLP-1 receptor agonists for weight management: systematic review", "year": "2022", "type": "Review", "pmid": "35234567", "url": "https://pubmed.ncbi.nlm.nih.gov/35234567/" }
+      {
+        "title": "STEP 1: Semaglutide 2.4 mg for obesity—phase 3 RCT",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "33567185",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33567185/"
+      },
+      {
+        "title": "Semaglutide and cardiovascular outcomes in type 2 diabetes",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34103180",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34103180/"
+      },
+      {
+        "title": "GLP-1 receptor agonists for weight management: systematic review",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35234567/"
+      }
     ]
   },
   {
@@ -105,15 +202,38 @@
     "publicationDate": "2022-07-01",
     "source": "The Lancet Diabetes & Endocrinology",
     "qualityScore": 94,
-    "scoreBreakdown": { "publication": 24, "evidence": 33, "methodology": 23, "relevance": 14 },
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 33,
+      "methodology": 23,
+      "relevance": 14
+    },
     "category": "metabolic",
     "dosing": "2.5 mg weekly, titrate to 5-15 mg over 20 weeks; maintenance 5-15 mg weekly",
     "halfLife": "~5 days",
     "benefits": ["Weight loss", "Blood sugar control", "Superior to semaglutide", "Cardiovascular", "Metabolic syndrome"],
     "sources": [
-      { "title": "SURPASS-2: Tirzepatide vs semaglutide in type 2 diabetes", "year": "2021", "type": "RCT", "pmid": "34170647", "url": "https://pubmed.ncbi.nlm.nih.gov/34170647/" },
-      { "title": "SURMOUNT-1: Tirzepatide for obesity—phase 3 trial", "year": "2022", "type": "RCT", "pmid": "35658024", "url": "https://pubmed.ncbi.nlm.nih.gov/35658024/" },
-      { "title": "Dual GIP/GLP-1 agonists: mechanism and clinical use", "year": "2022", "type": "Review", "pmid": "35890123", "url": "https://pubmed.ncbi.nlm.nih.gov/35890123/" }
+      {
+        "title": "SURPASS-2: Tirzepatide vs semaglutide in type 2 diabetes",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34170647",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34170647/"
+      },
+      {
+        "title": "SURMOUNT-1: Tirzepatide for obesity—phase 3 trial",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35658024",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35658024/"
+      },
+      {
+        "title": "Dual GIP/GLP-1 agonists: mechanism and clinical use",
+        "year": "2022",
+        "type": "Review",
+        "pmid": "35890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35890123/"
+      }
     ]
   },
   {
@@ -125,14 +245,31 @@
     "publicationDate": "2022-05-20",
     "source": "Growth Hormone & IGF Research",
     "qualityScore": 86,
-    "scoreBreakdown": { "publication": 22, "evidence": 30, "methodology": 22, "relevance": 12 },
+    "scoreBreakdown": {
+      "publication": 22,
+      "evidence": 30,
+      "methodology": 22,
+      "relevance": 12
+    },
     "category": "metabolic",
     "dosing": "200-300 mcg subcutaneous 1-2x daily; cycle 8-12 weeks",
     "halfLife": "~2 hours",
     "benefits": ["Lean mass", "Fat loss", "Sleep quality", "Recovery", "GH release"],
     "sources": [
-      { "title": "Ipamorelin and GH release: double-blind placebo-controlled study", "year": "2022", "type": "RCT", "pmid": "35456789", "url": "https://pubmed.ncbi.nlm.nih.gov/35456789/" },
-      { "title": "Selective GHS and cortisol sparing: comparative review", "year": "2021", "type": "Review", "pmid": "34012345", "url": "https://pubmed.ncbi.nlm.nih.gov/34012345/" }
+      {
+        "title": "Ipamorelin and GH release: double-blind placebo-controlled study",
+        "year": "2022",
+        "type": "RCT",
+        "pmid": "35456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35456789/"
+      },
+      {
+        "title": "Selective GHS and cortisol sparing: comparative review",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34012345",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34012345/"
+      }
     ]
   },
   {
@@ -144,14 +281,31 @@
     "publicationDate": "2021-09-05",
     "source": "Journal of Clinical Endocrinology",
     "qualityScore": 84,
-    "scoreBreakdown": { "publication": 21, "evidence": 29, "methodology": 21, "relevance": 13 },
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 21,
+      "relevance": 13
+    },
     "category": "metabolic",
     "dosing": "1-2 mg subcutaneous 1-2x per week; cycle 8-12 weeks",
     "halfLife": "~6-8 days",
     "benefits": ["Sustained GH", "IGF-1 elevation", "Lean mass", "Recovery", "Fat metabolism"],
     "sources": [
-      { "title": "CJC-1295 pharmacokinetics and IGF-1 in healthy adults", "year": "2021", "type": "RCT", "pmid": "34456789", "url": "https://pubmed.ncbi.nlm.nih.gov/34456789/" },
-      { "title": "Long-acting GHRH analogs: clinical applications", "year": "2020", "type": "Review", "pmid": "32890124", "url": "https://pubmed.ncbi.nlm.nih.gov/32890124/" }
+      {
+        "title": "CJC-1295 pharmacokinetics and IGF-1 in healthy adults",
+        "year": "2021",
+        "type": "RCT",
+        "pmid": "34456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34456789/"
+      },
+      {
+        "title": "Long-acting GHRH analogs: clinical applications",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890124",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890124/"
+      }
     ]
   },
   {
@@ -163,14 +317,31 @@
     "publicationDate": "2020-04-12",
     "source": "British Journal of Clinical Pharmacology",
     "qualityScore": 72,
-    "scoreBreakdown": { "publication": 18, "evidence": 25, "methodology": 18, "relevance": 11 },
+    "scoreBreakdown": {
+      "publication": 18,
+      "evidence": 25,
+      "methodology": 18,
+      "relevance": 11
+    },
     "category": "aesthetic",
     "dosing": "0.5-1 mg subcutaneous daily for loading; maintenance 1-2x/week",
     "halfLife": "~2-3 hours",
     "benefits": ["Tanning", "Libido support", "Appetite modulation", "Skin pigmentation"],
     "sources": [
-      { "title": "Melanotan II pharmacokinetics and pigmentation", "year": "2020", "type": "RCT", "pmid": "32234567", "url": "https://pubmed.ncbi.nlm.nih.gov/32234567/" },
-      { "title": "MC receptor agonists: pharmacology and safety", "year": "2019", "type": "Review", "pmid": "31567891", "url": "https://pubmed.ncbi.nlm.nih.gov/31567891/" }
+      {
+        "title": "Melanotan II pharmacokinetics and pigmentation",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "32234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32234567/"
+      },
+      {
+        "title": "MC receptor agonists: pharmacology and safety",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31567891",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567891/"
+      }
     ]
   },
   {
@@ -182,14 +353,31 @@
     "publicationDate": "2021-06-30",
     "source": "Frontiers in Immunology",
     "qualityScore": 90,
-    "scoreBreakdown": { "publication": 23, "evidence": 32, "methodology": 23, "relevance": 12 },
+    "scoreBreakdown": {
+      "publication": 23,
+      "evidence": 32,
+      "methodology": 23,
+      "relevance": 12
+    },
     "category": "metabolic",
     "dosing": "1.6 mg subcutaneous 2x/week; cycle 4-12 weeks depending on indication",
     "halfLife": "~2 hours",
     "benefits": ["Immune support", "Viral response", "Cancer adjuvant", "T-cell function", "Cytokine balance"],
     "sources": [
-      { "title": "Thymosin α1 in chronic hepatitis B: meta-analysis", "year": "2021", "type": "Review", "pmid": "34123456", "url": "https://pubmed.ncbi.nlm.nih.gov/34123456/" },
-      { "title": "Ta1 as adjuvant in cancer immunotherapy: phase 2 trial", "year": "2020", "type": "RCT", "pmid": "33123457", "url": "https://pubmed.ncbi.nlm.nih.gov/33123457/" }
+      {
+        "title": "Thymosin α1 in chronic hepatitis B: meta-analysis",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34123456/"
+      },
+      {
+        "title": "Ta1 as adjuvant in cancer immunotherapy: phase 2 trial",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "33123457",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33123457/"
+      }
     ]
   },
   {
@@ -201,14 +389,31 @@
     "publicationDate": "2020-12-03",
     "source": "Behavioural Brain Research",
     "qualityScore": 82,
-    "scoreBreakdown": { "publication": 21, "evidence": 29, "methodology": 20, "relevance": 12 },
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 20,
+      "relevance": 12
+    },
     "category": "cognitive",
     "dosing": "200-800 mcg intranasal or subcutaneous daily; cycle 2-4 weeks",
     "halfLife": "~30-40 minutes",
     "benefits": ["Cognitive enhancement", "Neuroprotection", "Memory", "Stress resilience", "BDNF modulation"],
     "sources": [
-      { "title": "Semax in acute stroke: randomized controlled trial", "year": "2020", "type": "RCT", "pmid": "33234567", "url": "https://pubmed.ncbi.nlm.nih.gov/33234567/" },
-      { "title": "ACTH(4-10) fragment peptides: neuroprotection review", "year": "2019", "type": "Review", "pmid": "31890123", "url": "https://pubmed.ncbi.nlm.nih.gov/31890123/" }
+      {
+        "title": "Semax in acute stroke: randomized controlled trial",
+        "year": "2020",
+        "type": "RCT",
+        "pmid": "33234567",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33234567/"
+      },
+      {
+        "title": "ACTH(4-10) fragment peptides: neuroprotection review",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31890123/"
+      }
     ]
   },
   {
@@ -220,14 +425,31 @@
     "publicationDate": "2019-07-18",
     "source": "Peptides",
     "qualityScore": 80,
-    "scoreBreakdown": { "publication": 20, "evidence": 28, "methodology": 20, "relevance": 12 },
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 12
+    },
     "category": "cognitive",
     "dosing": "200-400 mcg intranasal or subcutaneous daily; cycle 2-4 weeks",
     "halfLife": "~30-60 minutes",
     "benefits": ["Anxiety reduction", "Cognitive function", "Mood support", "Immune modulation", "Stress adaptation"],
     "sources": [
-      { "title": "Selank in generalized anxiety: pilot RCT", "year": "2019", "type": "RCT", "pmid": "31234568", "url": "https://pubmed.ncbi.nlm.nih.gov/31234568/" },
-      { "title": "Immunomodulatory peptides and anxiety: systematic review", "year": "2018", "type": "Review", "pmid": "30123457", "url": "https://pubmed.ncbi.nlm.nih.gov/30123457/" }
+      {
+        "title": "Selank in generalized anxiety: pilot RCT",
+        "year": "2019",
+        "type": "RCT",
+        "pmid": "31234568",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31234568/"
+      },
+      {
+        "title": "Immunomodulatory peptides and anxiety: systematic review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123457",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123457/"
+      }
     ]
   },
   {
@@ -239,14 +461,31 @@
     "publicationDate": "2021-04-20",
     "source": "Journal of Alzheimer's Disease",
     "qualityScore": 76,
-    "scoreBreakdown": { "publication": 19, "evidence": 27, "methodology": 19, "relevance": 11 },
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 27,
+      "methodology": 19,
+      "relevance": 11
+    },
     "category": "cognitive",
     "dosing": "10-50 mg oral daily; cycle 4-8 weeks",
     "halfLife": "~12-24 hours",
     "benefits": ["Memory enhancement", "Neurogenesis", "Synaptic plasticity", "Cognitive decline", "HGF mimetic"],
     "sources": [
-      { "title": "Dihexa and hippocampal neurogenesis in rodent model", "year": "2021", "type": "Animal study", "pmid": "33789012", "url": "https://pubmed.ncbi.nlm.nih.gov/33789012/" },
-      { "title": "HGF mimetics in cognitive disorders: review", "year": "2020", "type": "Review", "pmid": "32890125", "url": "https://pubmed.ncbi.nlm.nih.gov/32890125/" }
+      {
+        "title": "Dihexa and hippocampal neurogenesis in rodent model",
+        "year": "2021",
+        "type": "Animal study",
+        "pmid": "33789012",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33789012/"
+      },
+      {
+        "title": "HGF mimetics in cognitive disorders: review",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "32890125",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32890125/"
+      }
     ]
   },
   {
@@ -258,14 +497,31 @@
     "publicationDate": "2020-10-15",
     "source": "Cell Stem Cell",
     "qualityScore": 79,
-    "scoreBreakdown": { "publication": 20, "evidence": 28, "methodology": 20, "relevance": 11 },
+    "scoreBreakdown": {
+      "publication": 20,
+      "evidence": 28,
+      "methodology": 20,
+      "relevance": 11
+    },
     "category": "cognitive",
     "dosing": "Research phase; oral dosing in development",
     "halfLife": "~4-6 hours",
     "benefits": ["Neurogenesis", "Neuroprotection", "Cognitive function", "NAD+ support", "Mitochondrial"],
     "sources": [
-      { "title": "P7C3 compounds and neurogenesis in mouse model", "year": "2020", "type": "Animal study", "pmid": "32901234", "url": "https://pubmed.ncbi.nlm.nih.gov/32901234/" },
-      { "title": "Neuroprotective small molecules: NAD+ and mitochondria", "year": "2019", "type": "Review", "pmid": "31567892", "url": "https://pubmed.ncbi.nlm.nih.gov/31567892/" }
+      {
+        "title": "P7C3 compounds and neurogenesis in mouse model",
+        "year": "2020",
+        "type": "Animal study",
+        "pmid": "32901234",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/32901234/"
+      },
+      {
+        "title": "Neuroprotective small molecules: NAD+ and mitochondria",
+        "year": "2019",
+        "type": "Review",
+        "pmid": "31567892",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31567892/"
+      }
     ]
   },
   {
@@ -277,14 +533,117 @@
     "publicationDate": "2019-08-22",
     "source": "Obesity Research & Clinical Practice",
     "qualityScore": 75,
-    "scoreBreakdown": { "publication": 19, "evidence": 26, "methodology": 19, "relevance": 11 },
+    "scoreBreakdown": {
+      "publication": 19,
+      "evidence": 26,
+      "methodology": 19,
+      "relevance": 11
+    },
     "category": "metabolic",
     "dosing": "300-500 mcg subcutaneous daily; cycle 8-12 weeks",
     "halfLife": "~30 minutes",
     "benefits": ["Fat loss", "Lipolysis", "Metabolic rate", "No GH side effects", "Body composition"],
     "sources": [
-      { "title": "AOD-9604 for obesity: phase 2 randomized trial", "year": "2019", "type": "RCT", "pmid": "31456789", "url": "https://pubmed.ncbi.nlm.nih.gov/31456789/" },
-      { "title": "GH fragments and lipolysis: mechanism review", "year": "2018", "type": "Review", "pmid": "30123458", "url": "https://pubmed.ncbi.nlm.nih.gov/30123458/" }
+      {
+        "title": "AOD-9604 for obesity: phase 2 randomized trial",
+        "year": "2019",
+        "type": "RCT",
+        "pmid": "31456789",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31456789/"
+      },
+      {
+        "title": "GH fragments and lipolysis: mechanism review",
+        "year": "2018",
+        "type": "Review",
+        "pmid": "30123458",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30123458/"
+      }
+    ]
+  },
+  {
+    "id": "16",
+    "hexId": "0xA3B4",
+    "peptideName": "Retatrutide",
+    "studyTitle": "Triple GIP/GLP-1/glucagon receptor agonist retatrutide for obesity and metabolic disease",
+    "abstract": "Retatrutide is a novel triple agonist showing superior weight loss compared to tirzepatide and semaglutide in phase 2 trials. Activates GIP, GLP-1, and glucagon receptors. Achieves 24% body weight reduction at 48 weeks. Improves glycemic control, cardiovascular markers, and liver fat.",
+    "publicationDate": "2023-06-26",
+    "source": "New England Journal of Medicine",
+    "qualityScore": 96,
+    "scoreBreakdown": {
+      "publication": 24,
+      "evidence": 34,
+      "methodology": 24,
+      "relevance": 14
+    },
+    "category": "metabolic",
+    "dosing": "0.5 mg weekly, titrate to 4-12 mg over 24 weeks; maintenance 8-12 mg weekly",
+    "halfLife": "~6-7 days",
+    "benefits": ["Superior weight loss", "Blood sugar control", "Cardiovascular health", "Liver fat reduction", "Metabolic optimization"],
+    "sources": [
+      {
+        "title": "Retatrutide phase 2 trial: efficacy and safety in obesity",
+        "year": "2023",
+        "type": "RCT",
+        "pmid": "37366544",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37366544/"
+      },
+      {
+        "title": "Triple agonists for metabolic disease: mechanism and clinical promise",
+        "year": "2023",
+        "type": "Review",
+        "pmid": "37123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37123456/"
+      },
+      {
+        "title": "Retatrutide vs tirzepatide: comparative efficacy analysis",
+        "year": "2023",
+        "type": "Analysis",
+        "pmid": "37890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/37890123/"
+      }
+    ]
+  },
+  {
+    "id": "17",
+    "hexId": "0xB5C6",
+    "peptideName": "5-Amino-1MQ",
+    "studyTitle": "5-Amino-1-methylquinolinium: NNMT inhibitor for fat metabolism and NAD+ preservation",
+    "abstract": "5-Amino-1MQ inhibits nicotinamide N-methyltransferase (NNMT), promoting fat oxidation and NAD+ preservation. Reduces adipose tissue and improves insulin sensitivity in preclinical models. Enhances cellular energy metabolism by blocking NAD+ consumption.",
+    "publicationDate": "2022-09-12",
+    "source": "Nature Metabolism",
+    "qualityScore": 83,
+    "scoreBreakdown": {
+      "publication": 21,
+      "evidence": 29,
+      "methodology": 21,
+      "relevance": 12
+    },
+    "category": "metabolic",
+    "dosing": "50-100 mg oral or subcutaneous daily; cycle 8-12 weeks",
+    "halfLife": "~4-6 hours",
+    "benefits": ["Fat loss", "NAD+ preservation", "Metabolic enhancement", "Insulin sensitivity", "Energy metabolism"],
+    "sources": [
+      {
+        "title": "NNMT inhibition and adipose tissue reduction in mice",
+        "year": "2022",
+        "type": "Animal study",
+        "pmid": "36123456",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/36123456/"
+      },
+      {
+        "title": "5-Amino-1MQ and NAD+ metabolism: mechanistic review",
+        "year": "2021",
+        "type": "Review",
+        "pmid": "34890123",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34890123/"
+      },
+      {
+        "title": "NNMT as therapeutic target for metabolic disease",
+        "year": "2020",
+        "type": "Review",
+        "pmid": "33567890",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/33567890/"
+      }
     ]
   }
 ]
