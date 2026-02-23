@@ -10,6 +10,7 @@ import type { DoseCalculation } from "@/components/DoseCalculatorV3";
 import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
 import { generateDosesForCycle } from "@/lib/dose-generator";
 import CycleReviewModal from "@/components/CycleReviewModal";
+import { AdvancedDosageBuilder } from "@/components/AdvancedDosageBuilder";
 
 export type CycleFrequency = {
   type: "daily" | "weekly" | "monthly";
@@ -286,6 +287,7 @@ export function CyclesContent({
     frequency: CycleFrequency;
     startDate: string;
     notes: string;
+    dosagePhases?: unknown[];
   }) => {
     const start = new Date(form.startDate);
     const end = addDays(start, form.durationWeeks * 7);
@@ -604,6 +606,7 @@ function CreateCycleModal({
     frequency: CycleFrequency;
     startDate: string;
     notes: string;
+    dosagePhases?: unknown[];
   }) => void;
   onClose: () => void;
 }) {
@@ -617,6 +620,8 @@ function CreateCycleModal({
   const [notes, setNotes] = useState("");
   const [showCalculator, setShowCalculator] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dosagePhases, setDosagePhases] = useState<any[]>([]);
+  const [showDosageBuilder, setShowDosageBuilder] = useState(false);
   
   const handleCalculationComplete = (calc: DoseCalculation) => {
     setDoseAmount(`${calc.desiredDoseMg}mg (${calc.mlToDraw.toFixed(3)}ml @ ${calc.concentrationMgPerMl.toFixed(1)}mg/ml)`);
@@ -654,6 +659,7 @@ function CreateCycleModal({
       frequency,
       startDate,
       notes: notes.trim(),
+      dosagePhases: dosagePhases.length > 0 ? dosagePhases : undefined,
     });
   };
 
@@ -810,6 +816,39 @@ function CreateCycleModal({
               />
             )}
           </div>
+
+          {/* Advanced Dosage Builder */}
+          {peptideName && (
+            <div className="border border-[#00d4ff]/20 rounded-lg p-3 bg-black/20">
+              <button
+                type="button"
+                onClick={() => setShowDosageBuilder(!showDosageBuilder)}
+                className="w-full flex items-center justify-between text-left mb-2"
+              >
+                <span className="text-xs font-mono uppercase tracking-wider text-[#00d4ff] font-semibold">
+                  ⚡ Advanced Dosage Phases
+                </span>
+                {showDosageBuilder ? (
+                  <ChevronUp className="w-4 h-4 text-[#00d4ff]" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-[#00d4ff]" />
+                )}
+              </button>
+              
+              {showDosageBuilder && (
+                <div className="mt-3">
+                  <p className="text-[10px] text-[#9a9aa3] mb-3 font-mono">
+                    Create multi-phase dosing (e.g., 2 weeks @ 250mcg → 4 weeks @ 500mcg → taper)
+                  </p>
+                  <AdvancedDosageBuilder
+                    peptideName={peptideName}
+                    onSave={(phases) => setDosagePhases(phases)}
+                    initialPhases={dosagePhases}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label htmlFor="cycle-notes" className="block font-mono text-xs font-medium text-[#00ffaa] mb-1">Notes (optional)</label>
