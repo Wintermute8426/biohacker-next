@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, X, Syringe, Trash2 } from "lucide-react";
+import { Plus, X, Syringe, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import PeptideAutocomplete from "./PeptideAutocomplete";
+import { AdvancedDosageBuilder } from "./AdvancedDosageBuilder";
 
 export type ProtocolCategory = "injury_recovery" | "surgical" | "aesthetic" | "cognitive" | "longevity";
 
@@ -42,6 +43,10 @@ export default function ProtocolCreationForm({ onSuccess, onCancel }: {
   const [outcomesTimeline, setOutcomesTimeline] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Advanced dosage builder state
+  const [dosagePhases, setDosagePhases] = useState<any[]>([]);
+  const [showDosageBuilder, setShowDosageBuilder] = useState(false);
 
   const addPeptide = () => {
     setPeptides([...peptides, { name: "", dose: "", timing: "", route: "SubQ", priority: "Core" }]);
@@ -115,20 +120,25 @@ export default function ProtocolCreationForm({ onSuccess, onCancel }: {
     // Get user's display name from email
     const displayName = user.email ? user.email.split('@')[0] : 'Anonymous';
 
-    const { error: dbError } = await supabase.from("protocols").insert({
-      name: name.trim(),
-      duration: duration.trim(),
-      difficulty,
-      category,
-      peptides: validPeptides,
-      expected_outcomes: validOutcomes,
-      cost_estimate: costEstimate.trim() || null,
-      important_notes: importantNotes.trim() || null,
-      outcomes_timeline: outcomesTimeline.trim() || null,
-      is_official_template: false,
-      created_by: user.id,
-      creator_display_name: displayName,
-    });
+    // Insert protocol
+    const { data: protocol, error: dbError } = await supabase
+      .from("protocols")
+      .insert({
+        name: name.trim(),
+        duration: duration.trim(),
+        difficulty,
+        category,
+        peptides: validPeptides,
+        expected_outcomes: validOutcomes,
+        cost_estimate: costEstimate.trim() || null,
+        important_notes: importantNotes.trim() || null,
+        outcomes_timeline: outcomesTimeline.trim() || null,
+        is_official_template: false,
+        created_by: user.id,
+        creator_display_name: displayName,
+      })
+      .select()
+      .single();
 
     if (dbError) {
       setError(`Failed to create protocol: ${dbError.message}`);
@@ -136,7 +146,32 @@ export default function ProtocolCreationForm({ onSuccess, onCancel }: {
       return;
     }
 
+    // If dosage phases exist, save them
+    if (dosagePhases.length > 0 && protocol) {
+      const phasesWithProtocolId = dosagePhases.map((phase, idx) => ({
+        protocol_id: protocol.id,
+        peptide_name: peptides[0].name, // Use first peptide
+        phase_order: idx + 1,
+        duration: phase.duration,
+        duration_unit: phase.durationUnit,
+        dosage: phase.dosage,
+        dosage_unit: phase.dosageUnit,
+        frequency: phase.frequency,
+        notes: phase.notes || null,
+      }));
+
+      const { error: phasesError } = await supabase
+        .from('dosage_phases')
+        .insert(phasesWithProtocolId);
+
+      if (phasesError) {
+        console.error('Failed to save dosage phases:', phasesError);
+        // Don't fail the whole operation if phases fail
+      }
+    }
+
     // Success
+    setLoading(false);
     onSuccess();
   };
 
@@ -334,6 +369,42 @@ export default function ProtocolCreationForm({ onSuccess, onCancel }: {
               </div>
             ))}
           </div>
+
+          {/* Advanced Dosage Builder */}
+          {peptides[0]?.name && (
+            <div className="border border-[#00ffaa]/20 rounded-lg p-4 bg-black/20">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDosageBuilder(!showDosageBuilder);
+                }}
+                className="w-full flex items-center justify-between text-left mb-4"
+              >
+                <span className="text-sm font-mono uppercase tracking-wider text-[#00d4ff] font-semibold">
+                  ⚡ Advanced Dosage Scheduling (Optional)
+                </span>
+                {showDosageBuilder ? (
+                  <ChevronUp className="w-5 h-5 text-[#00d4ff]" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-[#00d4ff]" />
+                )}
+              </button>
+              
+              {showDosageBuilder && (
+                <div className="mt-4">
+                  <p className="text-xs text-[#9a9aa3] mb-4 font-mono">
+                    Create multi-phase dosing schedules (e.g., 2 weeks @ 250mcg, then 4 weeks @ 500mcg, then taper)
+                  </p>
+                  <AdvancedDosageBuilder
+                    peptideName={peptides[0].name}
+                    onSave={(phases) => setDosagePhases(phases)}
+                    initialPhases={dosagePhases}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Expected Outcomes */}
           <div className="space-y-4">
