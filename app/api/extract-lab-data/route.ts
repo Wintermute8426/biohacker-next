@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const message = await anthropic.messages.create({
       model: 'claude-3-opus-20240229',
       max_tokens: 4096,
-      betas: ['pdfs-2024-09-25'],
+
       messages: [
         {
           role: 'user',
