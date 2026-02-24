@@ -29,12 +29,27 @@ export async function POST(request: NextRequest) {
     
     console.log('Processing PDF, size:', buffer.length);
 
-    // Dynamic import of pdf-parse
-    const pdfParse = (await import('pdf-parse')) as any;
-
-    // Extract text from PDF
-    const pdfData = await pdfParse(buffer);
-    const extractedText = pdfData.text;
+    // Dynamic import of pdf2json
+    const PDFParser = (await import('pdf2json')).default;
+    
+    // Parse PDF
+    const pdfParser = new PDFParser();
+    
+    const extractedText = await new Promise<string>((resolve, reject) => {
+      pdfParser.on('pdfParser_dataError', (errData: any) => reject(errData.parserError));
+      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+        // Extract text from parsed PDF
+        let text = '';
+        pdfData.Pages?.forEach((page: any) => {
+          page.Texts?.forEach((textItem: any) => {
+            text += decodeURIComponent(textItem.R[0].T) + ' ';
+          });
+        });
+        resolve(text);
+      });
+      
+      pdfParser.parseBuffer(buffer);
+    });
     
     console.log('PDF text extracted, length:', extractedText.length);
 
