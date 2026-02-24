@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity, Trash2, Eye, Download, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -54,8 +54,7 @@ export function BloodworkAI() {
     return 'general';
   };
 
-  // Load reports on mount
-  const loadReports = async () => {
+  const fetchLabReports = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -76,6 +75,10 @@ export function BloodworkAI() {
       })));
     }
   };
+
+  useEffect(() => {
+    fetchLabReports();
+  }, []);
 
   // Handle PDF upload
   const handleFileUpload = async (file: File) => {
@@ -188,7 +191,7 @@ export function BloodworkAI() {
       }
 
       // Reload reports
-      await loadReports();
+      await fetchLabReports();
       setShowReviewModal(false);
       setExtractedData(null);
     } catch (err: any) {
