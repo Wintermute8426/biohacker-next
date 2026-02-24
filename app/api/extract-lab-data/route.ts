@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
 export const runtime = 'nodejs';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,31 +30,53 @@ export async function POST(request: NextRequest) {
 
     // Read PDF as buffer
     const buffer = Buffer.from(await file.arrayBuffer());
-    const base64Pdf = buffer.toString('base64');
-
+    
     console.log('Processing PDF, size:', buffer.length);
 
-    // Extract data with Claude - PDF support requires beta header
-    // @ts-ignore - SDK types don't include betas or document type yet
+    // Load PDF document
+    const loadingTask = pdfjsLib.getDocument({ data: buffer });
+    const pdfDoc = await loadingTask.promise;
+    
+    console.log('PDF loaded, pages:', pdfDoc.numPages);
+
+    // Convert first page to image (most lab reports are 1-2 pages)
+    const page = await pdfDoc.getPage(1);
+    const viewport = page.getViewport({ scale: 2.0 });
+    
+    // Create canvas
+    const { createCanvas } = await import('canvas');
+    const canvas = createCanvas(viewport.width, viewport.height);
+    const context = canvas.getContext('2d');
+
+    await page.render({
+      canvasContext: context as any,
+      viewport: viewport,
+    }).promise;
+
+    // Convert canvas to base64 PNG
+    const imageBase64 = canvas.toBuffer('image/png').toString('base64');
+    
+    console.log('PDF converted to image');
+
+    // Extract data with Claude using image
     const message = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 4096,
-
       messages: [
         {
           role: 'user',
           content: [
             {
-              type: 'document',
+              type: 'image',
               source: {
                 type: 'base64',
-                media_type: 'application/pdf',
-                data: base64Pdf,
+                media_type: 'image/png',
+                data: imageBase64,
               },
             },
             {
               type: 'text',
-              text: `Extract ALL lab test markers from this medical lab report PDF. For each marker, extract:
+              text: `Extract ALL lab test markers from this medical lab report image. For each marker, extract:
 - marker_name: The test name (e.g., "Testosterone", "Glucose", "Cholesterol")
 - value: The numeric value
 - unit: The unit of measurement (e.g., "ng/dL", "mg/dL", "pg/mL")
@@ -86,7 +112,7 @@ Extract ALL markers you can find in the document.`,
           ],
         },
       ],
-    } as any);
+    });
 
     console.log('Claude response received');
 
