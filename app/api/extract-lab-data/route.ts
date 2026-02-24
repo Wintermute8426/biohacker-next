@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Extract data with Claude
     const message = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
+      model: 'claude-3-opus-20240229',
       max_tokens: 4096,
       messages: [
         {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
               type: 'image',
               source: {
                 type: 'base64',
-                media_type: 'application/pdf',
+                type: 'document',
                 data: base64Pdf,
               },
             },
