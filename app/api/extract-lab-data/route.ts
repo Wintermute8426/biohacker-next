@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-// Force Node.js runtime for full env var access
 export const runtime = 'nodejs';
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
 
 export async function POST(request: NextRequest) {
   try {
-    // Check API key
-    if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('ANTHROPIC_API_KEY is not set');
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    
+    if (!apiKey) {
+      console.error('ANTHROPIC_API_KEY not found in environment');
       return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY is not configured' },
+        { error: 'API key not configured' },
         { status: 500 }
       );
     }
+
+    const anthropic = new Anthropic({ apiKey });
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -29,6 +27,8 @@ export async function POST(request: NextRequest) {
     // Read PDF as buffer
     const buffer = Buffer.from(await file.arrayBuffer());
     const base64Pdf = buffer.toString('base64');
+
+    console.log('Processing PDF, size:', buffer.length);
 
     // Extract data with Claude
     const message = await anthropic.messages.create({
@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
                 media_type: 'application/pdf',
                 data: base64Pdf,
               },
-              cache_control: { type: 'ephemeral' }
             },
             {
               type: 'text',
@@ -80,23 +79,27 @@ Return ONLY valid JSON in this exact format:
 
 Set is_flagged to true if the value is outside the reference range.
 If you can't determine a field, use null.
-Extract ALL markers you can find in the document.`
-            }
-          ]
-        }
-      ]
+Extract ALL markers you can find in the document.`,
+            },
+          ],
+        },
+      ],
     });
+
+    console.log('Claude response received');
 
     // Parse Claude's response
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     
-    // Extract JSON from response (Claude sometimes wraps it in markdown)
+    // Extract JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('Could not find JSON in response:', responseText);
       throw new Error('Could not parse JSON from Claude response');
     }
 
     const extractedData = JSON.parse(jsonMatch[0]);
+    console.log('Successfully extracted data, markers:', extractedData.markers?.length || 0);
 
     return NextResponse.json(extractedData);
   } catch (error: any) {
