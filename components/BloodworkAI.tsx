@@ -38,6 +38,22 @@ export function BloodworkAI() {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizeCategory = (category: string | null): string => {
+    if (!category) return 'general';
+    const normalized = category.toLowerCase().trim();
+    const validCategories = ['hormone', 'metabolic', 'cardiovascular', 'inflammatory', 'liver', 'kidney', 'thyroid', 'vitamin', 'general'];
+    if (validCategories.includes(normalized)) return normalized;
+    if (normalized.includes('hormone') || normalized.includes('endocrine')) return 'hormone';
+    if (normalized.includes('metabol')) return 'metabolic';
+    if (normalized.includes('cardio') || normalized.includes('heart')) return 'cardiovascular';
+    if (normalized.includes('inflam')) return 'inflammatory';
+    if (normalized.includes('hepat') || normalized.includes('liver')) return 'liver';
+    if (normalized.includes('renal') || normalized.includes('kidney')) return 'kidney';
+    if (normalized.includes('thyroid')) return 'thyroid';
+    if (normalized.includes('vitamin') || normalized.includes('nutrient')) return 'vitamin';
+    return 'general';
+  };
+
   // Load reports on mount
   const loadReports = async () => {
     const supabase = createClient();
@@ -141,6 +157,7 @@ export function BloodworkAI() {
       const markers = extractedData.markers.map(m => ({
         report_id: report.id,
         ...m,
+        category: normalizeCategory(m.category ?? null),
       }));
 
       const { error: markersError } = await supabase
@@ -327,7 +344,7 @@ export function BloodworkAI() {
 
       {/* Review Modal */}
       {showReviewModal && extractedData && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-card border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold">Review Extracted Data</h3>
@@ -350,7 +367,7 @@ export function BloodworkAI() {
                     type="date"
                     value={extractedData.test_date}
                     onChange={(e) => setExtractedData({ ...extractedData, test_date: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-gray-100"
                   />
                 </div>
                 <div>
@@ -359,7 +376,7 @@ export function BloodworkAI() {
                     type="text"
                     value={extractedData.lab_name || ''}
                     onChange={(e) => setExtractedData({ ...extractedData, lab_name: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 border rounded-lg text-gray-100"
                     placeholder="e.g., Quest Diagnostics"
                   />
                 </div>
@@ -367,31 +384,20 @@ export function BloodworkAI() {
 
               <div>
                 <h4 className="font-semibold mb-3">Extracted Markers ({extractedData.markers.length})</h4>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="grid grid-cols-4 gap-2 max-h-96 overflow-y-auto">
                   {extractedData.markers.map((marker, idx) => (
-                    <div key={idx} className="border rounded-lg p-3 bg-muted/50">
-                      <div className="grid grid-cols-4 gap-2 text-sm">
-                        <div>
-                          <span className="text-xs text-muted-foreground">Marker</span>
-                          <p className="font-medium">{marker.marker_name}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground">Value</span>
-                          <p className="font-medium">{marker.value} {marker.unit}</p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground">Reference</span>
-                          <p className="text-xs">
-                            {marker.reference_min}-{marker.reference_max} {marker.unit}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-xs text-muted-foreground">Status</span>
-                          <p className={`text-xs font-medium ${getStatusColor(marker.is_flagged)}`}>
-                            {marker.is_flagged ? "Flagged" : "Normal"}
-                          </p>
-                        </div>
-                      </div>
+                    <div key={idx} className="border rounded-lg p-2 bg-muted/50 text-sm">
+                      <span className="text-xs text-muted-foreground block">Marker</span>
+                      <p className="font-medium truncate" title={marker.marker_name}>{marker.marker_name}</p>
+                      <span className="text-xs text-muted-foreground block mt-1">Value</span>
+                      <p className="font-medium">{marker.value} {marker.unit}</p>
+                      <span className="text-xs text-muted-foreground block mt-1">Ref</span>
+                      <p className="text-xs">
+                        {marker.reference_min}-{marker.reference_max} {marker.unit}
+                      </p>
+                      <p className={`text-xs font-medium mt-1 ${getStatusColor(marker.is_flagged)}`}>
+                        {marker.is_flagged ? "Flagged" : "Normal"}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -409,7 +415,7 @@ export function BloodworkAI() {
                 </button>
                 <button
                   onClick={saveLabReport}
-                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                  className="flex-1 px-4 py-2 bg-green-500 text-black font-bold rounded-lg hover:bg-green-600"
                 >
                   Save Lab Report
                 </button>
