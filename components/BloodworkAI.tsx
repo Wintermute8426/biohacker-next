@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity, Trash2, Eye, Download } from "lucide-react";
+import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity, Trash2, Eye, Download, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 interface LabReport {
