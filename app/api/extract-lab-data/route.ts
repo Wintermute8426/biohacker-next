@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
     console.log('Processing PDF, size:', buffer.length);
 
     // Extract data with Claude
+    // @ts-ignore - SDK doesn't have document type in TypeScript yet, but API supports it
     const message = await anthropic.messages.create({
       model: 'claude-3-opus-20240229',
       max_tokens: 4096,
@@ -39,10 +40,10 @@ export async function POST(request: NextRequest) {
           role: 'user',
           content: [
             {
-              type: 'image',
+              type: 'document',
               source: {
                 type: 'base64',
-                type: 'document',
+                media_type: 'application/pdf',
                 data: base64Pdf,
               },
             },
@@ -81,7 +82,7 @@ Set is_flagged to true if the value is outside the reference range.
 If you can't determine a field, use null.
 Extract ALL markers you can find in the document.`,
             },
-          ],
+          ] as any, // Type assertion to bypass TypeScript check
         },
       ],
     });
