@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import pdfParse from 'pdf-parse';
 
 export const runtime = 'nodejs';
 
@@ -29,6 +28,9 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     
     console.log('Processing PDF, size:', buffer.length);
+
+    // Dynamic import of pdf-parse
+    const pdfParse = (await import('pdf-parse')).default;
 
     // Extract text from PDF
     const pdfData = await pdfParse(buffer);
