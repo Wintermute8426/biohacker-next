@@ -31,7 +31,7 @@ interface ExtractedData {
 
 export function BloodworkAI() {
   const [labReports, setLabReports] = useState<LabReport[]>([]);
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<LabReport | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
@@ -288,8 +288,8 @@ export function BloodworkAI() {
             {labReports.map((report) => (
               <div
                 key={report.id}
-                className="border rounded-lg p-4 hover:bg-accent cursor-pointer"
-                onClick={() => setSelectedReport(report.id)}
+                className="border rounded-lg p-4 cursor-pointer hover:border-green-400/50 transition-colors"
+                onClick={() => setSelectedReport(report)}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -339,6 +339,67 @@ export function BloodworkAI() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Report Modal */}
+      {selectedReport && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-card border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">
+                Lab Report — {new Date(selectedReport.test_date).toLocaleDateString()}
+                {selectedReport.lab_name && ` · ${selectedReport.lab_name}`}
+              </h3>
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="p-2 hover:bg-accent rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <h4 className="font-semibold mb-3">All Markers ({selectedReport.markers.length})</h4>
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+              {selectedReport.markers.map((marker, idx) => (
+                <div key={idx} className="border rounded-lg p-3 bg-muted/50 text-sm">
+                  <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center flex-wrap">
+                    <div>
+                      <span className="text-xs text-muted-foreground block">Marker</span>
+                      <p className="font-medium">{marker.marker_name}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">Value</span>
+                      <p className="font-medium">{marker.value} {marker.unit || ''}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">Reference</span>
+                      <p className="text-xs">
+                        {marker.reference_min != null && marker.reference_max != null
+                          ? `${marker.reference_min}–${marker.reference_max} ${marker.unit || ''}`
+                          : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">Status</span>
+                      <p className={`text-xs font-medium ${getStatusColor(marker.is_flagged)}`}>
+                        {marker.is_flagged ? "Flagged" : "Normal"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="px-4 py-2 border rounded-lg hover:bg-accent"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
