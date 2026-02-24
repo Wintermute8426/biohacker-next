@@ -158,6 +158,7 @@ export function BloodworkAI() {
         report_id: report.id,
         ...m,
         category: normalizeCategory(m.category ?? null),
+        unit: m.unit || '',
       }));
 
       const { error: markersError } = await supabase
