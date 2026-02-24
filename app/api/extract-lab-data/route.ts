@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     console.log('Processing PDF, size:', buffer.length);
 
     // Dynamic import of pdf-parse
-    const pdfParse = (await import('pdf-parse')).default;
+    const pdfParse = await import('pdf-parse');
 
     // Extract text from PDF
     const pdfData = await pdfParse(buffer);
