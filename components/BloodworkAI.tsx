@@ -1,137 +1,206 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity } from "lucide-react";
-
-interface LabMarker {
-  name: string;
-  value: number;
-  unit: string;
-  referenceRange: { min: number; max: number };
-  category: "hormone" | "metabolic" | "cardiovascular" | "inflammatory" | "general";
-  date: string;
-}
+import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity, Trash2, Eye, Download } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 interface LabReport {
   id: string;
-  date: string;
+  test_date: string;
+  lab_name?: string;
+  file_url?: string;
   markers: LabMarker[];
   notes?: string;
-  activeCycles?: string[]; // Peptides active during this test
 }
 
-interface BloodworkAnalysis {
-  marker: string;
-  trend: "improving" | "declining" | "stable";
-  changePercent: number;
-  correlatedPeptides: string[];
-  interpretation: string;
-  recommendation: string;
+interface LabMarker {
+  marker_name: string;
+  value: number;
+  unit: string;
+  reference_min?: number;
+  reference_max?: number;
+  category: string;
+  is_flagged: boolean;
+}
+
+interface ExtractedData {
+  markers: LabMarker[];
+  test_date: string;
+  lab_name?: string;
 }
 
 export function BloodworkAI() {
   const [labReports, setLabReports] = useState<LabReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<BloodworkAnalysis[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Common lab markers with reference ranges
-  const commonMarkers = {
-    testosterone: { name: "Testosterone", unit: "ng/dL", range: { min: 300, max: 1000 }, category: "hormone" as const },
-    estradiol: { name: "Estradiol", unit: "pg/mL", range: { min: 10, max: 40 }, category: "hormone" as const },
-    igf1: { name: "IGF-1", unit: "ng/mL", range: { min: 115, max: 307 }, category: "hormone" as const },
-    ghk: { name: "GHK", unit: "ng/mL", range: { min: 50, max: 200 }, category: "hormone" as const },
-    glucose: { name: "Glucose", unit: "mg/dL", range: { min: 70, max: 100 }, category: "metabolic" as const },
-    hba1c: { name: "HbA1c", unit: "%", range: { min: 4, max: 5.6 }, category: "metabolic" as const },
-    cholesterol: { name: "Total Cholesterol", unit: "mg/dL", range: { min: 125, max: 200 }, category: "cardiovascular" as const },
-    hdl: { name: "HDL", unit: "mg/dL", range: { min: 40, max: 60 }, category: "cardiovascular" as const },
-    ldl: { name: "LDL", unit: "mg/dL", range: { min: 0, max: 100 }, category: "cardiovascular" as const },
-    crp: { name: "C-Reactive Protein", unit: "mg/L", range: { min: 0, max: 3 }, category: "inflammatory" as const },
-    il6: { name: "IL-6", unit: "pg/mL", range: { min: 0, max: 5 }, category: "inflammatory" as const },
+  // Load reports on mount
+  const loadReports = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: reports } = await supabase
+      .from('lab_reports')
+      .select(`
+        *,
+        lab_markers (*)
+      `)
+      .eq('user_id', user.id)
+      .order('test_date', { ascending: false });
+
+    if (reports) {
+      setLabReports(reports.map(r => ({
+        ...r,
+        markers: r.lab_markers || []
+      })));
+    }
   };
 
-  const [newMarkers, setNewMarkers] = useState<Partial<LabMarker>[]>([
-    { name: "Testosterone", unit: "ng/dL", category: "hormone" },
-  ]);
+  // Handle PDF upload
+  const handleFileUpload = async (file: File) => {
+    if (!file.type.includes('pdf')) {
+      setError('Please upload a PDF file');
+      return;
+    }
 
-  const addLabReport = () => {
-    const report: LabReport = {
-      id: crypto.randomUUID(),
-      date: new Date().toISOString().split("T")[0],
-      markers: newMarkers.filter((m) => m.value) as LabMarker[],
-      activeCycles: [], // TODO: Pull from active cycles
-    };
+    setIsUploading(true);
+    setError(null);
 
-    setLabReports([report, ...labReports]);
-    setNewMarkers([{ name: "Testosterone", unit: "ng/dL", category: "hormone" }]);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Upload PDF to Supabase Storage
+      const filename = `${user.id}/${Date.now()}-${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from('lab-reports')
+        .upload(filename, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('lab-reports')
+        .getPublicUrl(filename);
+
+      // Send to API for extraction
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/extract-lab-data', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Failed to extract data');
+
+      const extracted: ExtractedData = await response.json();
+      
+      // Store file URL with extracted data
+      setExtractedData({ ...extracted, file_url: publicUrl } as any);
+      setShowReviewModal(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to process PDF');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const analyzeResults = async () => {
-    if (labReports.length < 2) return;
+  // Save reviewed data
+  const saveLabReport = async () => {
+    if (!extractedData) return;
+
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Insert lab report
+      const { data: report, error: reportError } = await supabase
+        .from('lab_reports')
+        .insert({
+          user_id: user.id,
+          test_date: extractedData.test_date,
+          lab_name: extractedData.lab_name || null,
+          file_url: (extractedData as any).file_url || null,
+        })
+        .select()
+        .single();
+
+      if (reportError) throw reportError;
+
+      // Insert markers
+      const markers = extractedData.markers.map(m => ({
+        report_id: report.id,
+        ...m,
+      }));
+
+      const { error: markersError } = await supabase
+        .from('lab_markers')
+        .insert(markers);
+
+      if (markersError) throw markersError;
+
+      // Snapshot active cycles
+      const { data: activeCycles } = await supabase
+        .from('cycles')
+        .select('id, peptide_name, dose_amount, frequency_type')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      if (activeCycles && activeCycles.length > 0) {
+        const snapshots = activeCycles.map(cycle => ({
+          report_id: report.id,
+          cycle_id: cycle.id,
+          peptide_name: cycle.peptide_name,
+          dosage: parseFloat(cycle.dose_amount) || 0,
+          dosage_unit: 'mg',
+          frequency: cycle.frequency_type,
+        }));
+
+        await supabase.from('lab_active_cycles').insert(snapshots);
+      }
+
+      // Reload reports
+      await loadReports();
+      setShowReviewModal(false);
+      setExtractedData(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save report');
+    }
+  };
+
+  // Analyze trends
+  const analyzeTrends = async () => {
+    if (labReports.length < 2) {
+      setError('Need at least 2 lab reports to analyze trends');
+      return;
+    }
 
     setIsAnalyzing(true);
+    setError(null);
 
-    // Simulate AI analysis (in production, call API)
-    setTimeout(() => {
-      const mockAnalysis: BloodworkAnalysis[] = [
-        {
-          marker: "Testosterone",
-          trend: "improving",
-          changePercent: 15,
-          correlatedPeptides: ["HCG", "Enclomiphene"],
-          interpretation:
-            "Testosterone levels increased by 15% since starting HCG protocol. Within optimal range.",
-          recommendation: "Continue current protocol. Consider maintenance phase after 12 weeks.",
-        },
-        {
-          marker: "IGF-1",
-          trend: "stable",
-          changePercent: 2,
-          correlatedPeptides: ["CJC-1295", "Ipamorelin"],
-          interpretation:
-            "IGF-1 levels remain stable and within healthy range. Growth hormone secretagogue protocol maintaining baseline.",
-          recommendation:
-            "Monitor for another 4 weeks. May need dosage adjustment if no increase.",
-        },
-      ];
-
-      setAnalysis(mockAnalysis);
+    try {
+      // TODO: Call AI analysis API
+      // For now, just show placeholder
+      setTimeout(() => {
+        setIsAnalyzing(false);
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message);
       setIsAnalyzing(false);
-    }, 2000);
-  };
-
-  const getMarkerStatus = (marker: LabMarker) => {
-    const { value, referenceRange } = marker;
-    if (value < referenceRange.min) return "low";
-    if (value > referenceRange.max) return "high";
-    return "normal";
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "low":
-        return "text-blue-500";
-      case "high":
-        return "text-red-500";
-      case "normal":
-        return "text-green-500";
-      default:
-        return "text-muted-foreground";
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case "improving":
-        return <TrendingUp className="w-4 h-4 text-green-500" />;
-      case "declining":
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      case "stable":
-        return <Activity className="w-4 h-4 text-blue-500" />;
-      default:
-        return null;
-    }
-  };
+  const getStatusColor = (isF: boolean) => isF ? "text-red-500" : "text-green-500";
 
   return (
     <div className="space-y-6">
@@ -140,11 +209,11 @@ export function BloodworkAI() {
         <div>
           <h2 className="text-2xl font-bold">BloodworkAI</h2>
           <p className="text-sm text-muted-foreground">
-            Analyze lab results and correlate with peptide cycles
+            Upload lab PDFs • AI extracts markers • Analyze trends
           </p>
         </div>
         <button
-          onClick={analyzeResults}
+          onClick={analyzeTrends}
           disabled={labReports.length < 2 || isAnalyzing}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
         >
@@ -153,96 +222,50 @@ export function BloodworkAI() {
         </button>
       </div>
 
-      {/* Upload Lab Results */}
-      <div className="border-2 border-dashed rounded-lg p-6">
-        <div className="flex items-center gap-4 mb-4">
-          <Upload className="w-8 h-8 text-muted-foreground" />
-          <div>
-            <h3 className="font-semibold">Add Lab Results</h3>
-            <p className="text-sm text-muted-foreground">
-              Enter bloodwork markers manually or upload lab report
-            </p>
-          </div>
+      {/* Error Display */}
+      {error && (
+        <div className="border border-red-500/50 bg-red-500/10 rounded-lg p-4">
+          <p className="text-red-400 font-mono text-sm">{error}</p>
         </div>
+      )}
 
-        {/* Marker Input */}
-        <div className="space-y-4">
-          {newMarkers.map((marker, idx) => (
-            <div key={idx} className="grid grid-cols-5 gap-3">
-              <select
-                value={marker.name}
-                onChange={(e) => {
-                  const selected = commonMarkers[e.target.value as keyof typeof commonMarkers];
-                  const updated = [...newMarkers];
-                  updated[idx] = {
-                    name: selected.name,
-                    unit: selected.unit,
-                    category: selected.category,
-                    referenceRange: selected.range,
-                    date: new Date().toISOString().split("T")[0],
-                  };
-                  setNewMarkers(updated);
-                }}
-                className="px-3 py-2 border rounded-lg col-span-2"
-              >
-                {Object.entries(commonMarkers).map(([key, m]) => (
-                  <option key={key} value={key}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="number"
-                placeholder="Value"
-                value={marker.value || ""}
-                onChange={(e) => {
-                  const updated = [...newMarkers];
-                  updated[idx].value = parseFloat(e.target.value);
-                  setNewMarkers(updated);
-                }}
-                className="px-3 py-2 border rounded-lg"
-              />
-
-              <input
-                type="text"
-                value={marker.unit}
-                disabled
-                className="px-3 py-2 border rounded-lg bg-muted"
-              />
-
-              <button
-                onClick={() => {
-                  if (idx === newMarkers.length - 1 && marker.value) {
-                    setNewMarkers([
-                      ...newMarkers,
-                      { name: "Testosterone", unit: "ng/dL", category: "hormone" },
-                    ]);
-                  } else {
-                    setNewMarkers(newMarkers.filter((_, i) => i !== idx));
-                  }
-                }}
-                className="px-3 py-2 border rounded-lg hover:bg-accent"
-              >
-                {idx === newMarkers.length - 1 && marker.value ? "+" : "−"}
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button
-          onClick={addLabReport}
-          disabled={newMarkers.filter((m) => m.value).length === 0}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
-        >
-          Save Lab Report
-        </button>
+      {/* PDF Upload */}
+      <div
+        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const file = e.dataTransfer.files[0];
+          if (file) handleFileUpload(file);
+        }}
+        onClick={() => document.getElementById('file-input')?.click()}
+      >
+        <input
+          id="file-input"
+          type="file"
+          accept=".pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFileUpload(file);
+          }}
+        />
+        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="font-semibold mb-2">
+          {isUploading ? "Processing..." : "Upload Lab Report PDF"}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Drag & drop or click to upload • AI will extract all markers automatically
+        </p>
       </div>
 
-      {/* Lab Reports History */}
+      {/* Lab Reports Archive */}
       {labReports.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Lab History</h3>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Lab History ({labReports.length} reports)
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {labReports.map((report) => (
               <div
@@ -253,25 +276,43 @@ export function BloodworkAI() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    <span className="font-medium">{new Date(report.date).toLocaleDateString()}</span>
+                    <span className="font-medium">
+                      {new Date(report.test_date).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {report.markers.length} markers
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {report.file_url && (
+                      <a
+                        href={report.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 hover:bg-accent rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                    )}
+                    <span className="text-sm text-muted-foreground">
+                      {report.markers.length} markers
+                    </span>
+                  </div>
                 </div>
 
+                {report.lab_name && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {report.lab_name}
+                  </p>
+                )}
+
                 <div className="space-y-2">
-                  {report.markers.slice(0, 3).map((marker) => {
-                    const status = getMarkerStatus(marker);
-                    return (
-                      <div key={marker.name} className="flex items-center justify-between text-sm">
-                        <span>{marker.name}</span>
-                        <span className={getStatusColor(status)}>
-                          {marker.value} {marker.unit}
-                        </span>
-                      </div>
-                    );
-                  })}
+                  {report.markers.slice(0, 3).map((marker) => (
+                    <div key={marker.marker_name} className="flex items-center justify-between text-sm">
+                      <span>{marker.marker_name}</span>
+                      <span className={getStatusColor(marker.is_flagged)}>
+                        {marker.value} {marker.unit}
+                      </span>
+                    </div>
+                  ))}
                   {report.markers.length > 3 && (
                     <p className="text-xs text-muted-foreground">
                       +{report.markers.length - 3} more markers
@@ -284,62 +325,105 @@ export function BloodworkAI() {
         </div>
       )}
 
-      {/* AI Analysis Results */}
-      {analysis.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Activity className="w-5 h-5" />
-            AI Analysis & Correlations
-          </h3>
-          <div className="space-y-4">
-            {analysis.map((item, idx) => (
-              <div key={idx} className="border rounded-lg p-4 bg-card">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-semibold">{item.marker}</h4>
-                    {getTrendIcon(item.trend)}
-                    <span
-                      className={`text-sm font-medium ${
-                        item.changePercent > 0 ? "text-green-500" : "text-red-500"
-                      }`}
-                    >
-                      {item.changePercent > 0 ? "+" : ""}
-                      {item.changePercent}%
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    {item.correlatedPeptides.map((peptide) => (
-                      <span
-                        key={peptide}
-                        className="px-2 py-1 text-xs bg-primary/10 text-primary rounded"
-                      >
-                        {peptide}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+      {/* Review Modal */}
+      {showReviewModal && extractedData && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Review Extracted Data</h3>
+              <button
+                onClick={() => {
+                  setShowReviewModal(false);
+                  setExtractedData(null);
+                }}
+                className="p-2 hover:bg-accent rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                    <p className="text-sm">{item.interpretation}</p>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-blue-500 mt-0.5" />
-                    <p className="text-sm text-muted-foreground">{item.recommendation}</p>
-                  </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Test Date</label>
+                  <input
+                    type="date"
+                    value={extractedData.test_date}
+                    onChange={(e) => setExtractedData({ ...extractedData, test_date: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Lab Name (optional)</label>
+                  <input
+                    type="text"
+                    value={extractedData.lab_name || ''}
+                    onChange={(e) => setExtractedData({ ...extractedData, lab_name: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="e.g., Quest Diagnostics"
+                  />
                 </div>
               </div>
-            ))}
+
+              <div>
+                <h4 className="font-semibold mb-3">Extracted Markers ({extractedData.markers.length})</h4>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {extractedData.markers.map((marker, idx) => (
+                    <div key={idx} className="border rounded-lg p-3 bg-muted/50">
+                      <div className="grid grid-cols-4 gap-2 text-sm">
+                        <div>
+                          <span className="text-xs text-muted-foreground">Marker</span>
+                          <p className="font-medium">{marker.marker_name}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Value</span>
+                          <p className="font-medium">{marker.value} {marker.unit}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Reference</span>
+                          <p className="text-xs">
+                            {marker.reference_min}-{marker.reference_max} {marker.unit}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Status</span>
+                          <p className={`text-xs font-medium ${getStatusColor(marker.is_flagged)}`}>
+                            {marker.is_flagged ? "Flagged" : "Normal"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setExtractedData(null);
+                  }}
+                  className="flex-1 px-4 py-2 border rounded-lg hover:bg-accent"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveLabReport}
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                >
+                  Save Lab Report
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Empty State */}
-      {labReports.length === 0 && (
+      {labReports.length === 0 && !isUploading && (
         <div className="text-center py-12 text-muted-foreground">
           <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No lab reports yet. Add your first bloodwork results above.</p>
+          <p>No lab reports yet. Upload your first PDF above!</p>
         </div>
       )}
     </div>
