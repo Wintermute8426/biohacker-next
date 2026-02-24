@@ -42,7 +42,12 @@ export async function POST(request: NextRequest) {
         let text = '';
         pdfData.Pages?.forEach((page: any) => {
           page.Texts?.forEach((textItem: any) => {
-            text += decodeURIComponent(textItem.R[0].T) + ' ';
+            try {
+              text += decodeURIComponent(textItem.R[0].T) + ' ';
+            } catch (e) {
+              // Skip malformed characters
+              text += textItem.R[0].T + ' ';
+            }
           });
         });
         resolve(text);
