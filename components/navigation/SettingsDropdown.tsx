@@ -44,7 +44,6 @@ export default function SettingsDropdown() {
   return
   (
     <div className="relative" ref={dropdownRef}>
-      {/* Settings Gear Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="p-2 border border-[#00ff41]/30 bg-[#1a1f2e] rounded hover:bg-[#00ff41]/10 hover:border-[#00ff41] transition-all"
@@ -52,21 +51,17 @@ export default function SettingsDropdown() {
         <Settings className="w-5 h-5 text-[#00ff41]" />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div className="absolute right-0 top-12 w-72 border border-[#00ff41]/30 bg-[#1a1f2e] rounded-lg shadow-[0_0_20px_rgba(0,255,65,0.2)] z-50">
-          {/* Corner brackets */}
           <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-[#00ff41]" />
           <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-[#00ff41]" />
           <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-[#00ff41]" />
           <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-[#00ff41]" />
 
-          {/* Hex ID */}
           <div className="absolute top-1 right-4 text-[#00ff41]/50 text-[10px] font-mono">
             [SET-0x7F]
           </div>
 
-          {/* Header */}
           <div className="p-4 border-b border-[#00ff41]/20">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[#00ff41] font-mono text-sm font-bold">SETTINGS</h3>
@@ -82,7 +77,6 @@ export default function SettingsDropdown() {
             </div>
           </div>
 
-          {/* Menu Items */}
           <div className="p-2">
             <button
               onClick={() => {
@@ -119,7 +113,6 @@ export default function SettingsDropdown() {
 
             <button
               onClick={() => {
-                // Future: payment settings page
                 setIsOpen(false);
               }}
               className="w-full flex items-center gap-3 p-3 text-left text-gray-500 cursor-not-allowed rounded font-mono text-sm"
@@ -140,14 +133,13 @@ export default function SettingsDropdown() {
             </button>
           </div>
 
-          {/* Status LED */}
-          <div cla
-ssName="p-3 border-t border-[#00ff41]/20 flex items-center justify-center gap-2">
-<div className="w-2 h-2 rounded-full bg-[#00ff41] animate-pulse shadow-[0_0_6px_rgba(0,255,65,0.8)]" />
-<span className="text-[#00ff41] text-[10px] font-mono">SYSTEM ONLINE</span>
-</div>
-</div>
-)}
-</div>
-);
+          <div className="p-3 border-t border-[#00ff41]/20 flex items-center justify-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[#00ff41] animate-pulse shadow-[0_0_6px_rgba(0,255,65,0.8)]" />
+            <span className="text-[#00ff41] text-[10px]
+font-mono">SYSTEM ONLINE</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
