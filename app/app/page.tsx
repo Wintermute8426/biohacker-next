@@ -2,13 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Activity, Calendar } from "lucide-react";
-import TodaysDosesWidget from "@/components/TodaysDosesWidget";
-import WeightTrackerWidget from "@/components/WeightTrackerWidget";
-import RecentActivityFeed from "@/components/RecentActivityFeed";
-import NextDoseReminder from "@/components/NextDoseReminder";
+import DoseTrackerWidget from "@/components/DoseTrackerWidget";
+import HealthTrackerWidget from "@/components/HealthTrackerWidget";
 import ActiveCycleProgress from "@/components/ActiveCycleProgress";
 import QuickActionsPanel from "@/components/QuickActionsPanel";
-import MiniHealthTrends from "@/components/MiniHealthTrends";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -38,8 +35,8 @@ export default async function DashboardPage() {
         <div className="relative z-10 space-y-6 p-4">
           {/* Stats Grid - Today's Doses First */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Today's Doses Widget - FIRST POSITION */}
-            <TodaysDosesWidget />
+            {/* Combined Dose Tracker (replaces TodaysDosesWidget + NextDoseReminder) */}
+            <DoseTrackerWidget />
 
             {/* Active Cycles Card */}
             <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "0ms"}}>
@@ -136,14 +133,11 @@ export default async function DashboardPage() {
               </Link>
             </div>
 
-            {/* Weight Tracker Widget */}
-            <WeightTrackerWidget />
+            {/* Combined Health Tracker (replaces WeightTrackerWidget + MiniHealthTrends) */}
+            <HealthTrackerWidget />
 
-            {/* New Widgets */}
-            <RecentActivityFeed />
-            <NextDoseReminder />
+            {/* Keep these existing widgets: */}
             <ActiveCycleProgress />
-            <MiniHealthTrends />
 
             {/* Quick Actions - spans 2 columns */}
             <QuickActionsPanel />

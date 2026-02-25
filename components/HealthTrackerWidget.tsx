@@ -2,22 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Scale, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { Scale, TrendingUp, TrendingDown, AlertCircle, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function WeightTrackerWidget() {
+export default function HealthTrackerWidget() {
   const [latestWeight, setLatestWeight] = useState<number | null>(null);
   const [latestBodyFat, setLatestBodyFat] = useState<number | null>(null);
   const [daysSinceUpdate, setDaysSinceUpdate] = useState<number>(0);
-  const [trend, setTrend] = useState<"up" | "down" | "stable">("stable");
+  const [weightTrend, setWeightTrend] = useState<"up" | "down" | "stable">("stable");
+  const [weightChange, setWeightChange] = useState<string>("0.0");
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    loadLatestWeight();
+    loadHealthData();
   }, []);
 
-  const loadLatestWeight = async () => {
+  const loadHealthData = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -40,9 +41,11 @@ export default function WeightTrackerWidget() {
 
       if (weights.length >= 2) {
         const change = weights[0].weight - weights[1].weight;
-        if (change > 0.5) setTrend("up");
-        else if (change < -0.5) setTrend("down");
-        else setTrend("stable");
+        setWeightChange(Math.abs(change).toFixed(1));
+        
+        if (change > 0.5) setWeightTrend("up");
+        else if (change < -0.5) setWeightTrend("down");
+        else setWeightTrend("stable");
       }
     }
 
@@ -50,9 +53,15 @@ export default function WeightTrackerWidget() {
   };
 
   const getTrendIcon = () => {
-    if (trend === "up") return <TrendingUp className="w-3 h-3 text-amber-500" />;
-    if (trend === "down") return <TrendingDown className="w-3 h-3 text-[#00ffaa]" />;
-    return null;
+    if (weightTrend === "up") return <TrendingUp className="w-4 h-4 text-amber-500" />;
+    if (weightTrend === "down") return <TrendingDown className="w-4 h-4 text-[#00ffaa]" />;
+    return <Activity className="w-4 h-4 text-[#9a9aa3]" />;
+  };
+
+  const getTrendText = () => {
+    if (weightTrend === "up") return `+${weightChange} lbs`;
+    if (weightTrend === "down") return `-${weightChange} lbs`;
+    return "Stable";
   };
 
   const showPrompt = daysSinceUpdate >= 3;
@@ -64,7 +73,7 @@ export default function WeightTrackerWidget() {
       </div>
 
       <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-        0xWT01
+        0xHLTH
       </span>
 
       <div className="flex items-center gap-2 mt-3">
@@ -72,7 +81,7 @@ export default function WeightTrackerWidget() {
       </div>
 
       <h3 className="text-xl font-bold tracking-tight text-[#f5f5f7] font-space-mono">
-        Weight Tracker
+        Health Tracker
       </h3>
 
       {showPrompt && (
@@ -95,7 +104,6 @@ export default function WeightTrackerWidget() {
                 {latestBodyFat}% BF
               </span>
             )}
-            {getTrendIcon()}
           </>
         ) : (
           <span className="rounded border border-[#9a9aa3]/30 bg-[#9a9aa3]/10 px-2 py-0.5 text-[10px] font-mono text-[#9a9aa3]">
@@ -104,12 +112,25 @@ export default function WeightTrackerWidget() {
         )}
       </div>
 
-      {/* Mini trend sparkline */}
+      {/* Weight Trend */}
       {latestWeight && (
-        <div className="mt-3 h-8 rounded bg-black/30 border border-[#00ffaa]/20 flex items-end justify-around p-1">
-          {[45, 52, 48, 60, 55, 65, 58].map((h, i) => (
-            <div key={i} className="w-1 bg-[#00ffaa]/60 rounded-t" style={{ height: `${h}%` }} />
-          ))}
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#9a9aa3]">
+              7-DAY TREND
+            </span>
+            <div className="flex items-center gap-1">
+              {getTrendIcon()}
+              <span className="text-xs font-mono font-bold text-[#e0e0e5]">{getTrendText()}</span>
+            </div>
+          </div>
+
+          {/* Mini sparkline */}
+          <div className="h-10 rounded bg-black/30 border border-[#00ffaa]/20 flex items-end justify-around p-1">
+            {[45, 52, 48, 60, 55, 65, 58].map((h, i) => (
+              <div key={i} className="w-1 bg-[#00ffaa]/60 rounded-t" style={{ height: `${h}%` }} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -121,10 +142,10 @@ export default function WeightTrackerWidget() {
           {latestWeight ? (
             <>
               <li>{daysSinceUpdate === 0 ? "Today" : `${daysSinceUpdate}d ago`}</li>
-              <li>Track trend weekly</li>
+              <li>Tracking weekly progress</li>
             </>
           ) : (
-            <li>No weight logs yet</li>
+            <li>No health data yet</li>
           )}
         </ul>
       </div>
