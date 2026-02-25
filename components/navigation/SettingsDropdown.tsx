@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Settings, User, CreditCard, LogOut, X } from "lucide-react";
+import { Settings, User, CreditCard, LogOut, X, BookOpen } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -95,6 +95,20 @@ export default function SettingsDropdown() {
             >
               <User className="w-4 h-4" />
               Profile Settings
+            </button>
+
+            <button
+              onClick={() => {
+                router.push("/app/settings/guide");
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-3 p-3 text-left text-gray-300 hover:bg-[#00ff41]/10 hover:text-[#00ff41] rounded transition-all font-mono text-sm border border-transparent hover:border-[#00ff41]/30"
+            >
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <div className="flex flex-col items-start min-w-0">
+                <span>Peptide Guide</span>
+                <span className="text-[10px] text-gray-500 font-mono">Learn peptide protocols, dosing, and safety</span>
+              </div>
             </button>
 
             <button
