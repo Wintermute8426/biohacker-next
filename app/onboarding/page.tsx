@@ -22,7 +22,6 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Check if onboarding already completed
     const { data: onboarding } = await supabase
       .from("user_onboarding")
       .select("*")
@@ -30,7 +29,6 @@ export default function OnboardingPage() {
       .single();
 
     if (onboarding) {
-      // Already completed, redirect to dashboard
       router.push("/app/dashboard");
     } else {
       setLoading(false);

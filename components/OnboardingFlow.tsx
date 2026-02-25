@@ -64,7 +64,6 @@ const PRIORITIES = [
   { id: "focus" as Priority, label: "Focus & Clarity", icon: Eye }
 ];
 
-// Protocol recommendations based on user input
 const PROTOCOL_DATABASE: ProtocolRecommendation[] = [
   {
     name: "Healing Stack",
@@ -156,7 +155,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
     const scored = PROTOCOL_DATABASE.map(protocol => {
       let score = 0;
 
-      // Match goals
       if (data.goals.includes("recovery") && protocol.name.includes("Healing")) score += 3;
       if (data.goals.includes("longevity") && protocol.name.includes("Longevity")) score += 3;
       if (data.goals.includes("performance") && protocol.name.includes("GH Secretagogue")) score += 3;
@@ -164,7 +162,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
       if (data.goals.includes("cognitive") && protocol.name.includes("Cognitive")) score += 3;
       if (data.goals.includes("immune") && protocol.name.includes("Immune")) score += 3;
 
-      // Match priorities
       if (data.priorities.includes("injury") && protocol.name.includes("Healing")) score += 2;
       if (data.priorities.includes("sleep") && protocol.name.includes("GH Secretagogue")) score += 2;
       if (data.priorities.includes("inflammation") && protocol.name.includes("Healing")) score += 2;
@@ -172,14 +169,12 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
       if (data.priorities.includes("focus") && protocol.name.includes("Cognitive")) score += 2;
       if (data.priorities.includes("energy") && protocol.name.includes("GH Secretagogue")) score += 1;
 
-      // Filter by experience level
       if (data.experience === "beginner" && protocol.difficulty !== "beginner") score -= 1;
       if (data.experience === "advanced" && protocol.difficulty === "beginner") score += 1;
 
       return { ...protocol, matchScore: score };
     });
 
-    // Sort by score and take top 3
     const top3 = scored
       .filter(p => p.matchScore > 0)
       .sort((a, b) => b.matchScore - a.matchScore)
@@ -190,7 +185,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
 
   const handleNext = () => {
     if (step === 2) {
-      // Calculate recommendations before showing them
       calculateRecommendations();
     }
     if (step < totalSteps - 1) {
@@ -214,7 +208,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
         throw new Error("Not authenticated");
       }
 
-      // Save onboarding data
       await supabase.from("user_onboarding").upsert({
         user_id: user.id,
         goals: data.goals,
@@ -223,7 +216,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
         completed_at: new Date().toISOString()
       });
 
-      // Call onComplete callback or redirect
       if (onComplete) {
         onComplete();
       } else {
@@ -448,7 +440,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
       <div className="scanline-layer-thick" aria-hidden />
 
       <div className="relative z-10 w-full max-w-3xl">
-        {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="font-mono text-xs text-[#00ffaa]">
@@ -466,12 +457,10 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
           </div>
         </div>
 
-        {/* Content */}
         <div className="deck-panel deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/30 p-6 mb-6">
           {renderStep()}
         </div>
 
-        {/* Navigation */}
         <div className="flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -503,7 +492,6 @@ export default function OnboardingFlow({ onComplete }: { onComplete?: () => void
           )}
         </div>
 
-        {/* Skip Option */}
         {step < totalSteps - 1 && (
           <div className="text-center mt-4">
             <button
