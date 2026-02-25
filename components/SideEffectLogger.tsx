@@ -2,332 +2,237 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { X } from "lucide-react";
+import { AlertTriangle, Check, X } from "lucide-react";
 
-export type Severity = "mild" | "moderate" | "severe";
-export type Appetite = "increased" | "decreased" | "";
-export type MoodChange = "none" | "positive" | "negative" | "irritable" | "euphoric" | "";
-export type InjectionSite = "abdomen" | "thigh" | "arm" | "glute" | "";
-
-export interface SideEffectLoggerProps {
+interface SideEffectLoggerProps {
   cycleId: string;
   peptideName: string;
   doseLogId?: string;
-  onComplete: () => void;
   onClose: () => void;
 }
 
-const INJECTION_SITES: { value: InjectionSite; label: string }[] = [
-  { value: "abdomen", label: "Abdomen" },
-  { value: "thigh", label: "Thigh" },
-  { value: "arm", label: "Arm" },
-  { value: "glute", label: "Glute" },
-];
-
-const MOOD_OPTIONS: { value: MoodChange; label: string }[] = [
-  { value: "none", label: "None" },
-  { value: "positive", label: "Positive" },
-  { value: "negative", label: "Negative" },
-  { value: "irritable", label: "Irritable" },
-  { value: "euphoric", label: "Euphoric" },
-];
-
-export default function SideEffectLogger({
-  cycleId,
-  peptideName,
-  doseLogId,
-  onComplete,
-  onClose,
-}: SideEffectLoggerProps) {
-  const [injectionSite, setInjectionSite] = useState<InjectionSite>("");
-  const [siteRedness, setSiteRedness] = useState(false);
-  const [siteSwelling, setSiteSwelling] = useState(false);
-  const [siteItching, setSiteItching] = useState(false);
-  const [siteBruising, setSiteBruising] = useState(false);
-  const [sitePainLevel, setSitePainLevel] = useState(0);
-  const [fatigueLevel, setFatigueLevel] = useState(0);
-  const [headacheLevel, setHeadacheLevel] = useState(0);
-  const [nausea, setNausea] = useState(false);
-  const [dizziness, setDizziness] = useState(false);
-  const [insomnia, setInsomnia] = useState(false);
-  const [waterRetention, setWaterRetention] = useState(false);
-  const [jointPain, setJointPain] = useState(false);
-  const [appetite, setAppetite] = useState<Appetite>("");
-  const [moodChanges, setMoodChanges] = useState<MoodChange>("");
-  const [severity, setSeverity] = useState<Severity | "">("");
+export default function SideEffectLogger({ cycleId, peptideName, doseLogId, onClose }: SideEffectLoggerProps) {
+  const [injectionSite, setInjectionSite] = useState<string>("");
+  const [siteReactions, setSiteReactions] = useState({
+    redness: false,
+    swelling: false,
+    pain: 0,
+    itching: false,
+    bruising: false
+  });
+  const [systemicEffects, setSystemicEffects] = useState({
+    fatigue: 0,
+    headache: 0,
+    nausea: false,
+    dizziness: false,
+    insomnia: false,
+    increasedAppetite: false,
+    decreasedAppetite: false,
+    moodChanges: "none",
+    waterRetention: false,
+    jointPain: false
+  });
+  const [severity, setSeverity] = useState<string>("mild");
   const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [logging, setLogging] = useState(false);
 
-  const hasSiteReaction =
-    siteRedness || siteSwelling || siteItching || siteBruising || sitePainLevel > 0;
-  const hasSystemic =
-    fatigueLevel > 0 ||
-    headacheLevel > 0 ||
-    nausea ||
-    dizziness ||
-    insomnia ||
-    waterRetention ||
-    jointPain ||
-    appetite !== "" ||
-    (moodChanges !== "" && moodChanges !== "none");
-  const hasAnySymptom = hasSiteReaction || hasSystemic;
-  const isValid = hasAnySymptom && severity !== "";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isValid) {
-      setError("Select at least one symptom and a severity.");
-      return;
-    }
-    setError(null);
-    setLoading(true);
-
+  const logSideEffect = async () => {
+    setLogging(true);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      setError("Not authenticated");
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
-    const row = {
+    const { error } = await supabase.from("side_effects").insert({
       user_id: user.id,
       cycle_id: cycleId,
-      peptide_name: peptideName,
       dose_log_id: doseLogId || null,
+      peptide_name: peptideName,
       injection_site: injectionSite || null,
-      site_redness: siteRedness,
-      site_swelling: siteSwelling,
-      site_itching: siteItching,
-      site_bruising: siteBruising,
-      site_pain_level: sitePainLevel,
-      fatigue_level: fatigueLevel,
-      headache_level: headacheLevel,
-      nausea,
-      dizziness,
-      insomnia,
-      water_retention: waterRetention,
-      joint_pain: jointPain,
-      appetite: appetite || null,
-      mood_changes: moodChanges || null,
-      severity: severity as Severity,
-      notes: notes.trim() || null,
-    };
+      site_redness: siteReactions.redness,
+      site_swelling: siteReactions.swelling,
+      site_pain_level: siteReactions.pain > 0 ? siteReactions.pain : null,
+      site_itching: siteReactions.itching,
+      site_bruising: siteReactions.bruising,
+      fatigue_level: systemicEffects.fatigue > 0 ? systemicEffects.fatigue : null,
+      headache_level: systemicEffects.headache > 0 ? systemicEffects.headache : null,
+      nausea: systemicEffects.nausea,
+      dizziness: systemicEffects.dizziness,
+      insomnia: systemicEffects.insomnia,
+      increased_appetite: systemicEffects.increasedAppetite,
+      decreased_appetite: systemicEffects.decreasedAppetite,
+      mood_changes: systemicEffects.moodChanges !== "none" ? systemicEffects.moodChanges : null,
+      water_retention: systemicEffects.waterRetention,
+      joint_pain: systemicEffects.jointPain,
+      severity: severity,
+      notes: notes || null
+    });
 
-    const { error: insertError } = await supabase.from("side_effects").insert(row);
-
-    if (insertError) {
-      setError(insertError.message);
-      setLoading(false);
-      return;
+    if (!error) {
+      onClose();
     }
-
-    onComplete();
-    onClose();
-    setLoading(false);
+    setLogging(false);
   };
 
-  const severityStyles = {
-    mild: "border-[#00ffaa]/50 bg-[#00ffaa]/10 text-[#00ffaa]",
-    moderate: "border-amber-500/50 bg-amber-500/10 text-amber-500",
-    severe: "border-red-500/50 bg-red-500/10 text-red-500",
-  };
+  const hasSiteReactions = siteReactions.redness || siteReactions.swelling || siteReactions.pain > 0 || siteReactions.itching || siteReactions.bruising;
+  const hasSystemicEffects = systemicEffects.fatigue > 0 || systemicEffects.headache > 0 || systemicEffects.nausea || systemicEffects.dizziness || systemicEffects.insomnia;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="side-effect-logger-title"
-    >
-      <div
-        className="deck-card-bg deck-border-thick rounded-xl p-6 w-full max-w-lg my-8 animate-fade-in border-amber-500/30"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2
-            id="side-effect-logger-title"
-            className="text-xl font-bold text-amber-500 font-space-mono"
+    <div className="deck-card-bg deck-border-thick rounded-xl p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="font-mono text-sm font-bold text-[#f5f5f7]">Log Side Effect</h4>
+        <AlertTriangle className="w-4 h-4 text-amber-500" />
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs font-mono text-[#9a9aa3] uppercase">Injection Site (Optional)</label>
+          <select
+            value={injectionSite}
+            onChange={(e) => setInjectionSite(e.target.value)}
+            className="w-full bg-black/30 border border-[#00ffaa]/20 rounded px-3 py-2 text-sm font-mono text-[#e0e0e5] focus:border-[#00ffaa]/40 focus:outline-none mt-1"
           >
-            Log Side Effect
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded p-1 text-[#9a9aa3] hover:bg-amber-500/20 hover:text-amber-500 transition-colors"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+            <option value="">Select site...</option>
+            <option value="abdomen">Abdomen</option>
+            <option value="thigh">Thigh</option>
+            <option value="arm">Arm</option>
+            <option value="glute">Glute</option>
+          </select>
         </div>
 
-        <p className="text-xs font-mono text-[#9a9aa3] mb-4">
-          Peptide: <span className="text-amber-500 font-medium">{peptideName}</span>
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Injection site */}
-          <div>
-            <label className="block text-amber-500/90 font-mono text-xs mb-2 uppercase tracking-wider">
-              Injection site
-            </label>
-            <select
-              value={injectionSite}
-              onChange={(e) => setInjectionSite(e.target.value as InjectionSite)}
-              className="w-full bg-black/50 border border-amber-500/40 rounded-lg px-4 py-2.5 text-[#f5f5f7] font-mono focus:outline-none focus:border-amber-500"
-            >
-              <option value="">Select...</option>
-              {INJECTION_SITES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Site reactions */}
-          <div>
-            <span className="block text-amber-500/90 font-mono text-xs mb-2 uppercase tracking-wider">
-              Site reactions
-            </span>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { key: "redness", label: "Redness", value: siteRedness, set: setSiteRedness },
-                { key: "swelling", label: "Swelling", value: siteSwelling, set: setSiteSwelling },
-                { key: "itching", label: "Itching", value: siteItching, set: setSiteItching },
-                { key: "bruising", label: "Bruising", value: siteBruising, set: setSiteBruising },
-              ].map(({ key, label, value, set }) => (
-                <label key={key} className="flex items-center gap-2 font-mono text-sm text-[#e0e0e5] cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={value}
-                    onChange={(e) => set(e.target.checked)}
-                    className="rounded border-amber-500/50 bg-black/50 text-amber-500 focus:ring-amber-500"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-            <div className="mt-2">
-              <span className="text-[10px] font-mono text-[#9a9aa3]">Site pain: </span>
-              <span className="font-mono text-amber-500 font-bold">{sitePainLevel}/10</span>
-              <input
-                type="range"
-                min={0}
-                max={10}
-                value={sitePainLevel}
-                onChange={(e) => setSitePainLevel(parseInt(e.target.value, 10))}
-                className="ml-2 w-24 h-2 accent-amber-500"
-              />
-            </div>
-          </div>
-
-          {/* Systemic effects */}
-          <div>
-            <span className="block text-amber-500/90 font-mono text-xs mb-2 uppercase tracking-wider">
-              Systemic effects
-            </span>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-mono text-[#9a9aa3]">Fatigue</span>
-                <span className="font-mono text-amber-500 font-bold">{fatigueLevel}/10</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={10}
-                value={fatigueLevel}
-                onChange={(e) => setFatigueLevel(parseInt(e.target.value, 10))}
-                className="w-full h-2 accent-amber-500"
-              />
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-xs font-mono text-[#9a9aa3]">Headache</span>
-                <span className="font-mono text-amber-500 font-bold">{headacheLevel}/10</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={10}
-                value={headacheLevel}
-                onChange={(e) => setHeadacheLevel(parseInt(e.target.value, 10))}
-                className="w-full h-2 accent-amber-500"
-              />
-            </div>
-            <div className="flex flex-wrap gap-3 mt-3">
-              {[
-                { key: "nausea", label: "Nausea", value: nausea, set: setNausea },
-                { key: "dizziness", label: "Dizziness", value: dizziness, set: setDizziness },
-                { key: "insomnia", label: "Insomnia", value: insomnia, set: setInsomnia },
-                {
-                  key: "water",
-                  label: "Water retention",
-                  value: waterRetention,
-                  set: setWaterRetention,
-                },
-                { key: "joint", label: "Joint pain", value: jointPain, set: setJointPain },
-              ].map(({ key, label, value, set }) => (
-                <label key={key} className="flex items-center gap-2 font-mono text-sm text-[#e0e0e5] cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={value}
-                    onChange={(e) => set(e.target.checked)}
-                    className="rounded border-amber-500/50 bg-black/50 text-amber-500 focus:ring-amber-500"
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-            <div className="mt-3">
-              <span className="block text-[10px] font-mono text-[#9a9aa3] mb-1">Appetite</span>
-              <div className="flex gap-4">
-                {(["increased", "decreased"] as const).map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 font-mono text-sm text-[#e0e0e5] cursor-pointer">
-                    <input
-                      type="radio"
-                      name="appetite"
-                      checked={appetite === opt}
-                      onChange={() => setAppetite(opt)}
-                      className="border-amber-500/50 text-amber-500 focus:ring-amber-500"
-                    />
-                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="mt-3">
-              <label className="block text-[10px] font-mono text-[#9a9aa3] mb-1">
-                Mood changes
+        <div>
+          <label className="text-xs font-mono text-[#9a9aa3] uppercase mb-2 block">Site Reactions</label>
+          <div className="grid grid-cols-2 gap-2">
+            {(['redness', 'swelling', 'itching', 'bruising'] as const).map(reaction => (
+              <label key={reaction} className="flex items-center gap-2 text-xs font-mono text-[#e0e0e5] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={siteReactions[reaction] as boolean}
+                  onChange={(e) => setSiteReactions({...siteReactions, [reaction]: e.target.checked})}
+                  className="w-4 h-4 rounded border-[#00ffaa]/40 bg-black/30 checked:bg-[#00ffaa] checked:border-[#00ffaa]"
+                />
+                <span className="capitalize">{reaction}</span>
               </label>
+            ))}
+          </div>
+
+          <div className="mt-2">
+            <label className="text-xs font-mono text-[#9a9aa3]">Pain Level: {siteReactions.pain}/10</label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value={siteReactions.pain}
+              onChange={(e) => setSiteReactions({...siteReactions, pain: parseInt(e.target.value)})}
+              className="w-full mt-1"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-mono text-[#9a9aa3] uppercase mb-2 block">Systemic Effects</label>
+          
+          <div className="space-y-2">
+            <div>
+              <label className="text-xs font-mono text-[#9a9aa3]">Fatigue: {systemicEffects.fatigue}/10</label>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={systemicEffects.fatigue}
+                onChange={(e) => setSystemicEffects({...systemicEffects, fatigue: parseInt(e.target.value)})}
+                className="w-full mt-1"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-mono text-[#9a9aa3]">Headache: {systemicEffects.headache}/10</label>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={systemicEffects.headache}
+                onChange={(e) => setSystemicEffects({...systemicEffects, headache: parseInt(e.target.value)})}
+                className="w-full mt-1"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'nausea' as const, label: 'Nausea' },
+                { key: 'dizziness' as const, label: 'Dizziness' },
+                { key: 'insomnia' as const, label: 'Insomnia' },
+                { key: 'waterRetention' as const, label: 'Water Retention' },
+                { key: 'jointPain' as const, label: 'Joint Pain' }
+              ].map(effect => (
+                <label key={effect.key} className="flex items-center gap-2 text-xs font-mono text-[#e0e0e5] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemicEffects[effect.key] as boolean}
+                    onChange={(e) => setSystemicEffects({...systemicEffects, [effect.key]: e.target.checked})}
+                    className="w-4 h-4 rounded border-[#00ffaa]/40 bg-black/30 checked:bg-[#00ffaa] checked:border-[#00ffaa]"
+                  />
+                  <span>{effect.label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div>
+              <label className="text-xs font-mono text-[#9a9aa3] uppercase">Appetite</label>
+              <div className="flex gap-2 mt-1">
+                <label className="flex items-center gap-2 text-xs font-mono text-[#e0e0e5] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemicEffects.increasedAppetite}
+                    onChange={(e) => setSystemicEffects({...systemicEffects, increasedAppetite: e.target.checked, decreasedAppetite: false})}
+                    className="w-4 h-4"
+                  />
+                  Increased
+                </label>
+                <label className="flex items-center gap-2 text-xs font-mono text-[#e0e0e5] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemicEffects.decreasedAppetite}
+                    onChange={(e) => setSystemicEffects({...systemicEffects, decreasedAppetite: e.target.checked, increasedAppetite: false})}
+                    className="w-4 h-4"
+                  />
+                  Decreased
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-mono text-[#9a9aa3] uppercase">Mood Changes</label>
               <select
-                value={moodChanges}
-                onChange={(e) => setMoodChanges(e.target.value as MoodChange)}
-                className="w-full bg-black/50 border border-amber-500/40 rounded-lg px-4 py-2.5 text-[#f5f5f7] font-mono focus:outline-none focus:border-amber-500"
+                value={systemicEffects.moodChanges}
+                onChange={(e) => setSystemicEffects({...systemicEffects, moodChanges: e.target.value})}
+                className="w-full bg-black/30 border border-[#00ffaa]/20 rounded px-3 py-2 text-sm font-mono text-[#e0e0e5] focus:border-[#00ffaa]/40 focus:outline-none mt-1"
               >
-                <option value="">Select...</option>
-                {MOOD_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
+                <option value="none">None</option>
+                <option value="positive">Positive</option>
+                <option value="negative">Negative</option>
+                <option value="irritable">Irritable</option>
+                <option value="euphoric">Euphoric</option>
               </select>
             </div>
           </div>
+        </div>
 
-          {/* Severity */}
+        {(hasSiteReactions || hasSystemicEffects) && (
           <div>
-            <span className="block text-amber-500/90 font-mono text-xs mb-2 uppercase tracking-wider">
-              Severity *
-            </span>
-            <div className="flex gap-2">
-              {(["mild", "moderate", "severe"] as const).map((s) => (
+            <label className="text-xs font-mono text-[#9a9aa3] uppercase">Overall Severity</label>
+            <div className="flex gap-2 mt-1">
+              {['mild', 'moderate', 'severe'].map(s => (
                 <button
                   key={s}
-                  type="button"
                   onClick={() => setSeverity(s)}
-                  className={`flex-1 rounded-lg border-2 px-3 py-2 font-mono text-xs font-medium capitalize transition-all ${
-                    severity === s ? severityStyles[s] : "border-[#9a9aa3]/30 bg-black/30 text-[#9a9aa3] hover:border-amber-500/40"
+                  className={`flex-1 px-3 py-2 rounded border font-mono text-xs capitalize transition-colors ${
+                    severity === s
+                      ? s === 'severe'
+                        ? 'bg-red-500/20 border-red-500/40 text-red-500'
+                        : s === 'moderate'
+                        ? 'bg-amber-500/20 border-amber-500/40 text-amber-500'
+                        : 'bg-[#00ffaa]/20 border-[#00ffaa]/40 text-[#00ffaa]'
+                      : 'bg-black/30 border-[#00ffaa]/20 text-[#9a9aa3]'
                   }`}
                 >
                   {s}
@@ -335,42 +240,35 @@ export default function SideEffectLogger({
               ))}
             </div>
           </div>
+        )}
 
-          {/* Notes */}
-          <div>
-            <label className="block text-amber-500/90 font-mono text-xs mb-2 uppercase tracking-wider">
-              Notes (optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full bg-black/50 border border-amber-500/40 rounded-lg px-4 py-3 text-[#f5f5f7] font-mono focus:outline-none focus:border-amber-500 resize-none"
-              placeholder="Any additional details..."
-            />
-          </div>
+        <div>
+          <label className="text-xs font-mono text-[#9a9aa3] uppercase">Additional Notes</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Describe the side effect, duration, etc."
+            rows={2}
+            className="w-full bg-black/30 border border-[#00ffaa]/20 rounded px-3 py-2 text-sm font-mono text-[#e0e0e5] placeholder:text-[#9a9aa3]/50 focus:border-[#00ffaa]/40 focus:outline-none resize-none mt-1"
+          />
+        </div>
+      </div>
 
-          {error && (
-            <p className="text-xs font-mono text-red-400">{error}</p>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg border border-amber-500/40 bg-transparent px-4 py-2.5 font-mono text-xs text-[#9a9aa3] hover:bg-amber-500/10"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !isValid}
-              className="flex-1 rounded-lg border border-amber-500 bg-amber-500/20 px-4 py-2.5 font-mono text-xs font-medium text-amber-500 hover:bg-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Saving..." : "Log side effect"}
-            </button>
-          </div>
-        </form>
+      <div className="flex gap-2">
+        <button
+          onClick={logSideEffect}
+          disabled={logging}
+          className="flex-1 flex items-center justify-center gap-2 rounded-lg border-amber-500/40 bg-amber-500/10 px-4 py-2.5 font-mono text-xs font-medium text-amber-500 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+        >
+          <Check className="w-4 h-4" />
+          {logging ? "Logging..." : "Log Side Effect"}
+        </button>
+        <button
+          onClick={onClose}
+          className="px-4 py-2.5 rounded-lg border border-[#9a9aa3]/20 bg-black/30 text-[#9a9aa3] hover:bg-[#9a9aa3]/10 transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );
