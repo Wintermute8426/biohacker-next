@@ -6,7 +6,7 @@ import CycleLabCorrelation from "@/components/reports/CycleLabCorrelation";
 import LabTrends from "@/components/reports/LabTrends";
 import AIInsights from "@/components/reports/AIInsights";
 import CycleTimeline from "@/components/reports/CycleTimeline";
-import BodyComposition from "@/components/reports/BodyComposition";
+import BodyCompositionReport from "./BodyCompositionReport";
 import CycleComparison from "@/components/reports/CycleComparison";
 
 type ReportType = "correlation" | "trends" | "ai" | "timeline" | "body" | "comparison";
@@ -71,7 +71,7 @@ export default function ReportsPage() {
       case "timeline":
         return <CycleTimeline />;
       case "body":
-        return <BodyComposition />;
+        return <BodyCompositionReport />;
       case "comparison":
         return <CycleComparison />;
       default:

@@ -4,6 +4,11 @@ import Link from "next/link";
 import { Activity, Calendar } from "lucide-react";
 import TodaysDosesWidget from "@/components/TodaysDosesWidget";
 import WeightTrackerWidget from "@/components/WeightTrackerWidget";
+import RecentActivityFeed from "@/components/RecentActivityFeed";
+import NextDoseReminder from "@/components/NextDoseReminder";
+import ActiveCycleProgress from "@/components/ActiveCycleProgress";
+import QuickActionsPanel from "@/components/QuickActionsPanel";
+import MiniHealthTrends from "@/components/MiniHealthTrends";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -133,6 +138,15 @@ export default async function DashboardPage() {
 
             {/* Weight Tracker Widget */}
             <WeightTrackerWidget />
+
+            {/* New Widgets */}
+            <RecentActivityFeed />
+            <NextDoseReminder />
+            <ActiveCycleProgress />
+            <MiniHealthTrends />
+
+            {/* Quick Actions - spans 2 columns */}
+            <QuickActionsPanel />
           </div>
         </div>
       </div>
