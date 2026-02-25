@@ -66,6 +66,11 @@ export default function SideEffectsPage() {
     return 'text-[#00ffaa] border-[#00ffaa]/40 bg-[#00ffaa]/10';
   };
 
+  const handleCloseLogger = () => {
+    setShowLogger(false);
+    loadData();
+  };
+
   return (
     <div className="space-y-6">
       <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
@@ -103,10 +108,7 @@ export default function SideEffectsPage() {
               <SideEffectLogger
                 cycleId={selectedCycle}
                 peptideName={activeCycles.find(c => c.id === selectedCycle)?.protocol_id || ""}
-                onComplete={() => {
-                  setShowLogger(false);
-                  loadData();
-                }}
+                onClose={handleCloseLogger}
               />
             </div>
           )}
