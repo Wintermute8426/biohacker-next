@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Activity, Calendar } from "lucide-react";
 import DoseTrackerWidget from "@/components/DoseTrackerWidget";
 import HealthTrackerWidget from "@/components/HealthTrackerWidget";
+import LatestLabReportWidget from "@/components/LatestLabReportWidget";
 import ActiveCycleProgress from "@/components/ActiveCycleProgress";
 import QuickActionsPanel from "@/components/QuickActionsPanel";
 
@@ -135,6 +136,9 @@ export default async function DashboardPage() {
 
             {/* Combined Health Tracker (replaces WeightTrackerWidget + MiniHealthTrends) */}
             <HealthTrackerWidget />
+
+            {/* Latest Lab Report */}
+            <LatestLabReportWidget />
 
             {/* Keep these existing widgets: */}
             <ActiveCycleProgress />
