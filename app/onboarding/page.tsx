@@ -29,14 +29,14 @@ export default function OnboardingPage() {
       .single();
 
     if (onboarding) {
-      router.push("/app/dashboard");
+      router.push("/app");
     } else {
       setLoading(false);
     }
   };
 
   const handleComplete = () => {
-    router.push("/app/dashboard");
+    router.push("/app");
   };
 
   if (loading) {
