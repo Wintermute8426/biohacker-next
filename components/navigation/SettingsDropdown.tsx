@@ -5,7 +5,7 @@ import { Settings, User, CreditCard, LogOut, X, FileText, BookOpen } from "lucid
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-export default function SettingsDropdown() {
+export default function SettingsDropdown(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ export default function SettingsDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const loadUser = async () => {
+  const loadUser = async (): Promise<void> => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -36,13 +36,13 @@ export default function SettingsDropdown() {
     }
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/auth/login");
   };
-  return
-  (
+
+  return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -135,8 +135,7 @@ export default function SettingsDropdown() {
 
           <div className="p-3 border-t border-[#00ff41]/20 flex items-center justify-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#00ff41] animate-pulse shadow-[0_0_6px_rgba(0,255,65,0.8)]" />
-            <span className="text-[#00ff41] text-[10px]
-font-mono">SYSTEM ONLINE</span>
+            <span className="text-[#00ff41] text-[10px] font-mono">SYSTEM ONLINE</span>
           </div>
         </div>
       )}
