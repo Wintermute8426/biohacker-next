@@ -9,6 +9,7 @@ import {
   Repeat,
   Calendar,
   Activity,
+  BarChart3,
 } from "lucide-react";
 import SettingsDropdown from "@/components/navigation/SettingsDropdown";
 
@@ -25,6 +26,7 @@ export default function AppLayout({
     { href: "/app/protocols", label: "Protocols", icon: FileText },
     { href: "/app/cycles", label: "Cycles", icon: Repeat },
     { href: "/app/labs", label: "Labs", icon: Activity },
+    { href: "/app/reports", label: "Reports", icon: BarChart3 },
     { href: "/app/calendar", label: "Calendar", icon: Calendar },
   ];
 
