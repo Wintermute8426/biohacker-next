@@ -1,19 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   Home,
-  FlaskConical,
   FileText,
   Repeat,
   Calendar,
-  Activity,
-  BarChart3,
+  FlaskConical,
   AlertTriangle,
   BookOpen,
+  TrendingUp,
+  Menu,
 } from "lucide-react";
 import SettingsDropdown from "@/components/navigation/SettingsDropdown";
+import MoreMenu from "@/components/navigation/MoreMenu";
 
 export default function AppLayout({
   children,
@@ -21,17 +23,22 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [showMore, setShowMore] = useState(false);
 
   const navItems = [
     { href: "/app", label: "Dashboard", icon: Home },
-    { href: "/app/research", label: "Research", icon: FlaskConical },
     { href: "/app/protocols", label: "Protocols", icon: FileText },
     { href: "/app/cycles", label: "Cycles", icon: Repeat },
-    { href: "/app/labs", label: "Labs", icon: Activity },
+    { href: "/app/calendar", label: "Calendar", icon: Calendar },
+  ];
+
+  const moreItems = [
+    { href: "/app/research", label: "Research", icon: FlaskConical },
     { href: "/app/side-effects", label: "Side Effects", icon: AlertTriangle },
     { href: "/app/journal", label: "Journal", icon: BookOpen },
-    { href: "/app/reports", label: "Reports", icon: BarChart3 },
-    { href: "/app/calendar", label: "Calendar", icon: Calendar },
+    { href: "/app/labs", label: "Labs", icon: FileText },
+    { href: "/app/reports", label: "Reports", icon: TrendingUp },
+    { href: "/app/weight-log", label: "Weight Log", icon: TrendingUp },
   ];
 
   return (
@@ -117,12 +124,27 @@ export default function AppLayout({
                 </Link>
               );
             })}
+            <button
+              type="button"
+              onClick={() => setShowMore(true)}
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded transition-all text-gray-400 hover:text-[#00d4ff]"
+            >
+              <Menu className="w-6 h-6" />
+              <span className="text-[10px] font-mono">MORE</span>
+            </button>
           </div>
         </div>
 
         {/* Scanline effect */}
         <div className="absolute inset-0 pointer-events-none opacity-10 bg-scanlines"></div>
       </nav>
+
+      <MoreMenu
+        isOpen={showMore}
+        onClose={() => setShowMore(false)}
+        items={moreItems}
+        currentPath={pathname}
+      />
     </div>
   );
 }
