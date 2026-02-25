@@ -5,7 +5,7 @@ import { Settings, User, CreditCard, LogOut, X, FileText, BookOpen } from "lucid
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-export default function SettingsDropdown(): JSX.Element {
+export default function SettingsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ export default function SettingsDropdown(): JSX.Element {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const loadUser = async (): Promise<void> => {
+  const loadUser = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
@@ -36,7 +36,7 @@ export default function SettingsDropdown(): JSX.Element {
     }
   };
 
-  const handleSignOut = async (): Promise<void> => {
+  const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/auth/login");
