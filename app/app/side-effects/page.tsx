@@ -66,7 +66,7 @@ export default function SideEffectsPage() {
     return 'text-[#00ffaa] border-[#00ffaa]/40 bg-[#00ffaa]/10';
   };
 
-  const handleCloseLogger = () => {
+  const handleComplete = () => {
     setShowLogger(false);
     loadData();
   };
@@ -108,7 +108,7 @@ export default function SideEffectsPage() {
               <SideEffectLogger
                 cycleId={selectedCycle}
                 peptideName={activeCycles.find(c => c.id === selectedCycle)?.protocol_id || ""}
-                onClose={handleCloseLogger}
+                onComplete={handleComplete}
               />
             </div>
           )}
