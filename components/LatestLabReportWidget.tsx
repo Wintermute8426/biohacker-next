@@ -27,7 +27,6 @@ export default function LatestLabReportWidget() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Get latest report
     const { data: reports } = await supabase
       .from("lab_reports")
       .select("id, test_date, lab_name")
@@ -38,7 +37,6 @@ export default function LatestLabReportWidget() {
     if (reports && reports.length > 0) {
       const report = reports[0];
 
-      // Get marker counts
       const { data: markers } = await supabase
         .from("lab_markers")
         .select("id, is_flagged")
@@ -69,10 +67,12 @@ export default function LatestLabReportWidget() {
     return Math.floor(diffMs / 86400000);
   };
 
+  const flaggedCount = latestReport?.flagged_count || 0;
+
   return (
     <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in">
       <div className="led-card-top-right">
-        <span className={`led-dot ${latestReport?.flagged_count > 0 ? 'led-amber' : 'led-green'}`} aria-hidden="true"></span>
+        <span className={`led-dot ${flaggedCount > 0 ? 'led-amber' : 'led-green'}`} aria-hidden="true"></span>
       </div>
 
       <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
@@ -106,9 +106,9 @@ export default function LatestLabReportWidget() {
             <span className="rounded border border-[#00ffaa]/30 bg-[#00ffaa]/10 px-2 py-0.5 text-[10px] font-mono text-[#00ffaa]">
               {latestReport.marker_count} MARKERS
             </span>
-            {latestReport.flagged_count > 0 && (
+            {flaggedCount > 0 && (
               <span className="rounded border px-2 py-0.5 text-[10px] font-mono font-medium bg-amber-500/20 border-amber-500/40 text-amber-500">
-                {latestReport.flagged_count} FLAGGED
+                {flaggedCount} FLAGGED
               </span>
             )}
           </div>
@@ -124,11 +124,11 @@ export default function LatestLabReportWidget() {
             </ul>
           </div>
 
-          {latestReport.flagged_count > 0 && (
+          {flaggedCount > 0 && (
             <div className="mt-3 flex items-start gap-2 rounded border border-amber-500/40 bg-amber-500/10 p-2">
               <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-[10px] font-mono text-amber-500">
-                {latestReport.flagged_count} marker{latestReport.flagged_count !== 1 ? 's' : ''} outside normal range
+                {flaggedCount} marker{flaggedCount !== 1 ? 's' : ''} outside normal range
               </p>
             </div>
           )}
