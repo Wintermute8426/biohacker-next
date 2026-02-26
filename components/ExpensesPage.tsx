@@ -121,8 +121,8 @@ export default function ExpensesPage() {
     text: "#9a9aa3",
     fill: "#00ffaa",
   };
-
-  return (
+  return
+  (
     <div className="space-y-6 pb-20">
       {/* Tabs */}
       <div className="flex flex-wrap gap-2">
@@ -212,7 +212,8 @@ export default function ExpensesPage() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleDeleteExpense(e.id)}
+                      onCli
+                      ck={() => handleDeleteExpense(e.id)}
                       className="rounded p-1 text-[#9a9aa3] hover:bg-red-500/20 hover:text-red-400"
                       aria-label="Delete"
                     >
@@ -262,99 +263,100 @@ export default function ExpensesPage() {
           )}
         </div>
       )}
+{tab === "reports" &&
+(
+  <div className="space-y-8">
+    <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
+      <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-2">Year-to-date total</h3>
+      <p className="font-mono text-3xl font-bold text-[#00ffaa] drop-shadow-[0_0_12px_rgba(0,255,170,0.5)]">
+        ${ytdTotal.toFixed(2)}
+      </p>
+    </div>
 
-      {tab === "reports" && (
-        <div className="space-y-8">
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
-            <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-2">Year-to-date total</h3>
-            <p className="font-mono text-3xl font-bold text-[#00ffaa] drop-shadow-[0_0_12px_rgba(0,255,170,0.5)]">
-              ${ytdTotal.toFixed(2)}
-            </p>
-          </div>
+    <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
+      <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-4">
+        Monthly spending (last 6 months)
+      </h3>
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={monthlyData.map((m) => ({
+              name: m.month.slice(0, 7),
+              total: m.total,
+            }))}
+            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+            <XAxis
+              dataKey="name"
+              stroke={chartTheme.text}
+              tick={{ fontFamily: "monospace", fontSize: 10 }}
+            />
+            <YAxis
+              stroke={chartTheme.text}
+              tick={{ fontFamily: "monospace", fontSize: 10 }}
+              tickFormatter={(v) => `$${v}`}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#0a0e1a",
+                border: "1px solid rgba(0,255,170,0.4)",
+                borderRadius: 8,
+              }}
+              labelStyle={{ color: "#9a9aa3" }}
+              formatter={(value) => `$${Number(value).toFixed(2)}`}
+            />
+            <Bar dataKey="total" fill={chartTheme.fill} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
 
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
-            <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-4">
-              Monthly spending (last 6 months)
-            </h3>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData.map((m) => ({
-                    name: m.month.slice(0, 7),
-                    total: m.total,
-                  }))}
-                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
-                  <XAxis
-                    dataKey="name"
-                    stroke={chartTheme.text}
-                    tick={{ fontFamily: "monospace", fontSize: 10 }}
-                  />
-                  <YAxis
-                    stroke={chartTheme.text}
-                    tick={{ fontFamily: "monospace", fontSize: 10 }}
-                    tickFormatter={(v) => `$${v}`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#0a0e1a",
-                      border: "1px solid rgba(0,255,170,0.4)",
-                      borderRadius: 8,
-                    }}
-                    labelStyle={{ color: "#9a9aa3" }}
-                    formatter={(value: number) => `$${value.toFixed(2)}`}
-                  />
-                  <Bar dataKey="total" fill={chartTheme.fill} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+    <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
+      <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-4">
+        Spending by category (YTD)
+      </h3>
+      {categoryData.length === 0 ? (
+        <p className="font-mono text-xs text-[#9a9aa3]">No data yet.</p>
+      ) : (
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={categoryData.map((c) => ({
+                  name: EXPENSE_TYPE_LABELS[c.expenseType],
+                  value: c.total,
+                }))}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={2}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={{ stroke: "#00ffaa40" }}
+              >
+                {categoryData.map((_, i) => (
+                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#0a0e1a",
+                  border: "1px solid rgba(0,255,170,0.4)",
+                  borderRadius: 8,
+                }}
+                formatter={(value) => `$${Number(value).toFixed(2)}`}
+              />
+              <Legend wrapperStyle={{ fontFamily: "monospace", fontSize: 10 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
 
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4">
-            <h3 className="font-mono text-sm font-bold text-[#00ffaa] mb-4">
-              Spending by category (YTD)
-            </h3>
-            {categoryData.length === 0 ? (
-              <p className="font-mono text-xs text-[#9a9aa3]">No data yet.</p>
-            ) : (
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData.map((c) => ({
-                        name: EXPENSE_TYPE_LABELS[c.expenseType],
-                        value: c.total,
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={2}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={{ stroke: "#00ffaa40" }}
-                    >
-                      {categoryData.map((_, i) => (
-                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0a0e1a",
-                        border: "1px solid rgba(0,255,170,0.4)",
-                        borderRadius: 8,
-                      }}
-                      formatter={(value: number) => `$${value.toFixed(2)}`}
-                    />
-                    <Legend wrapperStyle={{ fontFamily: "monospace", fontSize: 10 }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 overflow-hidden">
+    <div className="deck-card-bg dec
+k-border-thick rounded-xl border-[#00ffaa]/20 overflow-hidden">
             <h3 className="font-mono text-sm font-bold text-[#00ffaa] p-4">Cost per cycle</h3>
             {cycleCosts.length === 0 ? (
               <p className="font-mono text-xs text-[#9a9aa3] p-4">No cycle expenses linked yet.</p>
