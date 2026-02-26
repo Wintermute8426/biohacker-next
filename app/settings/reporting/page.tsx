@@ -2,359 +2,469 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { FileText, Download, Star } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
-interface CycleReview {
+type CycleReview = {
   id: string;
   cycle_id: string;
-  peptide_name: string;
   effectiveness_rating: number;
-  side_effects: string[];
-  side_effects_notes: string | null;
-  would_repeat: "yes" | "no" | "maybe";
-  notes: string | null;
-  completed_at: string;
-}
+  would_repeat: boolean;
+  notes: string;
+  side_effects: any;
+  created_at: string;
+};
 
-export default function ReportingPage() {
-  const [reviews, setReviews] = useState<CycleReview[]>([]);
+type SideEffect = {
+  cycle_id: string;
+  peptide_name: string;
+  effect_name: string;
+  severity: string;
+  logged_at: string;
+};
+
+type Cycle = {
+  id: string;
+  peptide_name: string;
+  end_date: string;
+};
+
+type CycleGoal = {
+  cycle_id: string;
+  status: string;
+};
+
+type EffectivenessData = {
+  date: string;
+  rating: number;
+  peptide: string;
+};
+
+type SideEffectSummary = {
+  peptide: string;
+  incidents: number;
+  avgSeverity: string;
+  severityScore: number;
+};
+
+type SideEffectFrequency = {
+  effect: string;
+  count: number;
+};
+
+export default function EffectivenessReport() {
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<CycleReview[]>([]);
+  const [sideEffects, setSideEffects] = useState<SideEffect[]>([]);
+  const [cycles, setCycles] = useState<Cycle[]>([]);
+  const [goals, setGoals] = useState<CycleGoal[]>([]);
 
   useEffect(() => {
-    loadReviews();
+    loadData();
   }, []);
 
-  const loadReviews = async () => {
+  async function loadData() {
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from("cycle_reviews")
-      .select("*")
-      .order("completed_at", { ascending: false });
 
-    if (!error && data) {
-      setReviews(data);
-    }
-    setLoading(false);
-  };
-
-  const exportToCSV = () => {
-    const headers = [
-      "Date",
-      "Peptide",
-      "Effectiveness",
-      "Side Effects",
-      "Would Repeat",
-      "Notes",
-    ];
-
-    const rows = reviews.map((review) => [
-      new Date(review.completed_at).toLocaleDateString(),
-      review.peptide_name,
-      review.effectiveness_rating,
-      review.side_effects.join("; "),
-      review.would_repeat.toUpperCase(),
-      review.notes || "",
+    const [reviewsRes, sideEffectsRes, cyclesRes, goalsRes] = await Promise.all([
+      supabase.from("cycle_reviews").select("*").order("created_at", { ascending: true }),
+      supabase.from("side_effects").select("*"),
+      supabase.from("cycles").select("id, peptide_name, end_date"),
+      supabase.from("cycle_goals").select("cycle_id, status"),
     ]);
 
-    const csv = [
-      headers.join(","),
-      ...rows.map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-      ),
-    ].join("\n");
+    setReviews(reviewsRes.data || []);
+    setSideEffects(sideEffectsRes.data || []);
+    setCycles(cyclesRes.data || []);
+    setGoals(goalsRes.data || []);
+    setLoading(false);
+  }
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `biohacker-reviews-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-  };
+  // A) Effectiveness Timeline Data
+  const effectivenessData: EffectivenessData[] = reviews.map((r) => {
+    const cycle = cycles.find((c) => c.id === r.cycle_id);
+    return {
+      date: cycle?.end_date || r.created_at.split("T")[0],
+      rating: r.effectiveness_rating,
+      peptide: cycle?.peptide_name || "Unknown",
+    };
+  });
+
+  const avgRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.effectiveness_rating, 0) / reviews.length).toFixed(1)
+      : "0.0";
+
+  const trend =
+    reviews.length >= 3
+      ? reviews[reviews.length - 1].effectiveness_rating > reviews[0].effectiveness_rating
+        ? "improving"
+        : reviews[reviews.length - 1].effectiveness_rating < reviews[0].effectiveness_rating
+        ? "declining"
+        : "stable"
+      : "insufficient data";
+
+  // B) Side Effects Summary
+  const sideEffectsByPeptide: Record<string, { incidents: number; severities: string[] }> = {};
+  sideEffects.forEach((se) => {
+    if (!sideEffectsByPeptide[se.peptide_name]) {
+      sideEffectsByPeptide[se.peptide_name] = { incidents: 0, severities: [] };
+    }
+    sideEffectsByPeptide[se.peptide_name].incidents += 1;
+    sideEffectsByPeptide[se.peptide_name].severities.push(se.severity);
+  });
+
+  const sideEffectSummary: SideEffectSummary[] = Object.entries(sideEffectsByPeptide).map(
+    ([peptide, data]) => {
+      const severityMap: Record<string, number> = { mild: 1, moderate: 2, severe: 3 };
+      const avgScore =
+        data.severities.reduce((sum, s) => sum + (severityMap[s.toLowerCase()] || 0), 0) /
+        data.severities.length;
+      const avgSeverity =
+        avgScore < 1.5 ? "mild" : avgScore < 2.5 ? "moderate" : "severe";
+      return { peptide, incidents: data.incidents, avgSeverity, severityScore: avgScore };
+    }
+  );
+
+  // Side effect frequency
+  const effectCounts: Record<string, number> = {};
+  sideEffects.forEach((se) => {
+    effectCounts[se.effect_name] = (effectCounts[se.effect_name] || 0) + 1;
+  });
+  const sideEffectFrequency: SideEffectFrequency[] = Object.entries(effectCounts)
+    .map(([effect, count]) => ({ effect, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  // C) Would-Repeat Analysis
+  const wouldRepeatYes = reviews.filter((r) => r.would_repeat).length;
+  const wouldRepeatNo = reviews.filter((r) => !r.would_repeat).length;
+  const wouldRepeatData = [
+    { name: "Would Repeat", value: wouldRepeatYes, color: "#39ff14" },
+    { name: "Would Not Repeat", value: wouldRepeatNo, color: "#ff0040" },
+  ];
+
+  const peptidesYouWouldRepeat = Array.from(
+    new Set(
+      reviews
+        .filter((r) => r.would_repeat)
+        .map((r) => cycles.find((c) => c.id === r.cycle_id)?.peptide_name)
+        .filter(Boolean)
+    )
+  );
+
+  // D) Correlation Insights
+  const highRatedCycles = reviews.filter((r) => r.effectiveness_rating >= 4);
+  const lowRatedCycles = reviews.filter((r) => r.effectiveness_rating <= 2);
+
+  const highRatedSideEffects =
+    highRatedCycles.length > 0
+      ? sideEffects.filter((se) => highRatedCycles.some((r) => r.cycle_id === se.cycle_id)).length /
+        highRatedCycles.length
+      : 0;
+  const lowRatedSideEffects =
+    lowRatedCycles.length > 0
+      ? sideEffects.filter((se) => lowRatedCycles.some((r) => r.cycle_id === se.cycle_id)).length /
+        lowRatedCycles.length
+      : 0;
+
+  const sideEffectDifference =
+    lowRatedSideEffects > 0
+      ? (((lowRatedSideEffects - highRatedSideEffects) / lowRatedSideEffects) * 100).toFixed(0)
+      : "0";
+
+  const achievedGoalCycles = goals.filter((g) => g.status === "achieved").map((g) => g.cycle_id);
+  const achievedCycleRatings = reviews
+    .filter((r) => achievedGoalCycles.includes(r.cycle_id))
+    .map((r) => r.effectiveness_rating);
+  const avgAchievedRating =
+    achievedCycleRatings.length > 0
+      ? (achievedCycleRatings.reduce((a, b) => a + b, 0) / achievedCycleRatings.length).toFixed(1)
+      : "N/A";
+
+  const peptideRatings: Record<string, number[]> = {};
+  reviews.forEach((r) => {
+    const cycle = cycles.find((c) => c.id === r.cycle_id);
+    if (cycle) {
+      if (!peptideRatings[cycle.peptide_name]) peptideRatings[cycle.peptide_name] = [];
+      peptideRatings[cycle.peptide_name].push(r.effectiveness_rating);
+    }
+  });
+
+  const peptideAvgRatings = Object.entries(peptideRatings)
+    .map(([peptide, ratings]) => ({
+      peptide,
+      avg: (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1),
+    }))
+    .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg));
+
+  const mostEffective = peptideAvgRatings[0];
+  const leastSideEffectProne = sideEffectSummary.sort((a, b) => a.incidents - b.incidents)[0];
+
+  // E) Decision Helper
+  const peptideDecisions = Array.from(
+    new Set(reviews.map((r) => cycles.find((c) => c.id === r.cycle_id)?.peptide_name).filter(Boolean))
+  ).map((peptide) => {
+    const peptideReviews = reviews.filter(
+      (r) => cycles.find((c) => c.id === r.cycle_id)?.peptide_name === peptide
+    );
+    const lastReview = peptideReviews[peptideReviews.length - 1];
+    const lastEffectiveness = lastReview?.effectiveness_rating || 0;
+    const wouldRepeat = lastReview?.would_repeat || false;
+    const totalSideEffects = sideEffects.filter((se) => se.peptide_name === peptide).length;
+
+    let recommendation = "⚠️ Proceed with caution";
+    if (lastEffectiveness >= 4 && wouldRepeat && totalSideEffects < 3) {
+      recommendation = "✅ Run again";
+    } else if (lastEffectiveness <= 2 || !wouldRepeat || totalSideEffects >= 5) {
+      recommendation = "❌ Avoid";
+    }
+
+    return {
+      peptide: peptide as string,
+      lastEffectiveness,
+      wouldRepeat,
+      totalSideEffects,
+      recommendation,
+    };
+  });
 
   if (loading) {
     return (
-      <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
-        <div className="scanline-layer-thin" aria-hidden="true"></div>
-        <div className="scanline-layer-thick" aria-hidden="true"></div>
-        <div className="relative z-10 flex items-center justify-center min-h-[400px]">
-          <div className="text-center text-[#00ff41] font-mono text-lg animate-pulse">
-            {'>'} LOADING REVIEW DATA...
-          </div>
+      <div className="deck-card-bg deck-border p-6 text-center">
+        <div className="text-green-500 animate-pulse">Loading report...</div>
+      </div>
+    );
+  }
+
+  if (reviews.length === 0) {
+    return (
+      <div className="deck-card-bg deck-border p-6 text-center">
+        <div className="text-green-500/60 mb-2">NO CYCLE REVIEWS YET</div>
+        <div className="text-xs text-green-500/40">
+          Complete some cycles and submit reviews to see your effectiveness report.
         </div>
       </div>
     );
   }
 
+  const COLORS = {
+    cyan: "#00ffff",
+    green: "#39ff14",
+    orange: "#ff6600",
+    magenta: "#ff00ff",
+    red: "#ff0040",
+  };
+
   return (
-    <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
-      {/* Scanline effects */}
-      <div className="scanline-layer-thin" aria-hidden="true"></div>
-      <div className="scanline-layer-thick" aria-hidden="true"></div>
+    <div className="space-y-6">
+      {/* A) Effectiveness Timeline */}
+      <div className="deck-card-bg deck-border p-4">
+        <div className="deck-section-title mb-4">A) EFFECTIVENESS TIMELINE</div>
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={effectivenessData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,0,0.1)" />
+            <XAxis
+              dataKey="date"
+              stroke="#39ff14"
+              tick={{ fontSize: 10 }}
+              tickFormatter={(val) => val.split("-")[2] || val}
+            />
+            <YAxis stroke="#39ff14" domain={[0, 5]} tick={{ fontSize: 10 }} />
+            <Tooltip
+              contentStyle={{
+                background: "rgba(0,0,0,0.9)",
+                border: "1px solid #39ff14",
+                borderRadius: "4px",
+                fontSize: "10px",
+              }}
+              labelStyle={{ color: "#39ff14" }}
+            />
+            <Line
+              type="monotone"
+              dataKey="rating"
+              stroke={COLORS.cyan}
+              strokeWidth={2}
+              dot={{ fill: COLORS.cyan, r: 4 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <div className="mt-3 text-xs text-green-500/70">
+          Average effectiveness: <span className="text-green-500 font-bold">{avgRating}/5</span> •
+          Trend: <span className="text-green-500 font-bold">{trend}</span>
+        </div>
+      </div>
 
-      {/* Main content */}
-      <div className="relative z-10 space-y-6">
-        {/* Header section with status light */}
-        <div className="deck-section relative space-y-3 pt-4 pb-2">
-          <div className="deck-bracket-bottom-left" aria-hidden="true"></div>
-          <div className="deck-bracket-bottom-right" aria-hidden="true"></div>
+      {/* B) Side Effects Summary */}
+      <div className="deck-card-bg deck-border p-4">
+        <div className="deck-section-title mb-4">B) SIDE EFFECTS SUMMARY</div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="font-space-mono text-2xl font-bold tracking-wider text-[#f5f5f7] uppercase sm:text-3xl">
-                CYCLE REVIEWS | REPORTING:
-              </h1>
-              {/* Large PC-style power LED */}
-              <div className="relative flex items-center justify-center -translate-y-1 ml-2">
-                <div className="absolute w-12 h-12 rounded-full bg-[#00ff41] opacity-30 blur-xl animate-pulse"></div>
-                <div className="absolute w-9 h-9 rounded-full bg-[#00ff41] opacity-50 blur-md"></div>
-                <div className="relative w-8 h-8 rounded-full bg-black border-[3px] border-gray-700 shadow-inner flex items-center justify-center">
-                  <div className="w-5 h-5 rounded-full bg-[#00ff41] shadow-[0_0_16px_#00ff41,inset_0_1px_3px_rgba(255,255,255,0.3)] animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Export Button */}
-            {reviews.length > 0 && (
-              <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 px-4 py-2 border border-[#00ff41]/40 bg-[#00ff41]/10 text-[#00ff41] rounded font-mono hover:bg-[#00ff41]/20 hover:border-[#00ff41]/60 transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,255,65,0.3)]"
-              >
-                <Download className="w-4 h-4" />
-                EXPORT CSV
-              </button>
-            )}
-          </div>
-
-          <div className="sys-info flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] text-[#22d3e5]">
-            <span>REVIEW.VER: 1.0</span>
-            <span>●</span>
-            <span>{reviews.length} TOTAL REVIEWS</span>
-          </div>
-          <span className="hex-id absolute right-3 top-3 z-10" aria-hidden="true">
-            0xRPT1
-          </span>
+        {/* Table */}
+        <div className="mb-4 overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-green-500/20">
+                <th className="text-left py-2 text-green-500">PEPTIDE</th>
+                <th className="text-center py-2 text-green-500">INCIDENTS</th>
+                <th className="text-right py-2 text-green-500">AVG SEVERITY</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sideEffectSummary.map((s, i) => {
+                const color =
+                  s.avgSeverity === "mild"
+                    ? COLORS.green
+                    : s.avgSeverity === "moderate"
+                    ? "#ffaa00"
+                    : COLORS.red;
+                return (
+                  <tr key={i} className="border-b border-green-500/10">
+                    <td className="py-2 text-green-500/70">{s.peptide}</td>
+                    <td className="text-center py-2 text-green-500">{s.incidents}</td>
+                    <td className="text-right py-2" style={{ color }}>
+                      {s.avgSeverity.toUpperCase()}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        {/* Stats Summary Grid */}
-        {reviews.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Total Reviews */}
-            <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ffaa]/40 hover:shadow-lg animate-fade-in">
-              <div className="led-card-top-right">
-                <span className="led-dot led-green" aria-hidden="true"></span>
-              </div>
-              <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                0xR001
-              </span>
+        {/* Bar Chart */}
+        {sideEffectFrequency.length > 0 && (
+          <>
+            <div className="text-xs text-green-500/70 mb-2">Most Common Side Effects:</div>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={sideEffectFrequency.slice(0, 5)}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,255,0,0.1)" />
+                <XAxis dataKey="effect" stroke="#39ff14" tick={{ fontSize: 9 }} />
+                <YAxis stroke="#39ff14" tick={{ fontSize: 9 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: "rgba(0,0,0,0.9)",
+                    border: "1px solid #39ff14",
+                    fontSize: "10px",
+                  }}
+                />
+                <Bar dataKey="count" fill={COLORS.orange} />
+              </BarChart>
+            </ResponsiveContainer>
+          </>
+        )}
+      </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-gray-400">
-                    TOTAL REVIEWS
-                  </div>
-                  <div className="font-space-mono text-4xl font-bold text-[#00ff41]">
-                    {reviews.length}
-                  </div>
-                </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-[#00ff41]/10 border border-[#00ff41]/30">
-                  <FileText className="w-8 h-8 text-[#00ff41]" />
-                </div>
-              </div>
-            </div>
-
-            {/* Avg Effectiveness */}
-            <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#22d3e5]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "100ms"}}>
-              <div className="led-card-top-right">
-                <span className="led-dot led-blue" aria-hidden="true"></span>
-              </div>
-              <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                0xR002
-              </span>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-gray-400">
-                    AVG EFFECTIVENESS
-                  </div>
-                  <div className="font-space-mono text-4xl font-bold text-[#22d3e5]">
-                    {(
-                      reviews.reduce((sum, r) => sum + r.effectiveness_rating, 0) /
-                      reviews.length
-                    ).toFixed(1)}
-                    <span className="text-2xl text-gray-400">/5</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-[#22d3e5]/10 border border-[#22d3e5]/30">
-                  <Star className="w-8 h-8 text-[#22d3e5] fill-[#22d3e5]" />
-                </div>
-              </div>
-            </div>
-
-            {/* Would Repeat */}
-            <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#00ff41]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "200ms"}}>
-              <div className="led-card-top-right">
-                <span className="led-dot led-green" aria-hidden="true"></span>
-              </div>
-              <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                0xR003
-              </span>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-gray-400">
-                    WOULD REPEAT
-                  </div>
-                  <div className="font-space-mono text-4xl font-bold text-[#00ff41]">
-                    {Math.round(
-                      (reviews.filter((r) => r.would_repeat === "yes").length /
-                        reviews.length) *
-                        100
-                    )}
-                    <span className="text-2xl text-gray-400">%</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-[#00ff41]/10 border border-[#00ff41]/30">
-                  <div className="text-4xl">✓</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Side Effects */}
-            <div className="group deck-card-bg deck-border-thick relative rounded-xl p-5 pt-6 transition-all duration-300 hover:scale-[1.02] hover:border-[#ffaa00]/40 hover:shadow-lg animate-fade-in" style={{animationDelay: "300ms"}}>
-              <div className="led-card-top-right">
-                <span className="led-dot led-orange" aria-hidden="true"></span>
-              </div>
-              <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                0xR004
-              </span>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-gray-400">
-                    SIDE EFFECTS
-                  </div>
-                  <div className="font-space-mono text-4xl font-bold text-[#ffaa00]">
-                    {reviews.reduce((sum, r) => sum + r.side_effects.length, 0)}
-                  </div>
-                </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-[#ffaa00]/10 border border-[#ffaa00]/30">
-                  <div className="text-4xl">⚠</div>
-                </div>
-              </div>
-            </div>
+      {/* C) Would-Repeat Analysis */}
+      <div className="deck-card-bg deck-border p-4">
+        <div className="deck-section-title mb-4">C) WOULD-REPEAT ANALYSIS</div>
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie
+              data={wouldRepeatData}
+              cx="50%"
+              cy="50%"
+              innerRadius={50}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+              label={(entry) => `${entry.name}: ${entry.value}`}
+            >
+              {wouldRepeatData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                background: "rgba(0,0,0,0.9)",
+                border: "1px solid #39ff14",
+                fontSize: "10px",
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="mt-3 text-xs text-green-500/70">
+          You've run <span className="text-green-500 font-bold">{reviews.length}</span> cycles.
+          Would repeat:{" "}
+          <span className="text-green-500 font-bold">
+            {wouldRepeatYes} ({((wouldRepeatYes / reviews.length) * 100).toFixed(0)}%)
+          </span>
+        </div>
+        {peptidesYouWouldRepeat.length > 0 && (
+          <div className="mt-2 text-xs text-green-500/70">
+            Peptides you'd run again:{" "}
+            <span className="text-green-500 font-bold">{peptidesYouWouldRepeat.join(", ")}</span>
           </div>
         )}
+      </div>
 
-        {/* Reviews List */}
-        {reviews.length === 0 ? (
-          <div className="deck-card-bg deck-border-thick rounded-xl p-12 text-center">
-            <FileText className="w-16 h-16 text-gray-600 mx-auto mb-6 opacity-50" />
-            <p className="text-gray-400 font-mono text-lg">
-              {'>'} No cycle reviews yet. Complete a cycle to submit your first review.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {reviews.map((review, idx) => (
-              <div
-                key={review.id}
-                className="group deck-card-bg deck-border-thick relative rounded-xl p-6 transition-all duration-300 hover:scale-[1.01] hover:border-[#00ff41]/40 hover:shadow-lg animate-fade-in"
-                style={{animationDelay: `${idx * 50}ms`}}
-              >
-                <div className="led-card-top-right">
-                  <span className={`led-dot ${
-                    review.would_repeat === "yes" ? "led-green" :
-                    review.would_repeat === "maybe" ? "led-orange" :
-                    "led-red"
-                  }`} aria-hidden="true"></span>
-                </div>
-                <span className="hex-id absolute left-6 top-3 z-10" aria-hidden="true">
-                  {`0xRV${(idx + 1).toString(16).toUpperCase().padStart(2, '0')}`}
-                </span>
+      {/* D) Correlation Insights */}
+      <div className="deck-card-bg deck-border p-4">
+        <div className="deck-section-title mb-4">D) CORRELATION INSIGHTS</div>
+        <div className="space-y-2 text-xs text-green-500/70">
+          {highRatedCycles.length > 0 && lowRatedCycles.length > 0 && (
+            <div>
+              High-rated cycles (4-5★) had{" "}
+              <span className="text-green-500 font-bold">{sideEffectDifference}% fewer</span> side
+              effects than low-rated cycles (1-2★).
+            </div>
+          )}
+          {achievedCycleRatings.length > 0 && (
+            <div>
+              Cycles with achieved goals averaged{" "}
+              <span className="text-green-500 font-bold">{avgAchievedRating}/5</span>{" "}
+              effectiveness.
+            </div>
+          )}
+          {mostEffective && (
+            <div>
+              Your most effective peptide:{" "}
+              <span className="text-green-500 font-bold">
+                {mostEffective.peptide} (avg {mostEffective.avg}/5)
+              </span>
+            </div>
+          )}
+          {leastSideEffectProne && (
+            <div>
+              Least side-effect-prone peptide:{" "}
+              <span className="text-green-500 font-bold">
+                {leastSideEffectProne.peptide} ({leastSideEffectProne.incidents} incidents)
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 mt-2">
-                  <div>
-                    <div className="text-[#00ff41] font-mono font-bold text-xl mb-1">
-                      {review.peptide_name}
-                    </div>
-                    <div className="text-gray-400 text-sm font-mono">
-                      {new Date(review.completed_at).toLocaleDateString()} at{" "}
-                      {new Date(review.completed_at).toLocaleTimeString()}
-                    </div>
-                  </div>
-
-                  {/* Effectiveness Stars */}
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`w-6 h-6 ${
-                          star <= review.effectiveness_rating
-                            ? "fill-[#00ff41] text-[#00ff41]"
-                            : "text-gray-700"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Would Repeat */}
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">
-                    WOULD REPEAT:
-                  </span>
-                  <span
-                    className={`px-3 py-1 rounded font-mono font-bold text-sm border ${
-                      review.would_repeat === "yes"
-                        ? "text-[#00ff41] bg-[#00ff41]/10 border-[#00ff41]/30"
-                        : review.would_repeat === "maybe"
-                        ? "text-[#ffaa00] bg-[#ffaa00]/10 border-[#ffaa00]/30"
-                        : "text-red-500 bg-red-500/10 border-red-500/30"
-                    }`}
-                  >
-                    {review.would_repeat.toUpperCase()}
-                  </span>
-                </div>
-
-                {/* Side Effects */}
-                {review.side_effects.length > 0 && (
-                  <div className="mb-4">
-                    <div className="text-xs font-mono text-gray-400 uppercase tracking-wider mb-2">
-                      SIDE EFFECTS:
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {review.side_effects.map((effect) => (
-                        <span
-                          key={effect}
-                          className="px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-mono rounded"
-                        >
-                          {effect}
-                        </span>
-                      ))}
-                    </div>
-                    {review.side_effects_notes && (
-                      <p className="text-sm text-gray-300 mt-3 font-mono leading-relaxed">
-                        {review.side_effects_notes}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Notes */}
-                {review.notes && (
-                  <div>
-                    <div className="text-xs font-mono text-gray-400 uppercase tracking-wider mb-2">
-                      NOTES:
-                    </div>
-                    <p className="text-sm text-gray-300 font-mono leading-relaxed">
-                      {review.notes}
-                    </p>
-                  </div>
-                )}
+      {/* E) Decision Helper */}
+      <div className="deck-card-bg deck-border p-4">
+        <div className="deck-section-title mb-4">E) DECISION HELPER</div>
+        <div className="space-y-3">
+          {peptideDecisions.map((p, i) => (
+            <div key={i} className="border-l-2 border-green-500/30 pl-3 py-2">
+              <div className="flex justify-between items-start mb-1">
+                <div className="text-sm text-green-500 font-bold">{p.peptide}</div>
+                <div className="text-xs">{p.recommendation}</div>
               </div>
-            ))}
-          </div>
-        )}
+              <div className="text-xs text-green-500/60 space-y-0.5">
+                <div>Last effectiveness: {p.lastEffectiveness}/5</div>
+                <div>Would repeat: {p.wouldRepeat ? "Yes" : "No"}</div>
+                <div>Total side effects: {p.totalSideEffects}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
