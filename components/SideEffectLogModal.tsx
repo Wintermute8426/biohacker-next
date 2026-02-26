@@ -29,32 +29,9 @@ function formToPseudoEffect(form: FormState): SideEffect {
     id: "",
     userId: "",
     cycleId: form.cycleId,
-    doseLogId: form.doseLogId,
+    // doseLogId removed
     peptideName: form.peptideName,
-    injectionSite: form.injectionSite,
-    siteRedness: form.siteRedness,
-    siteSwelling: form.siteSwelling,
-    sitePainLevel: form.sitePainLevel,
-    siteItching: form.siteItching,
-    siteBruising: form.siteBruising,
-    fatigueLevel: form.fatigueLevel,
-    headacheLevel: form.headacheLevel,
-    nausea: form.nausea,
-    dizziness: form.dizziness,
-    insomnia: form.insomnia,
-    increasedAppetite: form.increasedAppetite,
-    decreasedAppetite: form.decreasedAppetite,
-    moodChanges: form.moodChanges,
-    waterRetention: form.waterRetention,
-    jointPain: form.jointPain,
-    severity: form.severity || undefined,
-    notes: form.notes,
-    loggedAt: new Date(),
-    createdAt: new Date(),
-  };
-}
-
-interface FormState {
+    // ... rest
   cycleId: string;
   peptideName: string;
   injectionSite: string;
