@@ -332,7 +332,7 @@ export default function ExpensesPage() {
                       outerRadius={90}
                       paddingAngle={2}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => percent ? `${name} ${(percent * 100).toFixed(0)}%` : name}
                       labelLine={{ stroke: "#00ffaa40" }}
                     >
                       {categoryData.map((_, i) => (
