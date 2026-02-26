@@ -1,38 +1,27 @@
-"use client";
-
 import EffectivenessReport from "@/components/EffectivenessReport";
 
 export default function EffectivenessReportPage() {
   return (
-    <div className="dashboard-hardware group deck-grid deck-noise deck-circuits deck-vignette deck-bezel matrix-bg relative z-10 min-h-full rounded-lg px-1 py-2">
-      <div className="scanline-layer-thin" aria-hidden />
-      <div className="scanline-layer-thick" aria-hidden />
+    <div className="min-h-screen p-4 sm:p-6">
+      {/* Scanlines */}
+      <div className="scanline-layer-thin" aria-hidden="true"></div>
+      <div className="scanline-layer-thick" aria-hidden="true"></div>
 
-      <div className="relative z-10 space-y-6 p-4">
-        <div className="deck-section relative space-y-3 pt-4 pb-2">
-          <div className="deck-bracket-bottom-left" aria-hidden />
-          <div className="deck-bracket-bottom-right" aria-hidden />
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="font-space-mono text-xl font-bold tracking-wider text-[#f5f5f7] uppercase sm:text-2xl">
-                CYCLE EFFECTIVENESS & SIDE EFFECTS REPORT
-              </h1>
-              <p className="mt-1 font-mono text-[10px] text-[#9a9aa3]">
-                Effectiveness timeline, side effects summary, would-repeat analysis, and decision helper
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="led-dot led-green" aria-hidden />
-              <span className="px-2 py-1 rounded bg-[#00ffaa]/10 border border-[#00ffaa]/40 font-mono text-[10px] text-[#00ffaa]">
-                REPORT
-              </span>
-            </div>
-          </div>
-          <span className="hex-id absolute right-3 top-3 z-10" aria-hidden>
-            0xEF1
-          </span>
+      <div className="max-w-6xl mx-auto relative z-10">
+        {/* Header */}
+        <div className="deck-section mb-6">
+          <div className="deck-bracket-bottom-left" aria-hidden="true"></div>
+          <div className="deck-bracket-bottom-right" aria-hidden="true"></div>
+          
+          <h1 className="deck-section-title text-2xl mb-2">
+            CYCLE EFFECTIVENESS & SIDE EFFECTS REPORT
+          </h1>
+          <p className="text-xs text-green-500/60 font-mono">
+            Comprehensive analysis of your peptide cycle performance
+          </p>
         </div>
 
+        {/* Report */}
         <EffectivenessReport />
       </div>
     </div>
