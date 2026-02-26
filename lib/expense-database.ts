@@ -1,248 +1,171 @@
-/**
- * Supabase database persistence for peptide inventory and cycle expenses.
- * Uses same client pattern as lib/cycle-database.ts.
- */
-
 import { createClient } from "@/lib/supabase/client";
 
-// ============================================
-// TYPES
-// ============================================
+export type ExpenseType = "peptide" | "supplies" | "lab_work" | "consultation" | "other";
 
-export type PeptideInventoryItem = {
+export interface CycleExpense {
+  id: string;
+  userId: string;
+  expenseType: ExpenseType;
+  peptideName?: string;
+  cost: number;
+  description?: string;
+  purchasedDate?: string;
+  cycleId?: string;
+  createdAt: Date;
+}
+
+export interface PeptideInventoryItem {
   id: string;
   userId: string;
   peptideName: string;
-  supplier: string | null;
-  vialSizeMg: number | null;
-  concentrationMgPerMl: number | null;
-  volumeMl: number | null;
-  costPerVial: number;
+  supplier?: string;
+  vialSizeMg?: number;
   quantity: number;
-  purchasedDate: string | null; // YYYY-MM-DD
-  expiryDate: string | null; // YYYY-MM-DD
-  batchNumber: string | null;
-  notes: string | null;
+  costPerVial: number;
+  purchasedDate?: string;
+  expiryDate?: string;
+  notes?: string;
   createdAt: Date;
-};
+}
 
-export type ExpenseType =
-  | "peptide"
-  | "supplies"
-  | "lab_work"
-  | "consultation"
-  | "other";
-
-export type CycleExpense = {
-  id: string;
-  userId: string;
-  cycleId: string | null;
-  peptideName: string | null;
+export interface SaveExpenseParams {
   expenseType: ExpenseType;
+  peptideName?: string;
   cost: number;
-  description: string | null;
-  purchasedDate: string | null; // YYYY-MM-DD
-  notes: string | null;
-  createdAt: Date;
-};
+  description?: string;
+  purchasedDate?: string;
+  cycleId?: string;
+  supplier?: string;
+  vialSizeMg?: number;
+  quantity?: number;
+  notes?: string;
+  addToInventory?: boolean;
+}
 
-export type MonthlySpending = {
-  month: string; // YYYY-MM
-  total: number;
-};
-
-// ============================================
-// INVENTORY
-// ============================================
-
-export async function loadInventory(): Promise<PeptideInventoryItem[]> {
+export async function loadExpenses(): Promise<CycleExpense[]> {
   const supabase = createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data, error } = await supabase
-    .from("peptide_inventory")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("purchased_date", { ascending: false });
-
-  if (error) {
-    console.error("Error loading inventory:", error);
-    return [];
-  }
-
-  return (data || []).map(dbRowToInventoryItem);
-}
-
-export async function saveInventoryItem(
-  item: Partial<PeptideInventoryItem> & {
-    peptideName: string;
-    costPerVial: number;
-    quantity: number;
-  }
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: "User not authenticated" };
-  }
-
-  const id = item.id ?? crypto.randomUUID();
-  const row = {
-    id,
-    user_id: user.id,
-    peptide_name: item.peptideName,
-    supplier: item.supplier ?? null,
-    vial_size_mg: item.vialSizeMg ?? null,
-    concentration_mg_per_ml: item.concentrationMgPerMl ?? null,
-    volume_ml: item.volumeMl ?? null,
-    cost_per_vial: item.costPerVial,
-    quantity: item.quantity,
-    purchased_date: item.purchasedDate ?? null,
-    expiry_date: item.expiryDate ?? null,
-    batch_number: item.batchNumber ?? null,
-    notes: item.notes ?? null,
-    created_at: item.createdAt ? new Date(item.createdAt).toISOString() : new Date().toISOString(),
-  };
-
-  const { error } = await supabase.from("peptide_inventory").upsert(row);
-
-  if (error) {
-    console.error("Error saving inventory item:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
-}
-
-export async function deleteInventoryItem(
-  id: string
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = createClient();
-
-  const { error } = await supabase
-    .from("peptide_inventory")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error deleting inventory item:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
-}
-
-export async function getExpiringInventory(
-  withinDays: number = 30
-): Promise<PeptideInventoryItem[]> {
-  const supabase = createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const end = new Date();
-  end.setDate(end.getDate() + withinDays);
-  const endStr = end.toISOString().slice(0, 10);
-
-  const { data, error } = await supabase
-    .from("peptide_inventory")
-    .select("*")
-    .eq("user_id", user.id)
-    .not("expiry_date", "is", null)
-    .lte("expiry_date", endStr)
-    .order("expiry_date", { ascending: true });
-
-  if (error) {
-    console.error("Error loading expiring inventory:", error);
-    return [];
-  }
-
-  return (data || []).map(dbRowToInventoryItem);
-}
-
-// ============================================
-// EXPENSES
-// ============================================
-
-export async function loadExpenses(
-  cycleId?: string | null
-): Promise<CycleExpense[]> {
-  const supabase = createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  let query = supabase
     .from("cycle_expenses")
     .select("*")
     .eq("user_id", user.id)
-    .order("purchased_date", { ascending: false })
-    .order("created_at", { ascending: false });
-
-  if (cycleId != null) {
-    if (cycleId === "") {
-      query = query.is("cycle_id", null);
-    } else {
-      query = query.eq("cycle_id", cycleId);
-    }
-  }
-
-  const { data, error } = await query;
+    .order("purchased_date", { ascending: false });
 
   if (error) {
     console.error("Error loading expenses:", error);
     return [];
   }
 
-  return (data || []).map(dbRowToExpense);
+  return (data || []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    expenseType: row.expense_type as ExpenseType,
+    peptideName: row.peptide_name,
+    cost: row.cost,
+    description: row.description,
+    purchasedDate: row.purchased_date,
+    cycleId: row.cycle_id,
+    createdAt: new Date(row.created_at),
+  }));
 }
 
-export async function saveExpense(
-  expense: Partial<CycleExpense> & { expenseType: ExpenseType; cost: number }
-): Promise<{ success: boolean; error?: string }> {
+export async function loadInventory(): Promise<PeptideInventoryItem[]> {
   const supabase = createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: "User not authenticated" };
-  }
+  if (!user) return [];
 
-  const id = expense.id ?? crypto.randomUUID();
-  const row = {
-    id,
-    user_id: user.id,
-    cycle_id: expense.cycleId ?? null,
-    peptide_name: expense.peptideName ?? null,
-    expense_type: expense.expenseType,
-    cost: expense.cost,
-    description: expense.description ?? null,
-    purchased_date: expense.purchasedDate ?? null,
-    notes: expense.notes ?? null,
-    created_at: expense.createdAt ? new Date(expense.createdAt).toISOString() : new Date().toISOString(),
-  };
-
-  const { error } = await supabase.from("cycle_expenses").upsert(row);
+  const { data, error } = await supabase
+    .from("peptide_inventory")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error saving expense:", error);
-    return { success: false, error: error.message };
+    console.error("Error loading inventory:", error);
+    return [];
   }
 
-  return { success: true };
+  return (data || []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    peptideName: row.peptide_name,
+    supplier: row.supplier,
+    vialSizeMg: row.vial_size_mg,
+    quantity: row.quantity,
+    costPerVial: row.cost_per_vial,
+    purchasedDate: row.purchased_date,
+    expiryDate: row.expiry_date,
+    notes: row.notes,
+    createdAt: new Date(row.created_at),
+  }));
 }
 
-export async function deleteExpense(
-  id: string
-): Promise<{ success: boolean; error?: string }> {
+export async function saveExpense(params: SaveExpenseParams): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+
+  try {
+    // Save expense
+    const { data: expenseData, error: expenseError } = await supabase
+      .from("cycle_expenses")
+      .insert({
+        user_id: user.id,
+        expense_type: params.expenseType,
+        peptide_name: params.peptideName,
+        cost: params.cost,
+        description: params.description,
+        purchased_date: params.purchasedDate,
+        cycle_id: params.cycleId,
+      })
+      .select()
+      .single();
+
+    if (expenseError) {
+      console.error("Error saving expense:", expenseError);
+      return { success: false, error: expenseError.message };
+    }
+
+    // Add to inventory if requested
+    if (params.addToInventory && params.peptideName) {
+      const { error: inventoryError } = await supabase
+        .from("peptide_inventory")
+        .insert({
+          user_id: user.id,
+          peptide_name: params.peptideName,
+          supplier: params.supplier,
+          vial_size_mg: params.vialSizeMg,
+          quantity: params.quantity || 1,
+          cost_per_vial: params.cost / (params.quantity || 1),
+          purchased_date: params.purchasedDate,
+          notes: params.notes,
+        });
+
+      if (inventoryError) {
+        console.error("Error adding to inventory:", inventoryError);
+        // Don't fail the whole operation if inventory add fails
+      }
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Error in saveExpense:", err);
+    return { success: false, error: String(err) };
+  }
+}
+
+export async function deleteExpense(id: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
 
   const { error } = await supabase
     .from("cycle_expenses")
     .delete()
-    .eq("id", id);
+    .eq("id", id)
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("Error deleting expense:", error);
@@ -252,54 +175,45 @@ export async function deleteExpense(
   return { success: true };
 }
 
-export async function getMonthlySpending(
-  months: number = 12
-): Promise<MonthlySpending[]> {
+export async function deleteInventoryItem(id: string): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
 
+  const { error } = await supabase
+    .from("peptide_inventory")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error deleting inventory item:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+export async function getMonthlySpending(months: number): Promise<{ month: string; total: number }[]> {
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
-  const startStr = start.toISOString().slice(0, 10);
-  const endStr = now.toISOString().slice(0, 10);
-
-  const { data, error } = await supabase
-    .from("cycle_expenses")
-    .select("cost, purchased_date, created_at")
-    .eq("user_id", user.id)
-    .or(`purchased_date.gte.${startStr},purchased_date.is.null`);
+  const { data, error } = await supabase.rpc("get_monthly_spending", {
+    user_id_input: user.id,
+    months_back: months,
+  });
 
   if (error) {
-    console.error("Error loading monthly spending:", error);
+    console.error("Error getting monthly spending:", error);
     return [];
   }
 
-  const byMonth = new Map<string, number>();
-  for (let m = 0; m < months; m++) {
-    const d = new Date(start.getFullYear(), start.getMonth() + m, 1);
-    byMonth.set(d.toISOString().slice(0, 7), 0);
-  }
-
-  for (const row of data || []) {
-    const dateStr = (row.purchased_date as string) ?? (row.created_at as string)?.slice(0, 10);
-    if (!dateStr || dateStr < startStr || dateStr > endStr) continue;
-    const month = dateStr.slice(0, 7);
-    byMonth.set(month, (byMonth.get(month) ?? 0) + Number(row.cost));
-  }
-
-  return Array.from(byMonth.entries())
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, total]) => ({ month, total }));
+  return data || [];
 }
 
-export async function getSpendingByCategory(
-  startDate?: string | null,
-  endDate?: string | null
-): Promise<{ expenseType: ExpenseType; total: number }[]> {
+export async function getSpendingByCategory(startDate?: string, endDate?: string): Promise<{ expenseType: ExpenseType; total: number }[]> {
   const supabase = createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
@@ -308,102 +222,100 @@ export async function getSpendingByCategory(
     .select("expense_type, cost")
     .eq("user_id", user.id);
 
-  if (startDate) {
-    query = query.gte("purchased_date", startDate);
-  }
-  if (endDate) {
-    query = query.lte("purchased_date", endDate);
-  }
+  if (startDate) query = query.gte("purchased_date", startDate);
+  if (endDate) query = query.lte("purchased_date", endDate);
 
   const { data, error } = await query;
 
   if (error) {
-    console.error("Error loading spending by category:", error);
+    console.error("Error getting spending by category:", error);
     return [];
   }
 
-  const byType = new Map<ExpenseType, number>();
-  for (const row of data || []) {
-    const t = row.expense_type as ExpenseType;
-    byType.set(t, (byType.get(t) ?? 0) + Number(row.cost));
-  }
+  const grouped = (data || []).reduce((acc, row) => {
+    const type = row.expense_type as ExpenseType;
+    if (!acc[type]) acc[type] = 0;
+    acc[type] += row.cost;
+    return acc;
+  }, {} as Record<ExpenseType, number>);
 
-  return Array.from(byType.entries()).map(([expenseType, total]) => ({
-    expenseType,
+  return Object.entries(grouped).map(([expenseType, total]) => ({
+    expenseType: expenseType as ExpenseType,
     total,
   }));
 }
 
-export async function getTotalSpending(
-  startDate?: string | null,
-  endDate?: string | null
-): Promise<number> {
+export async function getTotalSpending(startDate: string, endDate: string): Promise<number> {
   const supabase = createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
 
-  let query = supabase
+  const { data, error } = await supabase
     .from("cycle_expenses")
     .select("cost")
-    .eq("user_id", user.id);
-
-  if (startDate) {
-    query = query.gte("purchased_date", startDate);
-  }
-  if (endDate) {
-    query = query.lte("purchased_date", endDate);
-  }
-
-  const { data, error } = await query;
+    .eq("user_id", user.id)
+    .gte("purchased_date", startDate)
+    .lte("purchased_date", endDate);
 
   if (error) {
-    console.error("Error loading total spending:", error);
+    console.error("Error getting total spending:", error);
     return 0;
   }
 
-  return (data || []).reduce((sum, row) => sum + Number(row.cost), 0);
+  return (data || []).reduce((sum, row) => sum + row.cost, 0);
 }
 
 export async function getCycleCost(cycleId: string): Promise<number> {
-  const expenses = await loadExpenses(cycleId);
-  return expenses.reduce((sum, e) => sum + e.cost, 0);
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const { data, error } = await supabase
+    .from("cycle_expenses")
+    .select("cost")
+    .eq("user_id", user.id)
+    .eq("cycle_id", cycleId);
+
+  if (error) {
+    console.error("Error getting cycle cost:", error);
+    return 0;
+  }
+
+  return (data || []).reduce((sum, row) => sum + row.cost, 0);
 }
 
-// ============================================
-// TYPE CONVERTERS
-// ============================================
+export async function getExpiringInventory(daysAhead: number = 90): Promise<PeptideInventoryItem[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
 
-function dbRowToInventoryItem(row: Record<string, unknown>): PeptideInventoryItem {
-  return {
-    id: row.id as string,
-    userId: row.user_id as string,
-    peptideName: row.peptide_name as string,
-    supplier: (row.supplier as string | null) ?? null,
-    vialSizeMg: row.vial_size_mg != null ? Number(row.vial_size_mg) : null,
-    concentrationMgPerMl: row.concentration_mg_per_ml != null ? Number(row.concentration_mg_per_ml) : null,
-    volumeMl: row.volume_ml != null ? Number(row.volume_ml) : null,
-    costPerVial: Number(row.cost_per_vial),
-    quantity: Number(row.quantity),
-    purchasedDate: (row.purchased_date as string | null) ?? null,
-    expiryDate: (row.expiry_date as string | null) ?? null,
-    batchNumber: (row.batch_number as string | null) ?? null,
-    notes: (row.notes as string | null) ?? null,
-    createdAt: new Date((row.created_at as string)),
-  };
-}
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + daysAhead);
 
-function dbRowToExpense(row: Record<string, unknown>): CycleExpense {
-  return {
-    id: row.id as string,
-    userId: row.user_id as string,
-    cycleId: (row.cycle_id as string | null) ?? null,
-    peptideName: (row.peptide_name as string | null) ?? null,
-    expenseType: row.expense_type as ExpenseType,
-    cost: Number(row.cost),
-    description: (row.description as string | null) ?? null,
-    purchasedDate: (row.purchased_date as string | null) ?? null,
-    notes: (row.notes as string | null) ?? null,
-    createdAt: new Date((row.created_at as string)),
-  };
+  const { data, error } = await supabase
+    .from("peptide_inventory")
+    .select("*")
+    .eq("user_id", user.id)
+    .not("expiry_date", "is", null)
+    .lte("expiry_date", futureDate.toISOString().slice(0, 10))
+    .order("expiry_date", { ascending: true });
+
+  if (error) {
+    console.error("Error getting expiring inventory:", error);
+    return [];
+  }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    peptideName: row.peptide_name,
+    supplier: row.supplier,
+    vialSizeMg: row.vial_size_mg,
+    quantity: row.quantity,
+    costPerVial: row.cost_per_vial,
+    purchasedDate: row.purchased_date,
+    expiryDate: row.expiry_date,
+    notes: row.notes,
+    createdAt: new Date(row.created_at),
+  }));
 }
