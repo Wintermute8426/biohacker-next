@@ -39,7 +39,10 @@ export default function ExpensesPage() {
       loadInventory(),
       getMonthlySpending(6),
       getSpendingByCategory(),
-      getTotalSpending(new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()),
+      getTotalSpending(
+        new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
+        new Date().toISOString().slice(0, 10)
+      ),
       getExpiringInventory(),
     ]);
 
