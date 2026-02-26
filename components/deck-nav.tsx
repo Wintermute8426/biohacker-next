@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, FlaskConical, List, RefreshCw, Calendar, Info } from "lucide-react";
+import { Home, FlaskConical, List, RefreshCw, Bookmark, Target, DollarSign, BarChart3, Calendar, Info } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/app", label: "Dashboard", icon: Home },
   { href: "/app/research", label: "Research", icon: FlaskConical },
   { href: "/app/protocols", label: "Protocols", icon: List },
   { href: "/app/cycles", label: "Cycles", icon: RefreshCw },
+  { href: "/app/templates", label: "Templates", icon: Bookmark },
+  { href: "/app/goals", label: "Goals", icon: Target },
+  { href: "/app/expenses", label: "Expenses", icon: DollarSign },
+  { href: "/app/reports", label: "Reports", icon: BarChart3 },
   { href: "/app/calendar", label: "Calendar", icon: Calendar },
   { href: "/app/about", label: "About", icon: Info },
 ] as const;

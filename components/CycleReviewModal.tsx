@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import SaveAsTemplateModal from "@/components/SaveAsTemplateModal";
 
 interface CycleReviewModalProps {
   cycleId: string;
@@ -38,6 +39,9 @@ export default function CycleReviewModal({
   const [wouldRepeat, setWouldRepeat] = useState<"yes" | "no" | "maybe" | "">("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [reviewSaved, setReviewSaved] = useState(false);
+  const [showSaveAsTemplatePrompt, setShowSaveAsTemplatePrompt] = useState(false);
+  const [showSaveAsTemplateModal, setShowSaveAsTemplateModal] = useState(false);
 
   const toggleSideEffect = (effect: string) => {
     if (sideEffects.includes(effect)) {
@@ -77,7 +81,8 @@ export default function CycleReviewModal({
       console.error("Error saving review:", error);
       alert("Failed to save review. Please try again.");
     } else {
-      onSubmit();
+      setReviewSaved(true);
+      setShowSaveAsTemplatePrompt(true);
     }
   };
 
@@ -218,7 +223,48 @@ export default function CycleReviewModal({
             {submitting ? "SAVING..." : "SUBMIT REVIEW"}
           </button>
         </div>
+
+        {/* Save as Template prompt (after review submitted) */}
+        {showSaveAsTemplatePrompt && (
+          <div className="mt-6 pt-6 border-t border-[#00ff41]/20">
+            <p className="text-sm font-mono text-gray-300 mb-3">
+              Review saved. Save this cycle as a template?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowSaveAsTemplatePrompt(false);
+                  setShowSaveAsTemplateModal(true);
+                }}
+                className="px-4 py-2 border border-[#00ff41] bg-[#00ff41]/10 text-[#00ff41] rounded font-mono hover:bg-[#00ff41]/20 transition-all"
+              >
+                YES
+              </button>
+              <button
+                onClick={() => {
+                  setShowSaveAsTemplatePrompt(false);
+                  onSubmit();
+                }}
+                className="px-4 py-2 border border-gray-600 text-gray-400 rounded font-mono hover:border-gray-500 transition-all"
+              >
+                NO
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {showSaveAsTemplateModal && (
+        <SaveAsTemplateModal
+          cycleId={cycleId}
+          cycleName={peptideName}
+          onSave={() => {}}
+          onClose={() => {
+            setShowSaveAsTemplateModal(false);
+            onSubmit();
+          }}
+        />
+      )}
     </div>
   );
 }

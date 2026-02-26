@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import {
   FileText,
   Activity,
@@ -249,6 +250,12 @@ export default function CycleToLabCorrelationPage() {
         <p className="text-sm font-mono text-gray-300/80">
           Lab reports with cycles active in the 90-day window before each test. Use filters to narrow by date, markers, or peptides.
         </p>
+        <Link
+          href="/app/reports/effectiveness"
+          className="inline-flex items-center gap-2 mt-2 text-sm font-mono text-[#00ffaa] hover:text-[#00ffaa]/80 border border-[#00ffaa]/40 rounded-lg px-3 py-1.5 hover:bg-[#00ffaa]/10"
+        >
+          View Cycle Effectiveness & Side Effects Report →
+        </Link>
       </div>
 
       {/* Filters */}

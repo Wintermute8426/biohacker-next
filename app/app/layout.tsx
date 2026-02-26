@@ -34,6 +34,7 @@ export default function AppLayout({
 
   const moreItems = [
     { href: "/app/research", label: "Research", icon: FlaskConical },
+    { href: "/app/templates", label: "Templates", icon: FileText },
     { href: "/app/side-effects", label: "Side Effects", icon: AlertTriangle },
     { href: "/app/journal", label: "Journal", icon: BookOpen },
     { href: "/app/labs", label: "Labs", icon: FileText },

@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart3, TrendingUp, Brain, Clock, Scale, FlaskConical } from "lucide-react";
+import { BarChart3, TrendingUp, Brain, Clock, Scale, FlaskConical, Star } from "lucide-react";
 import CycleLabCorrelation from "@/components/reports/CycleLabCorrelation";
 import LabTrends from "@/components/reports/LabTrends";
 import AIInsights from "@/components/reports/AIInsights";
 import CycleTimeline from "@/components/reports/CycleTimeline";
 import BodyCompositionReport from "./BodyCompositionReport";
 import CycleComparison from "@/components/reports/CycleComparison";
+import EffectivenessReport from "@/components/EffectivenessReport";
 
-type ReportType = "correlation" | "trends" | "ai" | "timeline" | "body" | "comparison";
+type ReportType = "correlation" | "trends" | "ai" | "timeline" | "body" | "comparison" | "effectiveness";
 
 interface ReportTab {
   id: ReportType;
@@ -24,6 +25,12 @@ const REPORT_TABS: ReportTab[] = [
     label: "Cycle-Lab Correlation",
     icon: BarChart3,
     description: "Which cycles impacted your lab results"
+  },
+  {
+    id: "effectiveness",
+    label: "Effectiveness & Side Effects",
+    icon: Star,
+    description: "Cycle effectiveness timeline, side effects, would-repeat, decision helper"
   },
   {
     id: "trends",
@@ -64,6 +71,8 @@ export default function ReportsPage() {
     switch (activeReport) {
       case "correlation":
         return <CycleLabCorrelation />;
+      case "effectiveness":
+        return <EffectivenessReport />;
       case "trends":
         return <LabTrends />;
       case "ai":

@@ -1,15 +1,21 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Syringe, X, ChevronDown, ChevronUp, Play, Plus, Trash2, Calculator } from "lucide-react";
 import { loadCycles, saveCycle, deleteCycle } from "@/lib/cycle-database";
 import type { Cycle as DbCycle } from "@/lib/cycle-database";
+import { getTemplateById, incrementTemplateUseCount } from "@/lib/template-database";
+import type { CycleTemplate } from "@/lib/template-database";
 import { markTaskComplete } from "@/lib/onboarding-helper";
 import DoseCalculator from "@/components/DoseCalculatorV3";
 import type { DoseCalculation } from "@/components/DoseCalculatorV3";
 import { getDoseRecommendation } from "@/lib/dose-recommendations-v3";
 import { generateDosesForCycle } from "@/lib/dose-generator";
 import CycleReviewModal from "@/components/CycleReviewModal";
+import SaveAsTemplateModal from "@/components/SaveAsTemplateModal";
+import GoalSetterModal from "@/components/GoalSetterModal";
+import ExpenseLogModal from "@/components/ExpenseLogModal";
 import { AdvancedDosageBuilder } from "@/components/AdvancedDosageBuilder";
 
 export type CycleFrequency = {
@@ -123,11 +129,13 @@ function ActiveCycleCard({
   onLogDose,
   onPause,
   onComplete,
+  onSaveAsTemplate,
 }: {
   cycle: Cycle;
   onLogDose: (c: Cycle) => void;
   onPause: (c: Cycle) => void;
   onComplete: (c: Cycle) => void;
+  onSaveAsTemplate?: (c: Cycle) => void;
 }) {
   const totalWeeks = Math.ceil((cycle.endDate.getTime() - cycle.startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
   const elapsedMs = Date.now() - cycle.startDate.getTime();
@@ -204,6 +212,15 @@ function ActiveCycleCard({
         >
           Complete
         </button>
+        {onSaveAsTemplate && (
+          <button
+            type="button"
+            onClick={() => onSaveAsTemplate(cycle)}
+            className="rounded border border-[#22d3ee]/40 bg-[#22d3ee]/10 px-3 py-1.5 font-mono text-[10px] text-[#22d3ee] hover:bg-[#22d3ee]/20"
+          >
+            Save as template
+          </button>
+        )}
       </div>
     </div>
   );
@@ -212,10 +229,13 @@ function ActiveCycleCard({
 export function CyclesContent({
   protocols,
   peptideNames,
+  initialTemplateId,
 }: {
   protocols: ProtocolTemplate[];
   peptideNames: string[];
+  initialTemplateId?: string;
 }) {
+  const router = useRouter();
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [loading, setLoading] = useState(true);
   const [protocolModalOpen, setProtocolModalOpen] = useState(false);
@@ -226,6 +246,17 @@ export function CyclesContent({
     id: string;
     name: string;
   } | null>(null);
+  const [templateIdHandled, setTemplateIdHandled] = useState(false);
+  const [saveAsTemplateCycle, setSaveAsTemplateCycle] = useState<Cycle | null>(null);
+  const [pendingGoalsCycleId, setPendingGoalsCycleId] = useState<string | null>(null);
+  const [showSetGoalsPrompt, setShowSetGoalsPrompt] = useState(false);
+  const [showLogCostPrompt, setShowLogCostPrompt] = useState(false);
+  const [logCostCycleId, setLogCostCycleId] = useState<string | null>(null);
+  const [logCostPeptideName, setLogCostPeptideName] = useState<string | null>(null);
+  const [showExpenseLogModal, setShowExpenseLogModal] = useState(false);
+  const [showGoalSetterModal, setShowGoalSetterModal] = useState(false);
+  const [goalsAddedForCycle, setGoalsAddedForCycle] = useState(0);
+  const [showAddAnotherGoalPrompt, setShowAddAnotherGoalPrompt] = useState(false);
 
   // Load cycles from database on mount
   useEffect(() => {
@@ -234,6 +265,18 @@ export function CyclesContent({
       setLoading(false);
     });
   }, []);
+
+  // Start cycle from template when initialTemplateId is in URL
+  useEffect(() => {
+    if (!initialTemplateId || templateIdHandled) return;
+    getTemplateById(initialTemplateId).then((template) => {
+      if (template) {
+        setTemplateIdHandled(true);
+        startFromTemplate(template);
+        router.replace("/app/cycles", { scroll: false });
+      }
+    });
+  }, [initialTemplateId, templateIdHandled, router]);
 
   useEffect(() => {
     if (!toast) return;
@@ -280,6 +323,41 @@ export function CyclesContent({
     });
   };
 
+  const startFromTemplate = (template: CycleTemplate) => {
+    const durationWeeks = template.duration_weeks ?? 8;
+    const start = new Date();
+    const end = addDays(start, durationWeeks * 7);
+    const newCycles: Cycle[] = (template.peptides ?? []).map((p, i) => {
+      const frequency = timingToFrequency(p.frequency);
+      const dosesPerWeek = dosesPerWeekFromFrequency(frequency);
+      const totalExpectedDoses = durationWeeks * dosesPerWeek;
+      const hexId = `0x${(0xc100 + cycles.length + i + 1).toString(16).toUpperCase().padStart(4, "0")}`;
+      return {
+        id: crypto.randomUUID(),
+        hexId,
+        peptideName: p.name,
+        doseAmount: p.dosage,
+        frequency,
+        startDate: new Date(start),
+        endDate: new Date(end),
+        status: "active" as const,
+        dosesLogged: 0,
+        totalExpectedDoses,
+        notes: undefined,
+      };
+    });
+    if (newCycles.length === 0) return;
+    Promise.all(newCycles.map(async (cycle) => {
+      await saveCycle(cycle);
+      await generateDosesForCycle(cycle);
+    })).then(async () => {
+      setCycles((prev) => [...prev, ...newCycles]);
+      markTaskComplete("set_first_cycle");
+      if (template.id) await incrementTemplateUseCount(template.id);
+      setToast("✅ Cycle started from template - doses scheduled on Calendar");
+    });
+  };
+
   const createIndividualCycle = (form: {
     peptideName: string;
     durationWeeks: number;
@@ -314,6 +392,9 @@ export function CyclesContent({
       setCreateModalOpen(false);
       markTaskComplete("set_first_cycle");
       setToast("✅ Cycle created - doses scheduled on Calendar");
+      setLogCostCycleId(cycle.id);
+      setLogCostPeptideName(cycle.peptideName);
+      setShowLogCostPrompt(true);
     });
   };
 
@@ -431,6 +512,7 @@ export function CyclesContent({
                   onLogDose={logDose}
                   onPause={togglePause}
                   onComplete={completeCycle}
+                  onSaveAsTemplate={setSaveAsTemplateCycle}
                 />
               ))}
             </div>
@@ -500,6 +582,13 @@ export function CyclesContent({
                     <span className="text-[#9a9aa3]">
                       Completed {c.completedAt ? new Date(c.completedAt).toLocaleDateString() : "—"}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => setSaveAsTemplateCycle(c)}
+                      className="font-mono text-[10px] text-[#22d3ee] hover:underline"
+                    >
+                      Save as template
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -536,6 +625,167 @@ export function CyclesContent({
             await finalizeCompletion(reviewingCycle.id);
             setReviewingCycle(null);
             setToast("✅ Cycle completed and review saved");
+          }}
+        />
+      )}
+
+      {/* Save as Template Modal */}
+      {saveAsTemplateCycle && (
+        <SaveAsTemplateModal
+          cycleId={saveAsTemplateCycle.id}
+          cycleName={saveAsTemplateCycle.peptideName}
+          onSave={() => setToast("✅ Template saved")}
+          onClose={() => setSaveAsTemplateCycle(null)}
+        />
+      )}
+
+      {/* Set goals for this cycle? (after new cycle created) */}
+      {showLogCostPrompt && logCostCycleId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="log-cost-prompt-title">
+          <div className="deck-card-bg deck-border-thick rounded-xl w-full max-w-sm border-[#00ffaa]/40 bg-[#0a0e1a] p-6 shadow-[0_0_24px_rgba(0,255,170,0.15)]">
+            <h2 id="log-cost-prompt-title" className="font-space-mono text-lg font-bold text-[#00ffaa] mb-2">
+              Log peptide cost?
+            </h2>
+            <p className="font-mono text-xs text-[#9a9aa3] mb-4">
+              Track what you spent on {logCostPeptideName ?? "this cycle"} and optionally add it to inventory.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogCostPrompt(false);
+                  setPendingGoalsCycleId(logCostCycleId);
+                  setShowSetGoalsPrompt(true);
+                  setLogCostCycleId(null);
+                  setLogCostPeptideName(null);
+                }}
+                className="flex-1 rounded-lg border border-[#9a9aa3]/40 bg-transparent py-2.5 font-mono text-xs text-[#9a9aa3] hover:bg-[#00ffaa]/5"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogCostPrompt(false);
+                  setShowExpenseLogModal(true);
+                }}
+                className="flex-1 rounded-lg border border-[#00ffaa] bg-[#00ffaa]/10 py-2.5 font-mono text-xs font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expense log modal (after "Log peptide cost?" Yes) */}
+      {showExpenseLogModal && logCostCycleId && (
+        <ExpenseLogModal
+          initialCycleId={logCostCycleId}
+          initialPeptideName={logCostPeptideName}
+          onSave={() => setToast("✅ Expense saved")}
+          onClose={() => {
+            setShowExpenseLogModal(false);
+            setPendingGoalsCycleId(logCostCycleId);
+            setShowSetGoalsPrompt(true);
+            setLogCostCycleId(null);
+            setLogCostPeptideName(null);
+          }}
+        />
+      )}
+
+      {/* Set goals for this cycle? (after new cycle created, or after log cost) */}
+      {showSetGoalsPrompt && pendingGoalsCycleId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="set-goals-prompt-title">
+          <div className="deck-card-bg deck-border-thick rounded-xl w-full max-w-sm border-[#00ffaa]/40 bg-[#0a0e1a] p-6 shadow-[0_0_24px_rgba(0,255,170,0.15)]">
+            <h2 id="set-goals-prompt-title" className="font-space-mono text-lg font-bold text-[#00ffaa] mb-2">
+              Set goals for this cycle?
+            </h2>
+            <p className="font-mono text-xs text-[#9a9aa3] mb-4">
+              You can add up to 3 goals to track (e.g. weight, sleep, recovery).
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSetGoalsPrompt(false);
+                  setPendingGoalsCycleId(null);
+                }}
+                className="flex-1 rounded-lg border border-[#9a9aa3]/40 bg-transparent py-2.5 font-mono text-xs text-[#9a9aa3] hover:bg-[#00ffaa]/5"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSetGoalsPrompt(false);
+                  setShowGoalSetterModal(true);
+                  setGoalsAddedForCycle(0);
+                }}
+                className="flex-1 rounded-lg border border-[#00ffaa] bg-[#00ffaa]/10 py-2.5 font-mono text-xs font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add another goal? (after saving one goal, up to 3) */}
+      {showAddAnotherGoalPrompt && pendingGoalsCycleId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="add-another-goal-title">
+          <div className="deck-card-bg deck-border-thick rounded-xl w-full max-w-sm border-[#00ffaa]/40 bg-[#0a0e1a] p-6 shadow-[0_0_24px_rgba(0,255,170,0.15)]">
+            <h2 id="add-another-goal-title" className="font-space-mono text-lg font-bold text-[#00ffaa] mb-2">
+              Add another goal?
+            </h2>
+            <p className="font-mono text-xs text-[#9a9aa3] mb-4">
+              {goalsAddedForCycle}/3 goals added for this cycle.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddAnotherGoalPrompt(false);
+                  setPendingGoalsCycleId(null);
+                }}
+                className="flex-1 rounded-lg border border-[#9a9aa3]/40 bg-transparent py-2.5 font-mono text-xs text-[#9a9aa3] hover:bg-[#00ffaa]/5"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddAnotherGoalPrompt(false);
+                  setShowGoalSetterModal(true);
+                }}
+                className="flex-1 rounded-lg border border-[#00ffaa] bg-[#00ffaa]/10 py-2.5 font-mono text-xs font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goal setter modal (for new cycle goals flow) */}
+      {showGoalSetterModal && pendingGoalsCycleId && (
+        <GoalSetterModal
+          initialCycleId={pendingGoalsCycleId}
+          onSave={() => {
+            setShowGoalSetterModal(false);
+            const nextCount = goalsAddedForCycle + 1;
+            setGoalsAddedForCycle(nextCount);
+            setToast("✅ Goal saved");
+            if (nextCount < 3) {
+              setShowAddAnotherGoalPrompt(true);
+            } else {
+              setPendingGoalsCycleId(null);
+            }
+          }}
+          onClose={() => {
+            setShowGoalSetterModal(false);
+            setPendingGoalsCycleId(null);
+            setShowAddAnotherGoalPrompt(false);
           }}
         />
       )}
