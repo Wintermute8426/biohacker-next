@@ -39,9 +39,9 @@ export default function AppLayout({
   const moreMenuItems = [
     { href: "/app/research", label: "Research", icon: FlaskConical },
     { href: "/app/templates", label: "Templates", icon: FileStack },
+    { href: "/app/labs", label: "Labs", icon: TestTube },
     { href: "/app/side-effects", label: "Side Effects", icon: AlertTriangle },
     { href: "/app/journal", label: "Journal", icon: BookOpen },
-    { href: "/app/labs", label: "Labs", icon: TestTube },
     { href: "/app/reports", label: "Reports", icon: TrendingUp },
     { href: "/app/weight", label: "Weight Log", icon: Weight },
     { href: "/app/calendar", label: "Calendar", icon: Calendar },
