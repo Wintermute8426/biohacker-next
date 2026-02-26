@@ -9,6 +9,8 @@ import type { Cycle } from "@/lib/cycle-database";
 interface ExpenseLogModalProps {
   onSave: () => void;
   onClose: () => void;
+  initialCycleId?: string;
+  initialPeptideName?: string | null;
 }
 
 const EXPENSE_TYPES: { value: ExpenseType; label: string }[] = [
@@ -19,15 +21,15 @@ const EXPENSE_TYPES: { value: ExpenseType; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
-export default function ExpenseLogModal({ onSave, onClose }: ExpenseLogModalProps) {
+export default function ExpenseLogModal({ onSave, onClose, initialCycleId, initialPeptideName }: ExpenseLogModalProps) {
   const [expenseType, setExpenseType] = useState<ExpenseType>("peptide");
-  const [peptideName, setPeptideName] = useState("");
+  const [peptideName, setPeptideName] = useState(initialPeptideName || "");
   const [cost, setCost] = useState("");
   const [description, setDescription] = useState("");
   const [purchasedDate, setPurchasedDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
-  const [linkedCycleId, setLinkedCycleId] = useState("");
+  const [linkedCycleId, setLinkedCycleId] = useState(initialCycleId || "");
   const [addToInventory, setAddToInventory] = useState(false);
   const [supplier, setSupplier] = useState("");
   const [vialSizeMg, setVialSizeMg] = useState("");
