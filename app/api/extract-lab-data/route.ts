@@ -1,25 +1,37 @@
 // app/api/extract-lab-data/route.ts
-// Simple PDF extraction using Claude Sonnet with native PDF support
+// Simple version: pdf-parse + Haiku (like AI Insights uses Sonnet for text)
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
 export const runtime = 'nodejs';
 
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!
+});
+
+// Simple PDF text extraction using pdfjs-dist (no system dependencies)
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  // Dynamic import to avoid build issues
+  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
+  
+  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
+  const pdf = await loadingTask.promise;
+  
+  let fullText = '';
+  
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+    const page = await pdf.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item: any) => item.str).join(' ');
+    fullText += pageText + '\n\n';
+  }
+  
+  return fullText.trim();
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    
-    if (!apiKey) {
-      console.error('ANTHROPIC_API_KEY not found in environment');
-      return NextResponse.json(
-        { error: 'API key not configured' },
-        { status: 500 }
-      );
-    }
-
-    const anthropic = new Anthropic({ apiKey });
-
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -28,28 +40,26 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const base64Pdf = buffer.toString('base64');
     console.log('Processing PDF, size:', buffer.length);
 
-    // Use Claude Sonnet with PDF document support
+    // Extract text from PDF
+    console.log('Extracting text from PDF...');
+    const pdfText = await extractPdfText(buffer);
+    console.log('Extracted text length:', pdfText.length);
+
+    if (!pdfText || pdfText.length < 50) {
+      throw new Error('Could not extract sufficient text from PDF');
+    }
+
+    // Send to Claude Haiku (same pattern as AI Insights uses Sonnet)
+    console.log('Sending to Claude Haiku for analysis...');
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 8192,
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 4096,
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: 'application/pdf',
-                data: base64Pdf,
-              },
-            },
-            {
-              type: 'text',
-              text: `Extract ALL lab test markers from this medical lab report PDF. For each marker, extract:
+          content: `Extract ALL lab test markers from this medical lab report text. For each marker, extract:
 - marker_name: The test name (e.g., "Testosterone", "Glucose", "Cholesterol")
 - value: The numeric value
 - unit: The unit of measurement (e.g., "ng/dL", "mg/dL", "pg/mL")
@@ -80,21 +90,22 @@ Return ONLY valid JSON in this exact format:
 
 Set is_flagged to true if the value is outside the reference range.
 If you can't determine a field, use null.
-Extract ALL markers you can find in the document.`,
-            },
-          ],
-        },
-      ],
+Extract ALL markers you can find in the document.
+
+Here is the lab report text:
+
+${pdfText}`
+        }
+      ]
     });
 
     console.log('Claude response received');
 
+    // Parse response (same as AI Insights)
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
-    
-    // Extract JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    
     if (!jsonMatch) {
-      console.error('Could not find JSON in response:', responseText);
       throw new Error('Could not parse JSON from Claude response');
     }
 
