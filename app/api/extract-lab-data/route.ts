@@ -1,5 +1,5 @@
 // app/api/extract-lab-data/route.ts
-// Uses unpdf (pure JS, serverless-compatible) + Haiku
+// Fixed - convert Buffer to Uint8Array for unpdf
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
@@ -20,12 +20,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    console.log('Processing PDF, size:', buffer.length);
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    console.log('Processing PDF, size:', uint8Array.length);
 
-    // Extract text using unpdf (pure JS, no native deps)
+    // Extract text using unpdf (needs Uint8Array, not Buffer)
     console.log('Extracting text from PDF with unpdf...');
-    const { text } = await extractText(buffer, { mergePages: true });
+    const { text } = await extractText(uint8Array, { mergePages: true });
     
     console.log('Extracted text length:', text.length);
 
