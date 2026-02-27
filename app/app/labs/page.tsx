@@ -143,7 +143,7 @@ export default function LabResultsPage() {
   };
 
   const renderValueWithStatus = (result: LabResult) => {
-    const val = parseFloat(result.value);
+    const val = typeof result.value === 'string' ? parseFloat(result.value) : result.value;
     const min = result.referenceRangeMin;
     const max = result.referenceRangeMax;
 
@@ -317,7 +317,7 @@ export default function LabResultsPage() {
                 snapshots.map((snapshot) => {
                   const isExpanded = expandedCards.has(snapshot.testDate);
                   const outOfRangeCount = snapshot.markers.filter(m => {
-                    const val = parseFloat(m.value);
+                    const val = typeof m.value === 'string' ? parseFloat(m.value) : m.value;
                     const min = m.referenceRangeMin;
                     const max = m.referenceRangeMax;
                     return min !== null && max !== null && (val < min || val > max);
