@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Upload, FileText, TrendingUp, TrendingDown, AlertCircle, CheckCircle, Activity, Trash2, Eye, Download, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -31,30 +31,15 @@ interface ExtractedData {
 
 export function BloodworkAI() {
   const [labReports, setLabReports] = useState<LabReport[]>([]);
-  const [selectedReport, setSelectedReport] = useState<LabReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const normalizeCategory = (category: string | null): string => {
-    if (!category) return 'general';
-    const normalized = category.toLowerCase().trim();
-    const validCategories = ['hormone', 'metabolic', 'cardiovascular', 'inflammatory', 'liver', 'kidney', 'thyroid', 'vitamin', 'general'];
-    if (validCategories.includes(normalized)) return normalized;
-    if (normalized.includes('hormone') || normalized.includes('endocrine')) return 'hormone';
-    if (normalized.includes('metabol')) return 'metabolic';
-    if (normalized.includes('cardio') || normalized.includes('heart')) return 'cardiovascular';
-    if (normalized.includes('inflam')) return 'inflammatory';
-    if (normalized.includes('hepat') || normalized.includes('liver')) return 'liver';
-    if (normalized.includes('renal') || normalized.includes('kidney')) return 'kidney';
-    if (normalized.includes('thyroid')) return 'thyroid';
-    if (normalized.includes('vitamin') || normalized.includes('nutrient')) return 'vitamin';
-    return 'general';
-  };
-
-  const fetchLabReports = async () => {
+  // Load reports on mount
+  const loadReports = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -75,10 +60,6 @@ export function BloodworkAI() {
       })));
     }
   };
-
-  useEffect(() => {
-    fetchLabReports();
-  }, []);
 
   // Handle PDF upload
   const handleFileUpload = async (file: File) => {
@@ -160,8 +141,6 @@ export function BloodworkAI() {
       const markers = extractedData.markers.map(m => ({
         report_id: report.id,
         ...m,
-        category: normalizeCategory(m.category ?? null),
-        unit: m.unit || '',
       }));
 
       const { error: markersError } = await supabase
@@ -191,25 +170,11 @@ export function BloodworkAI() {
       }
 
       // Reload reports
-      await fetchLabReports();
+      await loadReports();
       setShowReviewModal(false);
       setExtractedData(null);
     } catch (err: any) {
       setError(err.message || 'Failed to save report');
-    }
-  };
-
-  const deleteLabReport = async (report: LabReport, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const supabase = createClient();
-      await supabase.from('lab_markers').delete().eq('report_id', report.id);
-      const { error } = await supabase.from('lab_reports').delete().eq('id', report.id);
-      if (error) throw error;
-      setLabReports((prev) => prev.filter((r) => r.id !== report.id));
-      if (selectedReport?.id === report.id) setSelectedReport(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete report');
     }
   };
 
@@ -242,15 +207,15 @@ export function BloodworkAI() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold font-mono text-gray-300">BloodworkAI</h2>
-          <p className="text-sm text-gray-300/80 font-mono">
+          <h2 className="text-2xl font-bold">BloodworkAI</h2>
+          <p className="text-sm text-muted-foreground">
             Upload lab PDFs • AI extracts markers • Analyze trends
           </p>
         </div>
         <button
           onClick={analyzeTrends}
           disabled={labReports.length < 2 || isAnalyzing}
-          className="bg-green-500/20 border border-green-500/30 text-green-400 font-mono px-6 py-3 rounded hover:bg-green-500/30 disabled:opacity-50 flex items-center gap-2"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
         >
           <Activity className="w-4 h-4" />
           {isAnalyzing ? "Analyzing..." : "Analyze Trends"}
@@ -266,7 +231,7 @@ export function BloodworkAI() {
 
       {/* PDF Upload */}
       <div
-        className="border-2 border-dashed border-green-500/20 rounded-lg p-8 text-center cursor-pointer hover:border-green-500/40 bg-black/30 transition-colors"
+        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -285,11 +250,11 @@ export function BloodworkAI() {
             if (file) handleFileUpload(file);
           }}
         />
-        <Upload className="w-12 h-12 mx-auto mb-4 text-green-400/80" />
-        <h3 className="font-semibold font-mono text-gray-300 mb-2">
+        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="font-semibold mb-2">
           {isUploading ? "Processing..." : "Upload Lab Report PDF"}
         </h3>
-        <p className="text-sm text-gray-300/80 font-mono">
+        <p className="text-sm text-muted-foreground">
           Drag & drop or click to upload • AI will extract all markers automatically
         </p>
       </div>
@@ -297,29 +262,21 @@ export function BloodworkAI() {
       {/* Lab Reports Archive */}
       {labReports.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold font-mono text-gray-300 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-green-400" />
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="w-5 h-5" />
             Lab History ({labReports.length} reports)
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {labReports.map((report) => (
               <div
                 key={report.id}
-                className="bg-black/30 border border-green-500/20 rounded-lg p-4 cursor-pointer hover:border-green-500/40 transition-colors relative"
-                onClick={() => setSelectedReport(report)}
+                className="border rounded-lg p-4 hover:bg-accent cursor-pointer"
+                onClick={() => setSelectedReport(report.id)}
               >
-                <button
-                  type="button"
-                  onClick={(e) => deleteLabReport(report, e)}
-                  className="absolute top-3 right-3 p-1.5 rounded text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                  aria-label="Delete report"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <div className="flex items-center justify-between mb-3 pr-8">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-green-400" />
-                    <span className="font-medium font-mono text-green-400">
+                    <FileText className="w-5 h-5" />
+                    <span className="font-medium">
                       {new Date(report.test_date).toLocaleDateString()}
                     </span>
                   </div>
@@ -329,35 +286,35 @@ export function BloodworkAI() {
                         href={report.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1 rounded text-gray-300 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                        className="p-1 hover:bg-accent rounded"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Download className="w-4 h-4" />
                       </a>
                     )}
-                    <span className="text-sm text-gray-300 font-mono">
+                    <span className="text-sm text-muted-foreground">
                       {report.markers.length} markers
                     </span>
                   </div>
                 </div>
 
                 {report.lab_name && (
-                  <p className="text-xs text-gray-300/80 font-mono mb-2">
+                  <p className="text-xs text-muted-foreground mb-2">
                     {report.lab_name}
                   </p>
                 )}
 
                 <div className="space-y-2">
                   {report.markers.slice(0, 3).map((marker) => (
-                    <div key={marker.marker_name} className="flex items-center justify-between text-sm font-mono">
-                      <span className="text-gray-300">{marker.marker_name}</span>
+                    <div key={marker.marker_name} className="flex items-center justify-between text-sm">
+                      <span>{marker.marker_name}</span>
                       <span className={getStatusColor(marker.is_flagged)}>
                         {marker.value} {marker.unit}
                       </span>
                     </div>
                   ))}
                   {report.markers.length > 3 && (
-                    <p className="text-xs text-gray-300/80 font-mono">
+                    <p className="text-xs text-muted-foreground">
                       +{report.markers.length - 3} more markers
                     </p>
                   )}
@@ -368,79 +325,18 @@ export function BloodworkAI() {
         </div>
       )}
 
-      {/* Detailed Report Modal */}
-      {selectedReport && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-black/30 border border-green-500/20 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold font-mono text-gray-300">
-                Lab Report — {new Date(selectedReport.test_date).toLocaleDateString()}
-                {selectedReport.lab_name && ` · ${selectedReport.lab_name}`}
-              </h3>
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="p-2 rounded text-gray-300 hover:text-green-400 hover:bg-green-500/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <h4 className="font-semibold font-mono text-gray-300 mb-3">All Markers ({selectedReport.markers.length})</h4>
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
-              {selectedReport.markers.map((marker, idx) => (
-                <div key={idx} className="border border-green-500/20 rounded-lg p-3 bg-black/30 text-sm">
-                  <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-center flex-wrap font-mono">
-                    <div>
-                      <span className="text-xs text-gray-300 block">Marker</span>
-                      <p className="font-medium text-green-400">{marker.marker_name}</p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-300 block">Value</span>
-                      <p className="font-medium text-green-400">{marker.value} {marker.unit || ''}</p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-300 block">Reference</span>
-                      <p className="text-xs text-green-400">
-                        {marker.reference_min != null && marker.reference_max != null
-                          ? `${marker.reference_min}–${marker.reference_max} ${marker.unit || ''}`
-                          : '—'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-gray-300 block">Status</span>
-                      <p className={`text-xs font-medium ${getStatusColor(marker.is_flagged)}`}>
-                        {marker.is_flagged ? "Flagged" : "Normal"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="px-4 py-2 border border-green-500/30 rounded-lg text-green-400 font-mono hover:bg-green-500/20 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Review Modal */}
       {showReviewModal && extractedData && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-black/30 border border-green-500/20 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold font-mono text-gray-300">Review Extracted Data</h3>
+              <h3 className="text-xl font-bold">Review Extracted Data</h3>
               <button
                 onClick={() => {
                   setShowReviewModal(false);
                   setExtractedData(null);
                 }}
-                className="p-2 rounded text-gray-300 hover:text-green-400 hover:bg-green-500/10 transition-colors"
+                className="p-2 hover:bg-accent rounded"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -449,42 +345,53 @@ export function BloodworkAI() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium font-mono text-gray-300 mb-2 block">Test Date</label>
+                  <label className="text-sm font-medium mb-2 block">Test Date</label>
                   <input
                     type="date"
                     value={extractedData.test_date}
                     onChange={(e) => setExtractedData({ ...extractedData, test_date: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-500/20 rounded-lg text-gray-100 bg-black/30"
+                    className="w-full px-3 py-2 border rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium font-mono text-gray-300 mb-2 block">Lab Name (optional)</label>
+                  <label className="text-sm font-medium mb-2 block">Lab Name (optional)</label>
                   <input
                     type="text"
                     value={extractedData.lab_name || ''}
                     onChange={(e) => setExtractedData({ ...extractedData, lab_name: e.target.value })}
-                    className="w-full px-3 py-2 border border-green-500/20 rounded-lg text-gray-100 bg-black/30"
+                    className="w-full px-3 py-2 border rounded-lg"
                     placeholder="e.g., Quest Diagnostics"
                   />
                 </div>
               </div>
 
               <div>
-                <h4 className="font-semibold font-mono text-gray-300 mb-3">Extracted Markers ({extractedData.markers.length})</h4>
-                <div className="grid grid-cols-4 gap-2 max-h-96 overflow-y-auto">
+                <h4 className="font-semibold mb-3">Extracted Markers ({extractedData.markers.length})</h4>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
                   {extractedData.markers.map((marker, idx) => (
-                    <div key={idx} className="border border-green-500/20 rounded-lg p-2 bg-black/30 text-sm font-mono">
-                      <span className="text-xs text-gray-300 block">Marker</span>
-                      <p className="font-medium text-green-400 truncate" title={marker.marker_name}>{marker.marker_name}</p>
-                      <span className="text-xs text-gray-300 block mt-1">Value</span>
-                      <p className="font-medium text-green-400">{marker.value} {marker.unit}</p>
-                      <span className="text-xs text-gray-300 block mt-1">Ref</span>
-                      <p className="text-xs text-green-400">
-                        {marker.reference_min}-{marker.reference_max} {marker.unit}
-                      </p>
-                      <p className={`text-xs font-medium mt-1 ${getStatusColor(marker.is_flagged)}`}>
-                        {marker.is_flagged ? "Flagged" : "Normal"}
-                      </p>
+                    <div key={idx} className="border rounded-lg p-3 bg-muted/50">
+                      <div className="grid grid-cols-4 gap-2 text-sm">
+                        <div>
+                          <span className="text-xs text-muted-foreground">Marker</span>
+                          <p className="font-medium">{marker.marker_name}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Value</span>
+                          <p className="font-medium">{marker.value} {marker.unit}</p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Reference</span>
+                          <p className="text-xs">
+                            {marker.reference_min}-{marker.reference_max} {marker.unit}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">Status</span>
+                          <p className={`text-xs font-medium ${getStatusColor(marker.is_flagged)}`}>
+                            {marker.is_flagged ? "Flagged" : "Normal"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -496,13 +403,13 @@ export function BloodworkAI() {
                     setShowReviewModal(false);
                     setExtractedData(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-green-500/30 rounded-lg text-gray-300 font-mono hover:bg-green-500/10 hover:text-green-400 transition-colors"
+                  className="flex-1 px-4 py-2 border rounded-lg hover:bg-accent"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveLabReport}
-                  className="flex-1 px-4 py-2 bg-green-500/20 border border-green-500/30 text-green-400 font-bold font-mono rounded-lg hover:bg-green-500/30 transition-colors"
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
                 >
                   Save Lab Report
                 </button>
@@ -514,8 +421,8 @@ export function BloodworkAI() {
 
       {/* Empty State */}
       {labReports.length === 0 && !isUploading && (
-        <div className="text-center py-12 text-gray-300 font-mono">
-          <FileText className="w-12 h-12 mx-auto mb-4 text-green-400/50" />
+        <div className="text-center py-12 text-muted-foreground">
+          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>No lab reports yet. Upload your first PDF above!</p>
         </div>
       )}

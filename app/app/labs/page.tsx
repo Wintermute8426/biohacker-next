@@ -9,7 +9,7 @@ import {
 import type { LabResult, OutOfRangeBiomarker, TestType } from "@/lib/lab-database";
 import { Trash2, Plus, Eye, AlertTriangle } from "lucide-react";
 import LabResultModal from "@/components/LabResultModal";
-import BloodworkAI from "@/components/BloodworkAI";
+import { BloodworkAI } from "@/components/BloodworkAI";
 
 const TEST_TYPE_LABELS: Record<TestType, string> = {
   bloodwork: "Bloodwork",
