@@ -1,34 +1,15 @@
 // app/api/extract-lab-data/route.ts
-// Simple version: pdf-parse + Haiku (like AI Insights uses Sonnet for text)
+// Simplest version: pdf-parse (no complex imports)
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import pdf from 'pdf-parse';
 
 export const runtime = 'nodejs';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!
 });
-
-// Simple PDF text extraction using pdfjs-dist (no system dependencies)
-async function extractPdfText(buffer: Buffer): Promise<string> {
-  // Dynamic import to avoid build issues
-  const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
-  
-  const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
-  const pdf = await loadingTask.promise;
-  
-  let fullText = '';
-  
-  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-    const page = await pdf.getPage(pageNum);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items.map((item: any) => item.str).join(' ');
-    fullText += pageText + '\n\n';
-  }
-  
-  return fullText.trim();
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,16 +23,19 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     console.log('Processing PDF, size:', buffer.length);
 
-    // Extract text from PDF
-    console.log('Extracting text from PDF...');
-    const pdfText = await extractPdfText(buffer);
+    // Extract text using pdf-parse
+    console.log('Extracting text from PDF with pdf-parse...');
+    const data = await pdf(buffer);
+    const pdfText = data.text;
+    
     console.log('Extracted text length:', pdfText.length);
+    console.log('Pages:', data.numpages);
 
     if (!pdfText || pdfText.length < 50) {
       throw new Error('Could not extract sufficient text from PDF');
     }
 
-    // Send to Claude Haiku (same pattern as AI Insights uses Sonnet)
+    // Send to Claude Haiku
     console.log('Sending to Claude Haiku for analysis...');
     const message = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
@@ -101,7 +85,6 @@ ${pdfText}`
 
     console.log('Claude response received');
 
-    // Parse response (same as AI Insights)
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     
