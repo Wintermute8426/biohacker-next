@@ -1,17 +1,15 @@
 // app/api/extract-lab-data/route.ts
-// Use require() for CommonJS module in Node.js runtime
+// Uses unpdf (pure JS, serverless-compatible) + Haiku
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { extractText } from 'unpdf';
 
 export const runtime = 'nodejs';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!
 });
-
-// Use require for CommonJS module
-const pdf = require('pdf-parse');
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,15 +23,13 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     console.log('Processing PDF, size:', buffer.length);
 
-    // Extract text using pdf-parse
-    console.log('Extracting text from PDF with pdf-parse...');
-    const data = await pdf(buffer);
-    const pdfText = data.text;
+    // Extract text using unpdf (pure JS, no native deps)
+    console.log('Extracting text from PDF with unpdf...');
+    const { text } = await extractText(buffer, { mergePages: true });
     
-    console.log('Extracted text length:', pdfText.length);
-    console.log('Pages:', data.numpages);
+    console.log('Extracted text length:', text.length);
 
-    if (!pdfText || pdfText.length < 50) {
+    if (!text || text.length < 50) {
       throw new Error('Could not extract sufficient text from PDF');
     }
 
@@ -80,7 +76,7 @@ Extract ALL markers you can find in the document.
 
 Here is the lab report text:
 
-${pdfText}`
+${text}`
         }
       ]
     });
