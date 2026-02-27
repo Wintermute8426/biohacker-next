@@ -1,9 +1,8 @@
 // app/api/extract-lab-data/route.ts
-// Simplest version: pdf-parse (no complex imports)
+// Fixed CommonJS import for pdf-parse
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import pdf from 'pdf-parse';
 
 export const runtime = 'nodejs';
 
@@ -23,9 +22,10 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     console.log('Processing PDF, size:', buffer.length);
 
-    // Extract text using pdf-parse
+    // Dynamic import for CommonJS module
     console.log('Extracting text from PDF with pdf-parse...');
-    const data = await pdf(buffer);
+    const pdfParse = (await import('pdf-parse')).default;
+    const data = await pdfParse(buffer);
     const pdfText = data.text;
     
     console.log('Extracted text length:', pdfText.length);
