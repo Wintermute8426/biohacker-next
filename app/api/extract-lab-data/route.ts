@@ -1,5 +1,5 @@
 // app/api/extract-lab-data/route.ts
-// Fixed - convert Buffer to Uint8Array for unpdf
+// Fixed - removed category field (not in database)
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const uint8Array = new Uint8Array(arrayBuffer);
     console.log('Processing PDF, size:', uint8Array.length);
 
-    // Extract text using unpdf (needs Uint8Array, not Buffer)
+    // Extract text using unpdf
     console.log('Extracting text from PDF with unpdf...');
     const { text } = await extractText(uint8Array, { mergePages: true });
     
@@ -43,12 +43,11 @@ export async function POST(request: NextRequest) {
         {
           role: 'user',
           content: `Extract ALL lab test markers from this medical lab report text. For each marker, extract:
-- marker_name: The test name (e.g., "Testosterone", "Glucose", "Cholesterol")
+- marker_name: The biomarker name (e.g., "Testosterone", "Glucose", "Cholesterol")
 - value: The numeric value
 - unit: The unit of measurement (e.g., "ng/dL", "mg/dL", "pg/mL")
 - reference_min: Lower bound of reference range (if available)
 - reference_max: Upper bound of reference range (if available)
-- category: One of: hormone, metabolic, cardiovascular, inflammatory, liver, kidney, thyroid, vitamin, general
 
 Also extract:
 - test_date: The date of the test (YYYY-MM-DD format)
@@ -64,14 +63,11 @@ Return ONLY valid JSON in this exact format:
       "value": 450,
       "unit": "ng/dL",
       "reference_min": 300,
-      "reference_max": 1000,
-      "category": "hormone",
-      "is_flagged": false
+      "reference_max": 1000
     }
   ]
 }
 
-Set is_flagged to true if the value is outside the reference range.
 If you can't determine a field, use null.
 Extract ALL markers you can find in the document.
 
