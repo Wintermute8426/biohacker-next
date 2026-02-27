@@ -7,7 +7,7 @@ import {
   getOutOfRangeBiomarkers,
 } from "@/lib/lab-database";
 import type { LabResult, OutOfRangeBiomarker, TestType } from "@/lib/lab-database";
-import { Trash2, Plus, Eye, AlertTriangle } from "lucide-react";
+import { Trash2, Plus, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import LabResultModal from "@/components/LabResultModal";
 import { BloodworkAI } from "@/components/BloodworkAI";
 
@@ -20,6 +20,13 @@ const TEST_TYPE_LABELS: Record<TestType, string> = {
 
 type TabId = "all" | "out_of_range" | "recent" | "upload";
 
+// Group results by test date
+interface LabSnapshot {
+  testDate: string;
+  labName: string | null;
+  markers: LabResult[];
+}
+
 export default function LabResultsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("all");
   const [labResults, setLabResults] = useState<LabResult[]>([]);
@@ -27,6 +34,7 @@ export default function LabResultsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   // Filters
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -95,58 +103,139 @@ export default function LabResultsPage() {
     filterBiomarker,
   ]);
 
+  // Group filtered results by test date
+  const snapshots = useMemo<LabSnapshot[]>(() => {
+    const grouped = new Map<string, LabResult[]>();
+    
+    filtered.forEach(result => {
+      const existing = grouped.get(result.testDate) || [];
+      existing.push(result);
+      grouped.set(result.testDate, existing);
+    });
+
+    return Array.from(grouped.entries())
+      .map(([testDate, markers]) => ({
+        testDate,
+        labName: markers[0]?.labName || null,
+        markers: markers.sort((a, b) => a.biomarkerName.localeCompare(b.biomarkerName))
+      }))
+      .sort((a, b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime());
+  }, [filtered]);
+
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this lab result?")) return;
     const result = await deleteLabResult(id);
-    if (result.success) refresh();
-    else setError(result.error ?? "Delete failed");
+    if (result.success) {
+      refresh();
+    } else {
+      alert(result.error || "Failed to delete lab result");
+    }
   };
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: "all", label: "All Results" },
-    { id: "out_of_range", label: "Out of Range" },
-    { id: "recent", label: "Recent" },
-    { id: "upload", label: "Upload" },
-  ];
+  const toggleCard = (testDate: string) => {
+    const newExpanded = new Set(expandedCards);
+    if (newExpanded.has(testDate)) {
+      newExpanded.delete(testDate);
+    } else {
+      newExpanded.add(testDate);
+    }
+    setExpandedCards(newExpanded);
+  };
 
-  const isInRange = (result: LabResult): boolean => {
-    if (!result.referenceRangeMin || !result.referenceRangeMax) return true;
-    return result.value >= result.referenceRangeMin && result.value <= result.referenceRangeMax;
+  const renderValueWithStatus = (result: LabResult) => {
+    const val = parseFloat(result.value);
+    const min = result.referenceRangeMin;
+    const max = result.referenceRangeMax;
+
+    let statusColor = "text-gray-400";
+    let statusLabel = "NORMAL";
+
+    if (min !== null && max !== null) {
+      if (val < min) {
+        statusColor = "text-yellow-500";
+        statusLabel = "LOW";
+      } else if (val > max) {
+        statusColor = "text-red-500";
+        statusLabel = "HIGH";
+      } else {
+        statusColor = "text-green-500";
+        statusLabel = "NORMAL";
+      }
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-cyan-400 font-mono">{result.value}</span>
+        {result.unit && (
+          <span className="text-gray-500 text-xs">{result.unit}</span>
+        )}
+        <span className={`${statusColor} text-xs font-bold`}>[{statusLabel}]</span>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen p-4 pb-32">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-space-mono text-xl font-bold tracking-wider text-[#f5f5f7] uppercase sm:text-2xl">
-          LAB RESULTS
-        </h1>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-cyan-400 mb-1">LAB RESULTS</h1>
+          <div className="text-xs text-gray-500">
+            {snapshots.length} test dates • {labResults.length} total markers • {outOfRange.length} out of range
+          </div>
+        </div>
         <button
-          type="button"
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 rounded-lg border-2 border-[#00ffaa]/40 bg-[#00ffaa]/10 px-4 py-2.5 font-mono text-xs font-medium text-[#00ffaa] hover:bg-[#00ffaa]/20 hover:border-[#00ffaa] transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
         >
-          <Plus className="h-4 w-4" />
+          <Plus size={16} />
           ADD RESULT
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`rounded-lg border-2 px-4 py-2 font-mono text-xs font-semibold uppercase tracking-wider transition-all ${
-              activeTab === tab.id
-                ? "border-[#00ffaa] bg-[#00ffaa]/20 text-[#00ffaa]"
-                : "border-[#00ffaa]/25 bg-black/50 text-[#9a9aa3] hover:border-[#00ffaa]/50 hover:text-[#00ffaa]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="flex gap-2 mb-4 border-b border-gray-800">
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "all"
+              ? "text-cyan-400 border-b-2 border-cyan-400"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          ALL RESULTS
+        </button>
+        <button
+          onClick={() => setActiveTab("out_of_range")}
+          className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+            activeTab === "out_of_range"
+              ? "text-red-400 border-b-2 border-red-400"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          <AlertTriangle size={14} />
+          OUT OF RANGE ({outOfRange.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("recent")}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "recent"
+              ? "text-cyan-400 border-b-2 border-cyan-400"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          RECENT (30 DAYS)
+        </button>
+        <button
+          onClick={() => setActiveTab("upload")}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === "upload"
+              ? "text-cyan-400 border-b-2 border-cyan-400"
+              : "text-gray-500 hover:text-gray-300"
+          }`}
+        >
+          UPLOAD
+        </button>
       </div>
 
       {/* Upload Tab */}
@@ -154,145 +243,171 @@ export default function LabResultsPage() {
         <BloodworkAI />
       )}
 
-      {/* Other Tabs */}
+      {/* Results Tabs */}
       {activeTab !== "upload" && (
         <>
           {/* Filters */}
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 p-4 flex flex-wrap gap-4 items-end">
-            <div>
-              <label className="block font-mono text-[10px] text-[#9a9aa3] mb-1">From</label>
-              <input
-                type="date"
-                value={filterDateFrom}
-                onChange={(e) => setFilterDateFrom(e.target.value)}
-                className="bg-black/50 border border-[#00ffaa]/40 rounded px-3 py-1.5 font-mono text-sm text-[#f5f5f7]"
-              />
-            </div>
-            <div>
-              <label className="block font-mono text-[10px] text-[#9a9aa3] mb-1">To</label>
-              <input
-                type="date"
-                value={filterDateTo}
-                onChange={(e) => setFilterDateTo(e.target.value)}
-                className="bg-black/50 border border-[#00ffaa]/40 rounded px-3 py-1.5 font-mono text-sm text-[#f5f5f7]"
-              />
-            </div>
-            <div className="min-w-[140px]">
-              <label className="block font-mono text-[10px] text-[#9a9aa3] mb-1">Test type</label>
-              <select
-                value={filterTestType}
-                onChange={(e) => setFilterTestType(e.target.value as TestType | "")}
-                className="w-full bg-black/50 border border-[#00ffaa]/40 rounded px-3 py-1.5 font-mono text-sm text-[#f5f5f7]"
-              >
-                <option value="">All</option>
-                {(Object.keys(TEST_TYPE_LABELS) as TestType[]).map((k) => (
-                  <option key={k} value={k}>{TEST_TYPE_LABELS[k]}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1 min-w-[180px]">
-              <label className="block font-mono text-[10px] text-[#9a9aa3] mb-1">Biomarker search</label>
-              <input
-                type="text"
-                value={filterBiomarker}
-                onChange={(e) => setFilterBiomarker(e.target.value)}
-                placeholder="Search biomarker..."
-                className="w-full bg-black/50 border border-[#00ffaa]/40 rounded px-3 py-1.5 font-mono text-sm text-[#f5f5f7]"
-              />
+          <div className="mb-4 p-4 bg-black/40 border border-gray-800">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">FROM DATE</label>
+                <input
+                  type="date"
+                  value={filterDateFrom}
+                  onChange={(e) => setFilterDateFrom(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/60 border border-gray-700 text-gray-300 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">TO DATE</label>
+                <input
+                  type="date"
+                  value={filterDateTo}
+                  onChange={(e) => setFilterDateTo(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/60 border border-gray-700 text-gray-300 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">TEST TYPE</label>
+                <select
+                  value={filterTestType}
+                  onChange={(e) => setFilterTestType(e.target.value as TestType | "")}
+                  className="w-full px-3 py-2 bg-black/60 border border-gray-700 text-gray-300 text-sm"
+                >
+                  <option value="">All Types</option>
+                  {Object.entries(TEST_TYPE_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">BIOMARKER</label>
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={filterBiomarker}
+                  onChange={(e) => setFilterBiomarker(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/60 border border-gray-700 text-gray-300 text-sm"
+                />
+              </div>
             </div>
           </div>
 
+          {/* Loading/Error States */}
+          {loading && (
+            <div className="text-center py-12 text-gray-500">Loading lab results...</div>
+          )}
+
           {error && (
-            <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 font-mono text-sm text-red-400 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 shrink-0" />
+            <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 mb-4">
               {error}
             </div>
           )}
 
-          {/* Results Table */}
-          <div className="deck-card-bg deck-border-thick rounded-xl border-[#00ffaa]/20 overflow-hidden">
-            {loading ? (
-              <div className="py-12 text-center font-mono text-[#9a9aa3]">
-                Loading lab results...
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="py-12 text-center">
-                <p className="font-mono text-sm">No lab results yet. Add your first result below.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-[#00ffaa]/20">
-                      <th className="text-left p-3 font-mono text-xs text-[#9a9aa3] uppercase">Test Date</th>
-                      <th className="text-left p-3 font-mono text-xs text-[#9a9aa3] uppercase">Biomarker</th>
-                      <th className="text-left p-3 font-mono text-xs text-[#9a9aa3] uppercase">Value</th>
-                      <th className="text-left p-3 font-mono text-xs text-[#9a9aa3] uppercase">Reference Range</th>
-                      <th className="text-left p-3 font-mono text-xs text-[#9a9aa3] uppercase">Lab Name</th>
-                      <th className="text-right p-3 font-mono text-xs text-[#9a9aa3] uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((row) => {
-                      const inRange = isInRange(row);
-                      const valueColor = !row.referenceRangeMin && !row.referenceRangeMax
-                        ? "text-[#9a9aa3]"
-                        : inRange
-                        ? "text-green-500"
-                        : "text-red-500";
+          {/* Lab Snapshot Cards */}
+          {!loading && !error && (
+            <div className="space-y-4">
+              {snapshots.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 bg-black/40 border border-gray-800">
+                  No lab results found. Add your first result to get started.
+                </div>
+              ) : (
+                snapshots.map((snapshot) => {
+                  const isExpanded = expandedCards.has(snapshot.testDate);
+                  const outOfRangeCount = snapshot.markers.filter(m => {
+                    const val = parseFloat(m.value);
+                    const min = m.referenceRangeMin;
+                    const max = m.referenceRangeMax;
+                    return min !== null && max !== null && (val < min || val > max);
+                  }).length;
 
-                      return (
-                        <tr key={row.id} className="border-b border-[#00ffaa]/10 hover:bg-[#00ffaa]/5 transition-colors">
-                          <td className="p-3 font-mono text-xs text-[#e0e0e5]">
-                            {new Date(row.testDate).toLocaleDateString()}
-                          </td>
-                          <td className="p-3 font-mono text-sm text-[#f5f5f7]">
-                            {row.biomarkerName}
-                          </td>
-                          <td className={`p-3 font-mono text-sm font-bold ${valueColor}`}>
-                            {row.value} {row.unit}
-                          </td>
-                          <td className="p-3 font-mono text-xs text-[#9a9aa3]">
-                            {row.referenceRangeMin && row.referenceRangeMax
-                              ? `${row.referenceRangeMin} - ${row.referenceRangeMax}`
-                              : "—"}
-                          </td>
-                          <td className="p-3 font-mono text-xs text-[#9a9aa3]">
-                            {row.labName ?? "—"}
-                          </td>
-                          <td className="p-3">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                className="p-2 rounded text-[#9a9aa3] hover:text-[#00ffaa] transition-colors"
-                                aria-label="View"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(row.id)}
-                                className="p-2 rounded text-[#9a9aa3] hover:text-red-500 transition-colors"
-                                aria-label="Delete"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                  return (
+                    <div
+                      key={snapshot.testDate}
+                      className="bg-black/40 border border-gray-800 overflow-hidden"
+                    >
+                      {/* Card Header */}
+                      <div
+                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-black/60 transition-colors"
+                        onClick={() => toggleCard(snapshot.testDate)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <div className="text-lg font-bold text-cyan-400">
+                              {new Date(snapshot.testDate).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                            {snapshot.labName && (
+                              <div className="text-xs text-gray-500">{snapshot.labName}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="text-gray-400">{snapshot.markers.length} markers</span>
+                            {outOfRangeCount > 0 && (
+                              <span className="flex items-center gap-1 text-red-400">
+                                <AlertTriangle size={14} />
+                                {outOfRangeCount} flagged
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                      </div>
+
+                      {/* Card Content (expanded) */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-800 p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {snapshot.markers.map((marker) => (
+                              <div
+                                key={marker.id}
+                                className="p-3 bg-black/40 border border-gray-700 flex items-center justify-between"
+                              >
+                                <div className="flex-1">
+                                  <div className="font-medium text-cyan-400 text-sm mb-1">
+                                    {marker.biomarkerName}
+                                  </div>
+                                  <div className="text-xs">
+                                    {renderValueWithStatus(marker)}
+                                  </div>
+                                  {marker.referenceRangeMin !== null && marker.referenceRangeMax !== null && (
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Ref: {marker.referenceRangeMin} - {marker.referenceRangeMax}
+                                    </div>
+                                  )}
+                                </div>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(marker.id);
+                                  }}
+                                  className="text-red-400 hover:text-red-300 transition-colors ml-2"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </>
       )}
 
-      {/* Add Result Modal */}
+      {/* Add Modal */}
       {showAddModal && (
-        <LabResultModal onSave={refresh} onClose={() => setShowAddModal(false)} />
+        <LabResultModal onClose={() => setShowAddModal(false)} onSaved={refresh} />
       )}
     </div>
   );
