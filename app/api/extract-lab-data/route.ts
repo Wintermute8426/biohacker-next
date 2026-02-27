@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Extract data with Claude
     // @ts-ignore - SDK doesn't have document type in TypeScript yet, but API supports it
     const message = await anthropic.messages.create({
-      model: 'claude-3-opus-20240229',
+      model: 'claude-3-haiku-20240307',
       max_tokens: 4096,
       messages: [
         {
