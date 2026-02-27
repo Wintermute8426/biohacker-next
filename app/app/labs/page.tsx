@@ -150,7 +150,7 @@ export default function LabResultsPage() {
     let statusColor = "text-gray-400";
     let statusLabel = "NORMAL";
 
-    if (min !== null && max !== null) {
+    if (min !== null && min !== undefined && max !== null && max !== undefined) {
       if (val < min) {
         statusColor = "text-yellow-500";
         statusLabel = "LOW";
@@ -320,7 +320,7 @@ export default function LabResultsPage() {
                     const val = typeof m.value === 'string' ? parseFloat(m.value) : m.value;
                     const min = m.referenceRangeMin;
                     const max = m.referenceRangeMax;
-                    return min !== null && max !== null && (val < min || val > max);
+                    return min !== null && min !== undefined && max !== null && max !== undefined && (val < min || val > max);
                   }).length;
 
                   return (
