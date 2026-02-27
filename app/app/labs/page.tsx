@@ -407,7 +407,12 @@ export default function LabResultsPage() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <LabResultModal onClose={() => setShowAddModal(false)} onSaved={refresh} />
+        <LabResultModal 
+          onClose={() => {
+            setShowAddModal(false);
+            refresh();
+          }} 
+        />
       )}
     </div>
   );
