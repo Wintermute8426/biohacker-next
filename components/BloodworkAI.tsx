@@ -124,18 +124,25 @@ export function BloodworkAI() {
       if (!user) throw new Error('Not authenticated');
 
       // Insert each marker as a separate row in lab_results
-      const labResults = extractedData.markers.map(m => ({
-        user_id: user.id,
-        test_date: extractedData.test_date,
-        test_type: 'bloodwork', // default type
-        lab_name: extractedData.lab_name || null,
-        biomarker_name: m.marker_name, // map marker_name to biomarker_name
-        value: m.value,
-        unit: m.unit,
-        reference_range_min: m.reference_min, // map reference_min to reference_range_min
-        reference_range_max: m.reference_max, // map reference_max to reference_range_max
-        file_url: (extractedData as any).file_url || null,
-      }));
+      // Filter out markers with missing required fields
+      const labResults = extractedData.markers
+        .filter(m => m.marker_name && m.value !== null && m.value !== undefined)
+        .map(m => ({
+          user_id: user.id,
+          test_date: extractedData.test_date,
+          test_type: 'bloodwork',
+          lab_name: extractedData.lab_name || null,
+          biomarker_name: m.marker_name,
+          value: parseFloat(m.value.toString()),
+          unit: m.unit || 'N/A', // Default to 'N/A' if missing
+          reference_range_min: m.reference_min ? parseFloat(m.reference_min.toString()) : null,
+          reference_range_max: m.reference_max ? parseFloat(m.reference_max.toString()) : null,
+          file_url: (extractedData as any).file_url || null,
+        }));
+
+      if (labResults.length === 0) {
+        throw new Error('No valid markers to save');
+      }
 
       const { error: resultsError } = await supabase
         .from('lab_results')
