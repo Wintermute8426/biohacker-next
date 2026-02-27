@@ -1,54 +1,10 @@
 // app/api/extract-lab-data/route.ts
-// WORKING VERSION - Uses pdf2json to extract text, then Haiku to analyze
+// Simple PDF extraction using Claude Sonnet with native PDF support
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-// @ts-ignore
-import PDFParser from 'pdf2json';
 
 export const runtime = 'nodejs';
-
-// Helper to extract text from PDF using pdf2json
-async function extractPdfText(buffer: Buffer): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser();
-    
-    pdfParser.on('pdfParser_dataError', (error: any) => {
-      reject(new Error(error.parserError));
-    });
-    
-    pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
-      try {
-        // Extract text from all pages
-        let fullText = '';
-        
-        if (pdfData.Pages) {
-          pdfData.Pages.forEach((page: any) => {
-            if (page.Texts) {
-              page.Texts.forEach((text: any) => {
-                if (text.R) {
-                  text.R.forEach((r: any) => {
-                    if (r.T) {
-                      fullText += decodeURIComponent(r.T) + ' ';
-                    }
-                  });
-                }
-              });
-              fullText += '\n';
-            }
-          });
-        }
-        
-        resolve(fullText.trim());
-      } catch (error) {
-        reject(error);
-      }
-    });
-    
-    // Parse the buffer
-    pdfParser.parseBuffer(buffer);
-  });
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,27 +27,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Read PDF as buffer
     const buffer = Buffer.from(await file.arrayBuffer());
+    const base64Pdf = buffer.toString('base64');
     console.log('Processing PDF, size:', buffer.length);
 
-    // Extract text from PDF using pdf2json
-    console.log('Extracting text from PDF...');
-    const pdfText = await extractPdfText(buffer);
-    console.log('Extracted text length:', pdfText.length);
-
-    if (!pdfText || pdfText.length < 100) {
-      throw new Error('Could not extract sufficient text from PDF');
-    }
-
-    // Analyze with Claude Haiku (text-only model)
+    // Use Claude Sonnet with PDF document support
     const message = await anthropic.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 4096,
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 8192,
       messages: [
         {
           role: 'user',
-          content: `Extract ALL lab test markers from this medical lab report text. For each marker, extract:
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: 'application/pdf',
+                data: base64Pdf,
+              },
+            },
+            {
+              type: 'text',
+              text: `Extract ALL lab test markers from this medical lab report PDF. For each marker, extract:
 - marker_name: The test name (e.g., "Testosterone", "Glucose", "Cholesterol")
 - value: The numeric value
 - unit: The unit of measurement (e.g., "ng/dL", "mg/dL", "pg/mL")
@@ -122,18 +80,15 @@ Return ONLY valid JSON in this exact format:
 
 Set is_flagged to true if the value is outside the reference range.
 If you can't determine a field, use null.
-Extract ALL markers you can find in the document.
-
-Here is the lab report text:
-
-${pdfText}`,
+Extract ALL markers you can find in the document.`,
+            },
+          ],
         },
       ],
     });
 
     console.log('Claude response received');
 
-    // Parse Claude's response
     const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     
     // Extract JSON from response
